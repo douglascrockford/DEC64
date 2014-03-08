@@ -57,7 +57,7 @@ td.bits {
   </tr></tbody>
 </table>
 <p>&nbsp;</p>
-<p>The <var>coefficient</var> is in the range -<tt>36028797018963968</tt> .. <tt>36028797018963968. </tt>The <var>exponent</var> is in the range <tt>-127</tt> .. <tt>127</tt>. Numbers may not use an <var>exponent</var> containing <tt>-128</tt><tt></tt>. The <var>value</var> of a number is obtained from this formula:</p>
+<p>The <var>coefficient</var> is in the range -<tt>36028797018963968</tt> .. <tt>36028797018963967. </tt>The <var>exponent</var> is in the range <tt>-127</tt> .. <tt>127</tt>. Numbers may not use an <var>exponent</var> containing <tt>-128</tt><tt></tt>. The <var>value</var> of a number is obtained from this formula:</p>
 <p class=center><var>value</var><tt> = </tt><var>coefficient</var><tt> * 10</tt><sup><var>exponent</var></sup></p>
 <p>Normalization is not required, and is usually not desired. Integers can have an <var>exponent</var> of <tt>0</tt> as long as the <var>coefficient</var> is less than 36 quadrillion. Addition of numbers with equal <var>exponents</var> could be performed in a single machine cycle.</p>
 <p>There are 255 possible representations of zero. They are all considered to be equal.</p>
