@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head><title>DEC64: Decimal Floating Point</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style>
+@import url(http://fonts.googleapis.com/css?family=Cousine:700);
+@import url(http://fonts.googleapis.com/css?family=Inika:400,700);
+body {
+    background-color: cornsilk;
+    border-left: 1em solid indianred;
+    font-family: 'Inika', serif;
+    margin-left: 1em;
+    max-width: 50em;
+    padding: 10%;
+}
+
+pre {
+    border-left: 1em solid indianred;
+    padding-left: 1em;
+    padding-bottom: 0.25em;
+    padding-top: 0.25em;
+}
+
+td {
+    background-color: navajowhite;
+    border: 2pt solid black;
+}
+
+td.bits {
+    background-color: inherit;
+    border: 0;
+}
+
+.center {
+    text-align: center;
+}
+
+.dec64, h1, h2 {
+    font-family: 'Cousine', sans-serif;
+};
+</style>
+</head>
+
+<body>
+<img src="DEC64.png" width="398" height="103" alt="DEC64">
+<h1>Overview</h1>
+<p><span class=dec64>DEC64</span> is a number type. It can precisely represent decimal fractions with  16 decimal places, which makes it well suited to all applications that are concerned with money. It can  represent values as large as <tt>3.6028797018963968E+143</tt> or as small as <tt>1.0E-127</tt>, which makes it well suited to most scientific applications. It can provide very fast performance on integer values, eliminating the need for a separate <tt>int</tt> type and avoiding the terrible errors than can result from <tt>int</tt> truncation.</p>
+<p><span class=dec64>DEC64</span> is intended to be the only number type in the next generation of application programming languages.</p>
+<h1 id="representation">Representation</h1>
+<p><span class=dec64>DEC64</span> represents numbers as 64 bit values composed of 2 two&#8217;s complement components: a 56 bit <var>coefficient</var> and an 8 bit <var>exponent</var>. The <var>coefficient</var> is in the high order end, and the <var>exponent</var> is in the low order end. The <var>coefficient</var>&#8217;s decimal point is between bits 8 and 7.</p>
+<table cellspacing=1 cellpadding="0" width=100%><tbody>
+<tr><td align="left" class=bits>&nbsp;63</td><td align="right" class=bits>8&nbsp;</td>
+<td align="left" class=bits>&nbsp;7</td><td align="right" class=bits>0&nbsp;</td></tr>
+  <tr>
+    <td colspan="2" align="center" width=70%><em>coefficient</em></td>
+    <td colspan="2" align="center" width=10%><em>exponent</em></td>
+  </tr></tbody>
+</table>
+<p>&nbsp;</p>
+<p>The <var>coefficient</var> is in the range -<tt>36028797018963968</tt> .. <tt>36028797018963968. </tt>The <var>exponent</var> is in the range <tt>-127</tt> .. <tt>127</tt>. Numbers may not use an <var>exponent</var> containing <tt>-128</tt><tt></tt>. The <var>value</var> of a number is obtained from this formula:</p>
+<p class=center><var>value</var><tt> = </tt><var>coefficient</var><tt> * 10</tt><sup><var>exponent</var></sup></p>
+<p>Normalization is not required, and is usually not desired. Integers can have an <var>exponent</var> of <tt>0</tt> as long as the <var>coefficient</var> is less than 36 quadrillion. Addition of numbers with equal <var>exponents</var> could be performed in a single machine cycle.</p>
+<p>There are 255 possible representations of zero. They are all considered to be equal.</p>
+<p>There is a special value called <tt>nan</tt> that has a <var>coefficient</var> of <tt>0</tt> and an <var>exponent</var> of <tt>-128</tt>. The result of division by zero is <tt>nan</tt>. <tt>nan</tt> is also the result of operations that produce results that are too large to be represented. <tt>nan</tt> is equal to itself.</p>
+<p>When an arithmetic operation has an input with an <var>exponent</var> of <tt>-128</tt>, the result will be <tt>nan</tt>. Applications are free to use the <var>coefficient</var> as they wish when the <var>exponent</var> is <tt>-128</tt>, since in that case the <var>coefficient</var> has no arithmetic significance. One possible use is to store object pointers in the <var>coefficient</var>. </p>
+<h1 id="implementation">Implementation</h1>
+<p><span class=dec64>DEC64</span> can be implemented efficiently in hardware or software. </p>
+<p>Conversion to and from textual representations is simple and straightforward and free of the complexities that binary floating formats  must wrestle with to minimize the inevitable errors caused by the fundamental incompatibility of the binary and decimal systems. <span class=dec64>DEC64</span> instead uses an internal representation that is very compatible with the <tt>E</tt> notation.</p>
+<p>To convert an <tt>int</tt> to <span class=dec64>DEC64,</span> shift it left 8 bits. To unpack a <var>coefficient</var>, shift it right 8 bits with sign extension. The <var>exponent</var> can be unpacked at no cost on x64 architecture because the least significant byte can be accessed directly.</p>
+<p>There is a fast path for addition of integers that takes only 5 instructions:</p>
+<pre>; Add rdx to rax.
+
+        mov     cl,al         ; load the exponent of rax into cl
+        or      cl,dl         ; then or the two exponents together
+        jnz     slow_path     ; if both are zero, take the fast path
+        add     rax,rdx       ; add the coefficients together
+        jo      overflow      ; if there was no overflow, we are done</pre>
+<p>The fast path for addition in hardware should take only 1 cycle when the two exponents are equal to each other and there is no overflow. The fast path for multiplication in hardware takes the time it takes to do a 56*56 signed multiply when there is no overflow. </p>
+<p>A reference implementation is available at <a href="https://github.com/douglascrockford/DEC64">https://github.com/douglascrockford/DEC64</a>. It produces an object file about 2K in size.</p>
+<h1>Motivation</h1>
+<p>The idea of using powers of <em>ten</em> instead of powers of <em>two</em> is not new. For example, </p>
+<blockquote>
+  <p>Floating point subroutines and interpretive systems for early machines were coded by D. J. Wheeler and others, and the first publication of such routines was in <i>The Preparation of Programs for an Electronic Digital Computer</i> by Wilkes, Wheeler, and Gill (Reading, Mass.: Addison-Wesley, 1951), subroutines A1-A11, pages 35-37 and 105-117. It is interesting to note that floating <i>decimal</i> subroutines are described here, although a binary computer was being used; in other words, the numbers were represented as 10<i><sup>e</sup>f</i>, not 2<i><sup>e</sup>f</i>, and therefore the scaling operations required multiplication or division by 10.</p>
+  <p><i>The Art of Computer Programming, Volume 2: Seminumerical Algorithms, Third Edition</i> by Donald Knuth (Addison-Wesley, 1998), page 226.</p>
+</blockquote>
+<p>The book Knuth cited may have been the first software book. It described some of the libraries and conventions of Maurice Wilkes’s EDSAC, one of the first generation of Von Neumann machines. Some of its subroutines used a numeric format that was very similar to <span class=dec64>DEC64</span>.</p>
+<p>Floating point was so important that  support for it was moved into hardware for better performance. This led to the development of binary floating point because a shift could be implemented much more easily than a divide by 10. It was discovered that by biasing the exponent and moving it to the position just after the sign bit that floating point numbers could be compared with integer opcodes, a nifty optimization. It was also discovered that because normalization always left a 1 bit in the most significant position of the significand, that that bit could be omitted, providing an additional bit of significance.</p>
+<p>The Burroughs 5000 series had a floating point format in which an exponent of zero allowed the mantissa to be treated as an ordinary integer. <span class=dec64>DEC64</span> incorporates that brilliant idea.</p>
+<p>Languages for scientific computing like FORTRAN provided multiple floating point types such as <code>REAL</code> and <code>DOUBLE</code> <code>PRECISION</code> as well as <code>INTEGER</code>, often also in multiple sizes. This was to allow programmers to reduce program size and running time. This convention was adopted by later languages like C and Java. In modern systems, this sort of memory saving is pointless. By giving programmers a choice of number types, programmers are required to waste their time making choices that don’t matter. Even worse, making a bad choice can lead to a loss of accuracy or destructive bugs. This is a bad practice that is very deeply ingrained.</p>
+<p>Binary floating point trades away familiarity and decimal compatibility for performance. This made it unsuitable for business languages like COBOL. Decimal fractions cannot be represented accurately in binary floating point, which is a problem for programs that interact with humans, and is dangerous in programs that manipulate money. Exactness is required, so most business processing used BCD (Binary Coded Decimal) in which each digit is encoded in 4 bits. That created some inefficiency, but benefited from allowing a shift by 4 bits in place of the more complex divide by 10. For a time, mainframes could be ordered with optional floating point units for scientific computing, and optional BCD units for business computing.</p>
+<p>The BASIC language eliminated much of the complexity of FORTRAN by having a single number type. This simplified the programming model and avoided a class of errors caused by selection of the wrong type. The efficiencies that could have gained from having numerous number types proved to be insignificant. </p>
+<p>Business Basic was a dialect of BASIC that was developed by Basic/Four Corporation for its small business minicomputers. It used  decimal floating point, much like the EDSAC, so the language could be used for both scientific and business applications. Business Basic could do everything that BASIC could do, and it could also handle money.</p>
+<p>Intel undertook an ambitious architecture that was marketed as iAPX432. A decimal number type was considered for the 432 but rejected in favor of conventional binary floating point. The 432  failed, but its floating point unit was salvaged and repackaged as the 8087, a numeric coprocessor for the 8086. The 8087’s number types became the basis of the IEEE 754 floating point standard. The standard was so successful that it destroyed the market for decimal computing. A later revision of IEEE 754 attempted to remedy this, but the formats it recommended were so inefficient that it has not found much acceptance.  <span class=dec64>DEC64</span> is a better alternative.</p>
+</body>
+</html>

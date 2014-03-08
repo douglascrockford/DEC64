@@ -1,0 +1,24 @@
+DEC64: Decimal Floating Point
+
+Douglas Crockford
+douglas@crockford.com
+
+dec64.com
+2014-03-08
+Public Domain
+
+    NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
+    SUBJECT TO CHANGE WITHOUT NOTICE.
+
+DEC64 is a decimal floating point format for the next generation of
+application programming languages.
+
+dec64.asm is an implementation of the elementary operators for x64.
+
+dec64.h is a companion header file for C.
+
+dec64_test.c is a test program.
+
+dec64.html is a descriptive web page.
+
+dec64.png is a logo.
