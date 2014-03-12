@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2014-03-08
+; 2014-03-11
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -195,6 +195,21 @@ function_with_two_parameters macro
     mov     r1,r7           ;; UNIX
     mov     r2,r6           ;; UNIX
     endif
+    endm
+
+call_with_one_parameter macro function
+    if UNIX
+    mov     r7,r1           ;; UNIX
+    endif
+    call    function
+    endm
+
+call_with_two_parameters macro function
+    if UNIX
+    mov     r7,r1           ;; UNIX
+    mov     r6,r2           ;; UNIX
+    endif
+    call    function
     endm
 
 ; There may be a performance benefit in padding programs so that most jump
@@ -911,9 +926,10 @@ integer_divide_slow:
 
 ; The exponents are not the same, so do it the hard way.
 
-    call    dec64_divide
+    call_with_two_parameters dec64_divide
     mov     r1,r0
-    jmp     dec64_integer
+    call_with_two_parameters dec64_integer
+    ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
@@ -921,10 +937,13 @@ dec64_modulo: function_with_one_parameter
 ;(dividend: dec64, divisor: dec64) returns modulus: dec64
 
 ; Modulo. It produces the same result as
-;   dec64_subtract(dividend, dec64_multiply(
-;       dec64_integer_divide(dividend, divisor),
-;       divisor
-;   ))
+;   dec64_subtract(
+;       dividend, 
+;       dec64_multiply(
+;           dec64_integer_divide(dividend, divisor),
+;           divisor
+;       )
+;   )
 
     cmp     r1_b,r2_b       ; are the two exponents the same?
     jnz     modulo_slow     ; if not take the slow path
@@ -959,20 +978,21 @@ dec64_modulo: function_with_one_parameter
     ret
     pad
 
-modulo_slow:
+modulo_slow:  ;;;;;;;;;;; UNIX wants r7 and r6, not r1 and r2!
 
 ; The exponents are not the same, so do it the hard way.
 
     push    r1              ; save the dividend
     push    r2              ; save the divisor
 
-    call    dec64_integer_divide
+    call_with_two_parameters dec64_integer_divide
     pop     r2
     mov     r1,r0
-    call    dec64_multiply
+    call_with_two_parameters dec64_multiply
     pop     r1
     mov     r2,r0
-    jmp     dec64_subtract
+    call_with_two_parameters dec64_subtract
+    ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
@@ -1096,7 +1116,7 @@ equal_slow:
 
 ; Do it the hard way by subtraction. Is the difference zero?
 
-    call    dec64_subtract  ; r0 is r1 - r2
+    call_with_two_parameters dec64_subtract ; r0 is r1 - r2
     or      r0,r0           ; examine r0
     mov     r0,0            ; r0 is zero
     setz    r0_h            ; r0 is one if the numbers are equal
@@ -1149,7 +1169,7 @@ less_slow:
 
 ; Otherwise we must do a subtraction.
 
-    call    dec64_subtract  ; r0 is r1 - r2
+    call_with_two_parameters dec64_subtract ; r0 is r1 - r2
     or      r0,r0           ; examine the difference
     mov     r0,0            ; r0 is zero
     sets    r0_h            ; r0 is one if r1 is less than r2
