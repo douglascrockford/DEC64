@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2014-03-01
+2014-03-13
 Public Domain
 
 No warranty.
@@ -810,7 +810,7 @@ void test_all_subtract() {
     test_subtract(maxnum, maxnum, zero, "maxnum - maxnum");
 }
 
-void do_tests(int lvl) {
+int do_tests(int lvl) {
 /*
     Level of detail:
         3 full
@@ -841,10 +841,10 @@ void do_tests(int lvl) {
     test_all_subtract();
 
     printf("\n\n%lli pass, %lli fail.\n", nr_pass, nr_fail);
+    return nr_fail;
 }
 
 int main(int argc, char* argv[]) {
     define_constants();
-    do_tests(2);
-    return nr_fail;
+    return do_tests(2);
 }
