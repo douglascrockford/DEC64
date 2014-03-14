@@ -667,7 +667,7 @@ add_slower_decrease:
 ; at least twice, possibly more.
 
     imul    r0,10           ; before decrementing the exponent, multiply
-    jo      add_slower_decrease_no_more
+    jo      add_slower_increase
     sub     r8,1            ; decrease the first exponent
     mov     r10,r0          ; r10 is the enlarged first coefficient
 
@@ -683,32 +683,34 @@ add_slower_decrease_compare:
     jmp     pack            ; pack it up
     pad
 
-add_slower_decrease_no_more:
+add_slower_increase:
 
 ; We cannot decrease the first exponent any more, so we must instead try to
 ; increase the second exponent, which will result in a loss of significance.
 ; That is the heartbreak of floating point.
 
+; Determine how many places need to be shifted. If it is more than 17, there is 
+; nothing more to add.
+
+    mov     r2,r8           ; r2 is the first exponent
+    sub     r2,r9           ; r2 is the remaining exponent difference
     mov     r0,r11          ; r0 is the second coefficient
-    mov     r1,10           ; r1 is the divisor
-    pad
-
-add_slower_increase:
-
-; When we increase the exponent by 1, we also divide the coefficient by 10.
-
+    cmp     r2,17           ; 17 is the max digits in a packed coefficient
+    ja      add_underflow   ; too small to matter
+    mov     r9,power[r2*8]  ; r9 is the power of ten
     cqo                     ; sign extend r0 into r2
-    idiv    r1              ; divide r2:r0 by 10
-    add     r9,1            ; increase the second exponent by 1
-    mov     r11,r0          ; r11 is the reduced second coefficient
-    cmp     r8,r9           ; are the exponents equal yet?
-    jnz     add_slower_increase
+    idiv    r9              ; divide the second coefficient by the power of 10
 
 ; The exponents are now equal, so the coefficients may be added.
 
     add     r0,r10          ; add the two coefficients
     jmp     pack
     pad
+
+add_underflow:
+
+    mov     r0,r10          ; r0 is the first coefficient
+    jmp     pack
 
 add_overflow:
 
