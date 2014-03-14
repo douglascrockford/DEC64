@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2014-03-11
+; 2014-03-13
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -670,9 +670,6 @@ add_slower_decrease:
     jo      add_slower_increase
     sub     r8,1            ; decrease the first exponent
     mov     r10,r0          ; r10 is the enlarged first coefficient
-
-add_slower_decrease_compare:
-
     cmp     r8,r9           ; are the exponents equal yet?
     jg      add_slower_decrease
     mov     r0,r11          ; r0 is the second coefficient
@@ -700,6 +697,8 @@ add_slower_increase:
     mov     r9,power[r2*8]  ; r9 is the power of ten
     cqo                     ; sign extend r0 into r2
     idiv    r9              ; divide the second coefficient by the power of 10
+    test    r0,r0           ; examine the scaled coefficient
+    jz      add_underflow   ; too insignificant to add?
 
 ; The exponents are now equal, so the coefficients may be added.
 
@@ -709,8 +708,8 @@ add_slower_increase:
 
 add_underflow:
 
-    mov     r0,r10          ; r0 is the first coefficient
-    jmp     pack
+    mov     r0,r1           ; r0 is the original number
+    ret
 
 add_overflow:
 
@@ -753,11 +752,63 @@ dec64_subtract: function_with_two_parameters
     mov     r11,80000000000000H ; r11 is 36028797018963968
     mov     r0,r10          ; r0 is the first coefficient
     cmp     r8,r9           ; if the second exponent is larger, swap
-    jge     add_slower_decrease_compare
+    jge     subtract_slower_decrease_compare
     mov     r0,r11          ; r0 is the second coefficient
     xchg    r8,r9           ; swap the exponents
     xchg    r10,r11         ; swap the coefficients
-    jmp     add_slower_decrease_compare
+    jmp     subtract_slower_decrease_compare
+
+subtract_slower_decrease:
+
+; The coefficients are not the same. Before we can add, they must be the same.
+; We will try to decrease the first exponent. When we decrease the exponent
+; by 1, we must also multiply the coefficient by 10. We can do this as long as
+; there is no overflow. We have 8 extra bits to work with, so we can do this
+; at least twice, possibly more.
+
+    imul    r0,10           ; before decrementing the exponent, multiply
+    jo      subtract_slower_increase
+    sub     r8,1            ; decrease the first exponent
+    mov     r10,r0          ; r10 is the enlarged first coefficient
+
+subtract_slower_decrease_compare:
+
+    cmp     r8,r9           ; are the exponents equal yet?
+    jg      subtract_slower_decrease
+    mov     r0,r11          ; r0 is the second coefficient
+
+; The exponents are now equal, so the coefficients may be added.
+
+    add     r0,r10          ; add the two coefficients
+    jmp     pack            ; pack it up
+
+subtract_slower_increase:
+
+; We cannot decrease the first exponent any more, so we must instead try to
+; increase the second exponent, which will result in a loss of significance.
+; That is the heartbreak of floating point.
+
+; Determine how many places need to be shifted. If it is more than 17, there is 
+; nothing more to add.
+
+    mov     r2,r8           ; r2 is the first exponent
+    sub     r2,r9           ; r2 is the remaining exponent difference
+    mov     r0,r11          ; r0 is the second coefficient
+    cmp     r2,17           ; 17 is the max digits in a packed coefficient
+    ja      subtract_underflow   ; too small to matter
+    mov     r9,power[r2*8]  ; r9 is the power of ten
+    cqo                     ; sign extend r0 into r2
+    idiv    r9              ; divide the second coefficient by the power of 10
+
+; The exponents are now equal, so the coefficients may be added.
+
+    add     r0,r10          ; add the two coefficients
+    jmp     pack
+
+subtract_underflow:
+
+    mov     r0,r10          ; r0 is the first coefficient
+    jmp     pack
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
