@@ -168,7 +168,9 @@ void judge_binary(dec64 first, dec64 second, dec64 expected, dec64 actual, char 
 
 void judge_communitive(dec64 first, dec64 second, dec64 expected, dec64 actual, char * name, char * op, char * comment) {
     judge_binary(first, second, expected, actual, name, op, comment);
-    judge_binary(second, first, expected, actual, name, op, comment);
+    if (first != second) {
+        judge_binary(second, first, expected, actual, name, op, comment);
+    }
 }
 
 void test_abs(dec64 first, dec64 expected, char * comment) {
@@ -252,7 +254,7 @@ void test_signum(dec64 first, dec64 expected, char * comment) {
 
 void test_subtract(dec64 first, dec64 second, dec64 expected, char * comment) {
     dec64 actual = dec64_subtract(first, second);
-    judge_communitive(first, second, expected, actual, "subtract", "-", comment);
+    judge_binary(first, second, expected, actual, "subtract", "-", comment);
 }
 
 void test_all_abs() {
@@ -794,19 +796,26 @@ void test_all_subtract() {
     test_subtract(zero, nannan, nan, "0 - nannan");
     test_subtract(zero, zip, zero, "zero - zip");
     test_subtract(zero, negative_pi, pi, "0 - -pi");
+    test_subtract(zero, pi, negative_pi, "0 - pi");
     test_subtract(zero, negative_maxint, maxint_plus, "-maxint");
     test_subtract(zero, negative_maxnum, nan, "0 - -maxnum");
     test_subtract(zip, zero, zero, "zip - zero");
     test_subtract(zip, zip, zero, "zip - zip");
     test_subtract(epsilon, epsilon, zero, "epsilon - epsilon");
+    test_subtract(one, negative_maxint, maxint_plus, "1  - -maxint");
+    test_subtract(negative_one, negative_maxint, maxint, "-1  - -maxint");
     test_subtract(three, nan, nan, "3 - nan");
     test_subtract(three, dec64_new(30000000000000000, -16), zero, "equal but with different exponents");
     test_subtract(three, four, dec64_new(-1, 0), "3 - 4");
+    test_subtract(negative_pi, negative_pi, zero, "-pi - 0");
+    test_subtract(negative_pi, zero, negative_pi, "-pi - 0");
     test_subtract(four, dec64_new(4000000000000000, -15), zero, "equal but with different exponents");
     test_subtract(ten, six, four, "10 - 6");
     test_subtract(maxint, negative_maxint, dec64_new(7205759403792794, 1), "-maxint");
     test_subtract(maxint, maxint_plus, dec64_new(-3, 0), "maxint - (maxint + 1)");
-    test_subtract(negative_maxint, negative_maxint, zero, "-maxint");
+    test_subtract(negative_maxint, negative_maxint, zero, "-maxint - -maxint");
+    test_subtract(maxnum, maxint, maxnum, "maxnum - maxint");
+    test_subtract(maxnum, negative_maxint, maxnum, "maxnum - -maxint");
     test_subtract(maxnum, maxnum, zero, "maxnum - maxnum");
 }
 
