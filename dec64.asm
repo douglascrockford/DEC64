@@ -176,7 +176,7 @@ r1_w  equ cx
 
 ; There is painfully inadequate standardization around x64 calling conventions.
 ; On Win64, the first two arguments are passed in r1 and r2. On Unix, the first
-; two arguments are passed in r6 and r7. We try to hide this behind macros. The
+; two arguments are passed in r7 and r6. We try to hide this behind macros. The
 ; two systems also have different conventions on which registers may be
 ; clobbered and which must be preserved. This code lives in the intersection.
 
@@ -210,6 +210,21 @@ call_with_two_parameters macro function
     mov     r6,r2           ;; UNIX
     endif
     call    function
+    endm
+
+tail_with_one_parameter macro function
+    if UNIX
+    mov     r7,r1           ;; UNIX
+    endif
+    jmp     function
+    endm
+
+tail_with_two_parameters macro function
+    if UNIX
+    mov     r7,r1           ;; UNIX
+    mov     r6,r2           ;; UNIX
+    endif
+    jmp     function
     endm
 
 ; There may be a performance benefit in padding programs so that most jump
@@ -928,8 +943,7 @@ integer_divide_slow:
 
     call_with_two_parameters dec64_divide
     mov     r1,r0
-    call_with_two_parameters dec64_integer
-    ret
+    tail_with_one_parameter dec64_integer
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
@@ -978,7 +992,7 @@ dec64_modulo: function_with_one_parameter
     ret
     pad
 
-modulo_slow:  ;;;;;;;;;;; UNIX wants r7 and r6, not r1 and r2!
+modulo_slow:  
 
 ; The exponents are not the same, so do it the hard way.
 
@@ -991,8 +1005,7 @@ modulo_slow:  ;;;;;;;;;;; UNIX wants r7 and r6, not r1 and r2!
     call_with_two_parameters dec64_multiply
     pop     r1
     mov     r2,r0
-    call_with_two_parameters dec64_subtract
-    ret
+    tail_with_two_parameters dec64_subtract
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
