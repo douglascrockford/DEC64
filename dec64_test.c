@@ -37,6 +37,7 @@ dec64 maxint_plus;
 dec64 maxnum;
 dec64 minnum;
 dec64 epsilon;
+dec64 almost_one;
 dec64 e;
 dec64 pi;
 dec64 half;
@@ -66,6 +67,8 @@ void define_constants() {
     epsilon = dec64_new(1, -16);    /* the smallest number addable to 1 */
     cent = dec64_new(1, -2);        /* 0.01 */
     half = dec64_new(5, -1);        /* 0.5 */
+    almost_one = dec64_new(9999999999999999, -16);
+                                    /* 0.9999999999999999 */
     e = dec64_new(27182818284590452, -16);
                                     /* e */
     pi = dec64_new(31415926535897932, -16);
@@ -278,6 +281,8 @@ void test_all_add() {
     test_add(zero, zip, zero, "zero + zip");
     test_add(zip, zero, zero, "zip + zero");
     test_add(zip, zip, zero, "zip + zip");
+    test_add(almost_one, epsilon, one, "almost_one + epsilon");
+    test_add(almost_one, nine, ten, "almost_one + 1");
     test_add(one, nan, nan, "one + nan");
     test_add(one, one, two, "one + one");
     test_add(one, cent, dec64_new(101, -2), "one + cent");
@@ -803,6 +808,8 @@ void test_all_subtract() {
     test_subtract(zip, zip, zero, "zip - zip");
     test_subtract(epsilon, epsilon, zero, "epsilon - epsilon");
     test_subtract(one, negative_maxint, maxint_plus, "1  - -maxint");
+    test_subtract(one, epsilon, almost_one, "1 - epsilon");
+    test_subtract(one, almost_one, epsilon, "1 - almost_one");
     test_subtract(negative_one, negative_maxint, maxint, "-1  - -maxint");
     test_subtract(three, nan, nan, "3 - nan");
     test_subtract(three, dec64_new(30000000000000000, -16), zero, "equal but with different exponents");
