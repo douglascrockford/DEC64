@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2014-03-13
+2014-03-15
 Public Domain
 
 No warranty.
@@ -73,17 +73,17 @@ void define_constants() {
                                     /* e */
     pi = dec64_new(31415926535897932, -16);
                                     /* pi */
-                                    /* -pi */
     maxint = dec64_new(36028797018963967, 0);
                                     /* the largest normal integer */
     maxint_plus = dec64_new(3602879701896397, 1);
                                     /* the smallest number larger than maxint */
     maxnum = dec64_new(36028797018963967, 127);
-                                    /* the largest possible number*/
+                                    /* the largest possible number */
     negative_one = dec64_new(-1, 0);/* -1 */
     negative_nine = dec64_new(-9, 0);
                                     /* -9 */
     negative_pi = dec64_new(-31415926535897932, -16);
+                                    /* -pi */
     negative_maxint = dec64_new(-36028797018963968, 0);
                                     /* the largest negative normal integer */
     negative_maxnum = dec64_new(-36028797018963968, 127);
@@ -208,11 +208,17 @@ void test_integer_divide(dec64 first, dec64 second, dec64 expected, char * comme
 
 void test_is_nan(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_is_nan(first);
-    judge_unary(first, expected, actual, "is_nan", "i", comment);
+    judge_unary(first, expected, actual, "is_nan", "n", comment);
 }
+
+void test_is_one(dec64 first, dec64 expected, char * comment) {
+    dec64 actual = dec64_is_one(first);
+    judge_unary(first, expected, actual, "is_one", "1", comment);
+}
+
 void test_is_zero(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_is_zero(first);
-    judge_unary(first, expected, actual, "is_zero", "z", comment);
+    judge_unary(first, expected, actual, "is_zero", "0", comment);
 }
 
 void test_less(dec64 first, dec64 second, dec64 expected, char * comment) {
@@ -515,7 +521,24 @@ void test_all_is_nan() {
     test_is_nan(one, zero, "one");
     test_is_nan(cent, zero, "cent");
     test_is_nan(maxnum, zero, "maxnum");
-    test_is_nan(negative_maxnum, zero, "maxnum");
+    test_is_nan(negative_maxnum, zero, "-maxnum");
+}
+
+void test_all_is_one() {
+    test_is_one(nan, zero, "nan");
+    test_is_one(nannan, zero, "nannan");
+    test_is_one(zero, zero, "zero");
+    test_is_one(zip, zero, "zip");
+    test_is_one(one, one, "one");
+    test_is_one(dec64_new(10000000000000000, -16), one, "one 16");
+    test_is_one(dec64_new(100000000000000000, -17), one, "one 16");
+    test_is_one(epsilon, zero, "epsilon");
+    test_is_one(cent, zero, "cent");
+    test_is_one(almost_one, zero, "almost one");
+    test_is_one(ten, zero, "ten");
+    test_is_one(minnum, zero, "minnum");
+    test_is_one(maxnum, zero, "maxnum");
+    test_is_one(negative_maxnum, zero, "-maxnum");
 }
 
 void test_all_is_zero() {
@@ -526,7 +549,7 @@ void test_all_is_zero() {
     test_is_zero(one, zero, "one");
     test_is_zero(cent, zero, "cent");
     test_is_zero(maxnum, zero, "maxnum");
-    test_is_zero(negative_maxnum, zero, "maxnum");
+    test_is_zero(negative_maxnum, zero, "-maxnum");
 }
 
 void test_all_less() {
@@ -845,6 +868,7 @@ int do_tests(int lvl) {
     test_all_integer();
     test_all_integer_divide();
     test_all_is_nan();
+    test_all_is_one();
     test_all_is_zero();
     test_all_less();
     test_all_modulo();

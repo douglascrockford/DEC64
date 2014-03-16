@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2014-03-13
+; 2014-03-15
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -94,6 +94,9 @@ public dec64_integer_divide;(dividend: dec64, divisor: dec64)
 ;      returns quotient: dec64
 
 public dec64_is_nan;(number: dec64)
+;      returns comparison: dec64
+
+public dec64_is_one;(number: dec64)
 ;      returns comparison: dec64
 
 public dec64_is_zero;(number: dec64)
@@ -1249,6 +1252,21 @@ dec64_is_nan: function_with_one_parameter
     xor     r0,r0           ; r0 is zero
     cmp     r1_b,128        ; is r1 nan?
     sete    r0_h            ; r0 is one if r1 is nan
+    ret
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+dec64_is_one: function_with_one_parameter
+;(number: dec64) returns comparison: dec64
+
+    movsx   r2,r1_b         ; r2 is the exponent
+    sar     r1,8            ; r1 is the coefficient
+    neg     r2              ; negate the exponent
+    xor     r0,r0           ; r0 is zero
+    cmp     r2,16           ; some exponents cannot be part of one
+    ja      return
+    cmp     r1,power[r2*8]  ; is the coefficient equal to power[-exponent]?
+    sete    r0_h            ; r0 is one if the number was one
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
