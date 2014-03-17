@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2014-03-15
+2014-03-16
 Public Domain
 
 No warranty.
@@ -196,6 +196,11 @@ void test_equal(dec64 first, dec64 second, dec64 expected, char * comment) {
     judge_communitive(first, second, expected, actual, "equal", "=", comment);
 }
 
+void test_equal_int64(dec64 first, int64 second, dec64 expected, char * comment) {
+    dec64 actual = dec64_equal_int64(first, second);
+    judge_binary(first, second, expected, actual, "equal", "=", comment);
+}
+
 void test_integer(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_integer(first);
     judge_unary(first, expected, actual, "integer", "i", comment);
@@ -209,11 +214,6 @@ void test_integer_divide(dec64 first, dec64 second, dec64 expected, char * comme
 void test_is_nan(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_is_nan(first);
     judge_unary(first, expected, actual, "is_nan", "n", comment);
-}
-
-void test_is_one(dec64 first, dec64 expected, char * comment) {
-    dec64 actual = dec64_is_one(first);
-    judge_unary(first, expected, actual, "is_one", "1", comment);
 }
 
 void test_is_zero(dec64 first, dec64 expected, char * comment) {
@@ -422,6 +422,30 @@ void test_all_equal() {
     test_equal(negative_maxint, negative_one, zero, "-maxint = -1");
 }
 
+void test_all_equal_int64() {
+    test_equal_int64(nan, 1, zero, "nan = 1");
+    test_equal_int64(nannan, 1, zero, "nannan = 1");
+    test_equal_int64(zero, 0, one, "zero = 0");
+    test_equal_int64(zero, 1, zero, "zero = 1");
+    test_equal_int64(zip, 0, one, "zip = 0");
+    test_equal_int64(zip, 1, zero, "zip = 1");
+    test_equal_int64(one, 0, zero, "0 = one");
+    test_equal_int64(one, 1, one, "1 = one");
+    test_equal_int64(dec64_new(10000000000000000, -16), 1, one, "1 = one 16");
+    test_equal_int64(dec64_new(100000000000000000, -17), 1, one, "1 = one 16");
+    test_equal_int64(epsilon, 1, zero, "1 = epsilon");
+    test_equal_int64(cent, 1, zero, "1 = cent");
+    test_equal_int64(almost_one, 1, zero, "1 = almost one");
+    test_equal_int64(ten, 1, zero, "1 = ten");
+    test_equal_int64(ten, 10, one, "10 = ten");
+    test_equal_int64(maxint, 36028797018963967, one, "maxint = 36028797018963967");
+    test_equal_int64(negative_maxint, -36028797018963968, one, "-maxint = -36028797018963968");
+    test_equal_int64(minnum, 0, zero, "0 = minnum");
+    test_equal_int64(minnum, 1, zero, "1 = minnum");
+    test_equal_int64(maxnum, 1, zero, "1 = maxnum");
+    test_equal_int64(negative_maxnum, 1, zero, "1 = -maxnum");
+}
+
 void test_all_integer() {
     test_integer(nan, nan, "nan");
     test_integer(nannan, nan, "nannan");
@@ -522,23 +546,6 @@ void test_all_is_nan() {
     test_is_nan(cent, zero, "cent");
     test_is_nan(maxnum, zero, "maxnum");
     test_is_nan(negative_maxnum, zero, "-maxnum");
-}
-
-void test_all_is_one() {
-    test_is_one(nan, zero, "nan");
-    test_is_one(nannan, zero, "nannan");
-    test_is_one(zero, zero, "zero");
-    test_is_one(zip, zero, "zip");
-    test_is_one(one, one, "one");
-    test_is_one(dec64_new(10000000000000000, -16), one, "one 16");
-    test_is_one(dec64_new(100000000000000000, -17), one, "one 16");
-    test_is_one(epsilon, zero, "epsilon");
-    test_is_one(cent, zero, "cent");
-    test_is_one(almost_one, zero, "almost one");
-    test_is_one(ten, zero, "ten");
-    test_is_one(minnum, zero, "minnum");
-    test_is_one(maxnum, zero, "maxnum");
-    test_is_one(negative_maxnum, zero, "-maxnum");
 }
 
 void test_all_is_zero() {
@@ -865,10 +872,10 @@ int do_tests(int lvl) {
     test_all_add();
     test_all_divide();
     test_all_equal();
+    test_all_equal_int64();
     test_all_integer();
     test_all_integer_divide();
     test_all_is_nan();
-    test_all_is_one();
     test_all_is_zero();
     test_all_less();
     test_all_modulo();

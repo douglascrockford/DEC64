@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2014-03-15
+; 2014-03-16
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -82,7 +82,10 @@ public dec64_divide;(dividend: dec64, divisor: dec64)
 ;      returns quotient: dec64
 
 public dec64_equal;(comparahend: dec64, comparator: dec64)
-;      returns comparison: int64
+;      returns comparison: dec64
+
+public dec64_equal_int64;(comparahend: dec64, comparator: int64)
+;      returns comparison: dec64
 
 public dec64_exponent;(number: dec64)
 ;      returns exponent: int64
@@ -94,9 +97,6 @@ public dec64_integer_divide;(dividend: dec64, divisor: dec64)
 ;      returns quotient: dec64
 
 public dec64_is_nan;(number: dec64)
-;      returns comparison: dec64
-
-public dec64_is_one;(number: dec64)
 ;      returns comparison: dec64
 
 public dec64_is_zero;(number: dec64)
@@ -1193,6 +1193,28 @@ equal_slow:
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
+dec64_equal_int64: function_with_two_parameters
+;(comparahend: dec64, comparator: int64) returns comparison: dec64
+
+; Compare a dec64 with an int64 in the range -36028797018963968 .. 
+; 36028797018963967.
+
+    test    r2,r2           ; examine the int64 in r2
+    jz      dec64_is_zero   ; if it is 0, let dec64_zero handle it
+    movsx   r8,r1_b         ; r8 is the exponent
+    sar     r1,8            ; r1 is the coefficient
+    neg     r8              ; negate the exponent
+    xor     r0,r0           ; r0 is zero
+    cmp     r8,16           ; some exponents cannot be part of int64
+    ja      return          ; return zero
+    mov     r10,power[r8*8] ; r10 is power[-exponent]
+    imul    r10,r2          ; r10 is the comparator times the poewr of ten
+    cmp     r1,r10          ; is the coefficient equal to power[-exponent]?
+    sete    r0_h            ; r0 is one if the number was one
+    ret
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
 dec64_less: function_with_two_parameters
 ;(comparahend: dec64, comparator: dec64) returns comparison: dec64
 
@@ -1252,21 +1274,6 @@ dec64_is_nan: function_with_one_parameter
     xor     r0,r0           ; r0 is zero
     cmp     r1_b,128        ; is r1 nan?
     sete    r0_h            ; r0 is one if r1 is nan
-    ret
-
-    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
-dec64_is_one: function_with_one_parameter
-;(number: dec64) returns comparison: dec64
-
-    movsx   r2,r1_b         ; r2 is the exponent
-    sar     r1,8            ; r1 is the coefficient
-    neg     r2              ; negate the exponent
-    xor     r0,r0           ; r0 is zero
-    cmp     r2,16           ; some exponents cannot be part of one
-    ja      return
-    cmp     r1,power[r2*8]  ; is the coefficient equal to power[-exponent]?
-    sete    r0_h            ; r0 is one if the number was one
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
