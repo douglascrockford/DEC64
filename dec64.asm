@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2014-03-16
+; 2014-03-17
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -82,9 +82,6 @@ public dec64_divide;(dividend: dec64, divisor: dec64)
 ;      returns quotient: dec64
 
 public dec64_equal;(comparahend: dec64, comparator: dec64)
-;      returns comparison: dec64
-
-public dec64_equal_int64;(comparahend: dec64, comparator: int64)
 ;      returns comparison: dec64
 
 public dec64_exponent;(number: dec64)
@@ -689,7 +686,7 @@ add_slower_increase:
 ; increase the second exponent, which will result in a loss of significance.
 ; That is the heartbreak of floating point.
 
-; Determine how many places need to be shifted. If it is more than 17, there is 
+; Determine how many places need to be shifted. If it is more than 17, there is
 ; nothing more to add.
 
     mov     r2,r8           ; r2 is the first exponent
@@ -791,7 +788,7 @@ subtract_slower_increase:
 ; increase the second exponent, which will result in a loss of significance.
 ; That is the heartbreak of floating point.
 
-; Determine how many places need to be shifted. If it is more than 17, there is 
+; Determine how many places need to be shifted. If it is more than 17, there is
 ; nothing more to add.
 
     mov     r2,r8           ; r2 is the first exponent
@@ -1008,7 +1005,7 @@ dec64_modulo: function_with_one_parameter
 
 ; Modulo. It produces the same result as
 ;   dec64_subtract(
-;       dividend, 
+;       dividend,
 ;       dec64_multiply(
 ;           dec64_integer_divide(dividend, divisor),
 ;           divisor
@@ -1048,7 +1045,7 @@ dec64_modulo: function_with_one_parameter
     ret
     pad
 
-modulo_slow:  
+modulo_slow:
 
 ; The exponents are not the same, so do it the hard way.
 
@@ -1189,28 +1186,6 @@ equal_slow:
     or      r0,r0           ; examine r0
     mov     r0,0            ; r0 is zero
     setz    r0_h            ; r0 is one if the numbers are equal
-    ret
-
-    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
-dec64_equal_int64: function_with_two_parameters
-;(comparahend: dec64, comparator: int64) returns comparison: dec64
-
-; Compare a dec64 with an int64 in the range -36028797018963968 .. 
-; 36028797018963967.
-
-    test    r2,r2           ; examine the int64 in r2
-    jz      dec64_is_zero   ; if it is 0, let dec64_zero handle it
-    movsx   r8,r1_b         ; r8 is the exponent
-    sar     r1,8            ; r1 is the coefficient
-    neg     r8              ; negate the exponent
-    xor     r0,r0           ; r0 is zero
-    cmp     r8,16           ; some exponents cannot be part of int64
-    ja      return          ; return zero
-    mov     r10,power[r8*8] ; r10 is power[-exponent]
-    imul    r10,r2          ; r10 is the comparator times the poewr of ten
-    cmp     r1,r10          ; is the coefficient equal to power[-exponent]?
-    sete    r0_h            ; r0 is one if the number was one
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
