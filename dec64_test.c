@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2014-03-16
+2014-03-25
 Public Domain
 
 No warranty.
@@ -44,6 +44,7 @@ dec64 half;
 dec64 cent;
 dec64 negative_one;
 dec64 negative_nine;
+dec64 negative_minnum;
 dec64 negative_maxint;
 dec64 negative_maxnum;
 dec64 negative_pi;
@@ -79,6 +80,8 @@ void define_constants() {
                                     /* the smallest number larger than maxint */
     maxnum = dec64_new(36028797018963967, 127);
                                     /* the largest possible number */
+    negative_minnum = dec64_new(-1, -127);    
+                                    /* the smallest possible negative number */
     negative_one = dec64_new(-1, 0);/* -1 */
     negative_nine = dec64_new(-9, 0);
                                     /* -9 */
@@ -108,6 +111,29 @@ int compare(dec64 first, dec64 second) {
         second = dec64_normal(second);
     }
     return first == second;
+
+}
+
+void judge_not(dec64 expected, dec64 actual, char * name, char * comment) {
+    if (compare(expected, actual)) {
+        nr_pass += 1;
+        if (level >= 3) {
+            printf("\n\npass %s: %s", name, comment);
+            printf("\n%-4s", "=");
+            print_dec64(actual);
+        }
+    } else {
+        nr_fail += 1;
+        if (level >= 1) {
+            printf("\n\nFAIL %s: %s", name, comment);
+            if (level >= 2) {
+                printf("\n%-4s", "?");
+                print_dec64(actual);
+                printf("\n%-4s", "=");
+                print_dec64(expected);
+            }
+        }
+    }
 
 }
 
@@ -236,6 +262,11 @@ void test_neg(dec64 first, dec64 expected, char * comment) {
     judge_unary(first, expected, actual, "neg", "n", comment);
 }
 
+void test_new(int64 coefficient, int64 exponent, dec64 expected, char * comment) {
+    dec64 actual = dec64_new(coefficient, exponent);
+    judge_not(expected, actual, "new", comment);
+}
+
 void test_normal(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_normal(first);
     judge_unary(first, expected, actual, "normal", "n", comment);
@@ -302,10 +333,10 @@ void test_all_add() {
     test_add(maxint, dec64_new(4999999999, -11), maxint, "maxint + 0.4999999999");
     test_add(maxint, maxint, dec64_new(7205759403792793, 1), "maxint + maxint");
     test_add(maxint, dec64_new(111, -2), maxint_plus, "maxint + 1.11");
-    test_add(maxint, dec64_new(36028797018963967, -20), maxint, "something too small");
-    test_add(maxint, dec64_new(30000000000000000, -16), maxint_plus, "3");
-    test_add(maxint, dec64_new(20000000000000000, -16), maxint_plus, "something too small");
-    test_add(maxint, negative_maxint, dec64_new(-1, 0), "-maxint");
+    test_add(maxint, dec64_new(36028797018963967, -20), maxint, "maxint + something too small");
+    test_add(maxint, dec64_new(30000000000000000, -16), maxint_plus, "maxint + 3");
+    test_add(maxint, dec64_new(20000000000000000, -16), maxint_plus, "maxint + something too small");
+    test_add(maxint, negative_maxint, dec64_new(-1, 0), "maxint + -maxint");
     test_add(maxnum, dec64_new(1, -127), maxnum, "insignificance");
     test_add(maxnum, one, maxnum, "insignificance");
     test_add(maxnum, maxint, maxnum, "insignificance");
@@ -371,6 +402,7 @@ void test_all_divide() {
     test_divide(pi, negative_pi, dec64_new(-10000000000000000, -16), "pi / -pi");
     test_divide(negative_pi, pi, dec64_new(-10000000000000000, -16), "-pi / pi");
     test_divide(negative_pi, negative_pi, dec64_new(10000000000000000, -16), "-pi / -pi");
+    test_divide(dec64_new(-16, 0), ten, dec64_new(-16, -1), "-16 / 10");
     test_divide(maxint, epsilon, dec64_new(36028797018963967, 16), "maxint / epsilon");
     test_divide(one, maxint, dec64_new(27755575615628914, -33), "one / maxint");
     test_divide(one, negative_maxint, dec64_new(-27755575615628914, -33), "one / -maxint");
@@ -435,9 +467,6 @@ void test_all_integer() {
     test_integer(maxint, maxint, "maxint");
     test_integer(maxnum, maxnum, "maxnum");
     test_integer(negative_maxint, negative_maxint, "negative_maxint");
-    test_integer(dec64_new(-12500000000000000, -16), dec64_new(-2, 0), "-1.25");
-    test_integer(dec64_new(-1500000000000000, -15), dec64_new(-2, 0), "-1.5");
-    test_integer(dec64_new(-1560000000000000, -15), dec64_new(-2, 0), "-1.56");
     test_integer(dec64_new(11111111111111111, -17), zero, "0.1...");
     test_integer(dec64_new(22222222222222222, -17), zero, "0.2...");
     test_integer(dec64_new(33333333333333333, -17), zero, "0.3...");
@@ -447,6 +476,9 @@ void test_all_integer() {
     test_integer(dec64_new(7777777777777778, -16), zero, "0.7...");
     test_integer(dec64_new(8888888888888889, -16), zero, "0.8...");
     test_integer(dec64_new(10000000000000000, -16), one, "1");
+    test_integer(dec64_new(-12500000000000000, -16), dec64_new(-2, 0), "-1.25");
+    test_integer(dec64_new(-1500000000000000, -15), dec64_new(-2, 0), "-1.5");
+    test_integer(dec64_new(-1560000000000000, -15), dec64_new(-2, 0), "-1.56");
     test_integer(dec64_new(-11111111111111111, -17), negative_one, "-0.1...");
     test_integer(dec64_new(-22222222222222222, -17), negative_one, "-0.2...");
     test_integer(dec64_new(-33333333333333333, -17), negative_one, "-0.3...");
@@ -503,6 +535,7 @@ void test_all_integer_divide() {
     test_integer_divide(dec64_new(-5, 0), dec64_new(-30000000000000000, -16), one, "-5 / -3");
     test_integer_divide(dec64_new(-50000000000000000, -16), dec64_new(-30000000000000000, -16), one, "-5 / -3");
     test_integer_divide(dec64_new(-50000000000000000, -16), three, dec64_new(-2, 0), "-5 / 3");
+    test_integer_divide(dec64_new(-16, 0), ten, dec64_new(-2, 0), "-16 / 10");
     test_integer_divide(maxnum, epsilon, nan, "maxnum / epsilon");
     test_integer_divide(maxint, epsilon, dec64_new(36028797018963967, 16), "maxint / epsilon");
     test_integer_divide(dec64_new(10, -1), maxint, zero, "one / maxint");
@@ -655,6 +688,100 @@ void test_all_neg() {
     test_neg(negative_maxint, maxint_plus, "-maxint");
     test_neg(maxnum, dec64_new(-36028797018963967, 127), "maxnum");
     test_neg(negative_maxnum, nan, "-maxnum");
+}
+
+void test_all_new() {
+    test_new(0, 0, zero, "zero");
+    test_new(0, 1000, zero, "0e1000");
+    test_new(0, -1000, zero, "0e-1000");
+    test_new(1, 0, (1 << 8), "one");
+    test_new(1, 1000, nan, "0e1000");
+    test_new(1, -1000, zero, "0e-1000");
+    test_new(-1, 127, (-1 << 8) + 127, "-1e127");
+    test_new(-1, 128, (-10 << 8) + 127, "-1e128");
+    test_new(1, -128, zero, "1e-128");
+    test_new(-1, 143, (-10000000000000000LL << 8) + 127, "-1e143");
+    test_new(-1, 144, nan, "-1e144");
+    test_new(10, -128, minnum, "10e-128");
+    test_new(100, -129, minnum, "100e-129");
+    test_new(1000000000000000000, -145, minnum, "1000000000000000000e-145");
+    test_new(1000000000000000000, -146, zero, "1000000000000000000e-146");
+    test_new(-10000000000000000000, -147, zero, "-10000000000000000000e-147");
+    test_new(1152921504606846975,  0,  (1152921504606847 << 8) + 3, "1152921504606846975");
+    test_new(-1152921504606846975, 0, (-1152921504606847 << 8) + 3, "-1152921504606846975");
+    test_new(144115188075855871,  0,  (14411518807585587 << 8) + 1, "144115188075855871");
+    test_new(-144115188075855871, 0, (-14411518807585587 << 8) + 1, "-144115188075855871");
+    test_new(2305843009213693951,  0,  (2305843009213694 << 8) + 3, "2305843009213693951");
+    test_new(-2305843009213693951, 0, (-2305843009213694 << 8) + 3, "-2305843009213693951");
+    test_new(288230376151711743,  0,  (28823037615171174 << 8) + 1, "288230376151711743");
+    test_new(-288230376151711743, 0, (-28823037615171174 << 8) + 1, "-288230376151711743");
+    test_new(36028797018963967,  0, (36028797018963967 << 8), "3602879701896397e0");
+    test_new(-36028797018963967, 0, -36028797018963967 << 8, "-3602879701896397e0");
+    test_new(36028797018963967, -128, (3602879701896397 << 8) + (0xff & -127), "36028797018963967e-128");
+    test_new(36028797018963967, -129, (360287970189640 << 8) + (0xff & -127), "36028797018963967e-129");
+    test_new(36028797018963967, -130, (36028797018964 << 8) + (0xff & -127), "36028797018963967e-130");
+    test_new(36028797018963967, -131, (3602879701896 << 8) + (0xff & -127), "36028797018963967e-131");
+    test_new(36028797018963967, -132, (360287970190 << 8) + (0xff & -127), "36028797018963967e-132");
+    test_new(36028797018963967, -133, (36028797019 << 8) + (0xff & -127), "36028797018963967e-133");
+    test_new(36028797018963967, -134, (3602879702LL << 8) + (0xff & -127), "36028797018963967e-134");
+    test_new(36028797018963967, -135, (360287970LL << 8) + (0xff & -127), "36028797018963967e-135");
+    test_new(36028797018963967, -136, (36028797LL << 8) + (0xff & -127), "36028797018963967e-136");
+    test_new(36028797018963967, -137, (3602880LL << 8) + (0xff & -127), "36028797018963967e-137");
+    test_new(36028797018963967, -138, (360288LL << 8) + (0xff & -127), "36028797018963967e-138");
+    test_new(36028797018963967, -139, (36029LL << 8) + (0xff & -127), "36028797018963967e-139");
+    test_new(36028797018963967, -140, (3603LL << 8) + (0xff & -127), "36028797018963967e-140");
+    test_new(36028797018963967, -141, (360LL << 8) + (0xff & -127), "36028797018963967e-141");
+    test_new(36028797018963967, -142, (36LL << 8) + (0xff & -127), "36028797018963967e-142");
+    test_new(36028797018963967, -143, (4LL << 8) + (0xff & -127), "36028797018963967e-143");
+    test_new(36028797018963967, -144, zero, "36028797018963967e-144");
+    test_new( 360287970189639670,  0, ( 36028797018963967 << 8) + 1, "36028797018963970e0");
+    test_new(-360287970189639670,  0, (-36028797018963967 << 8) + 1, "-36028797018963970e0");
+    test_new( 3602879701896396700, 0, ( 36028797018963967 << 8) + 2, "3602879701896396700e0");
+    test_new(-3602879701896396700, 0, (-36028797018963967 << 8) + 2, "-3602879701896396700e0");
+    test_new( 3602879701896396701, 0, ( 36028797018963967 << 8) + 2, "3602879701896396701e0");
+    test_new(-3602879701896396701, 0, (-36028797018963967 << 8) + 2, "-3602879701896396701e0");
+    test_new( 360287970189639674,  0, ( 36028797018963967 << 8) + 1, "36028797018963974e0");
+    test_new(-360287970189639674,  0, (-36028797018963967 << 8) + 1, "-36028797018963974e0");
+    test_new( 3602879701896396740, 0, ( 36028797018963967 << 8) + 2, "3602879701896396740e0");
+    test_new(-3602879701896396740, 0, (-36028797018963967 << 8) + 2, "-3602879701896396740e0");
+    test_new( 3602879701896396749, 0, ( 36028797018963967 << 8) + 2, "3602879701896396749e0");
+    test_new(-3602879701896396749, 0, (-36028797018963967 << 8) + 2, "-3602879701896396749e0");
+    test_new(-360287970189639675,  0, (-36028797018963968 << 8) + 1, "-36028797018963975e0");
+    test_new( 360287970189639675,  0, ( 3602879701896397  << 8) + 2, "36028797018963975e0");
+    test_new(-3602879701896396750, 0, (-36028797018963968 << 8) + 2, "-3602879701896396750e0");
+    test_new( 3602879701896396750, 0, ( 3602879701896397  << 8) + 3, "3602879701896396750e0");
+    test_new(-36028797018963968,   0, (-36028797018963968 << 8), "-3602879701896398e0");
+    test_new(-36028797018963968, -147, zero, "-36028797018963968e-147");
+    test_new(-3602879701896396800, 0, (-36028797018963968 << 8) + 2, "-3602879701896396800e0");
+    test_new( 3602879701896396800, 0, (3602879701896397 << 8) + 3, "3602879701896396800e0");
+    test_new(4611686018427387903, 0, (4611686018427388 << 8) + 3, "4611686018427387903");
+    test_new(-4611686018427387903, 0, (-4611686018427388 << 8) + 3, "-4611686018427387903");
+    test_new(49, -129, zero, "49e-129");
+    test_new(50, -129, minnum, "50e-129");
+    test_new(500000000000, -139, minnum, "500000000000e-139");
+    test_new(-500000000000, -139, negative_minnum, "-500000000000e-139");
+    test_new(5000000000000000000, -145, (5 << 8) + (0x81), "5000000000000000000e-145");
+    test_new(-5000000000000000000, -146, negative_minnum, "-5000000000000000000e-146");
+    test_new(-5555555555555555, 0, (-5555555555555555 << 8) + 0, "-55555555555555555");
+    test_new(-55555555555555555, 0, (-5555555555555556 << 8) + 1, "-55555555555555555");
+    test_new(-555555555555555555, 0, (-5555555555555556 << 8) + 2, "-555555555555555555");
+    test_new(-5555555555555555555, 0, (-5555555555555556 << 8) + 3, "-5555555555555555555");
+    test_new( 576460752303423487, 0,  (5764607523034235 << 8) + 2, "1152921504606846975");
+    test_new(-576460752303423487, 0, (-5764607523034235 << 8) + 2, "-1152921504606846975");
+    test_new( 72057594037927935, 0,  (7205759403792794 << 8) + 1, "72057594037927935");
+    test_new(-72057594037927935, 0, (-7205759403792794 << 8) + 1, "-72057594037927935");
+    test_new( 9223372036854775807, 0,  (9223372036854776 << 8) + 3, "9223372036854775807");
+    test_new(-9223372036854775807, 0, (-9223372036854776 << 8) + 3, "-9223372036854775807");
+    test_new(-9223372036854775807, 124, (-9223372036854776 << 8) + 127, "-9223372036854775807e124");
+    test_new(-9223372036854775807, 125, nan, "-9223372036854775807e125");
+    test_new(-9223372036854775807, -132, (-92233720368548 << 8) + (0x81), "-9223372036854775807e-132");
+    test_new(-9223372036854775807, -133, (-9223372036855 << 8) + (0x81), "-9223372036854775807e-133");
+    test_new(9223372036854775807, -143, (922LL << 8) + (0xff & -127), "9223372036854775807e-143");
+    test_new(9223372036854775807, -144, (92LL << 8) + (0xff & -127), "9223372036854775807e-144");
+    test_new(-9223372036854775807, -145, (-9 << 8) + (0x81), "-9223372036854775807e-145");
+    test_new(9223372036854775807, -145, (9LL << 8) + (0xff & -127), "9223372036854775807e-145");
+    test_new(-9223372036854775807, -146, (-1 << 8) + (0x81), "-9223372036854775807e-146");
+    test_new(9223372036854775807, -146, (1LL << 8) + (0xff & -127), "9223372036854775807e-146");
 }
 
 void test_all_normal() {
@@ -851,6 +978,7 @@ int do_tests(int lvl) {
     test_all_modulo();
     test_all_multiply();
     test_all_neg();
+    test_all_new();
     test_all_normal();
     test_all_not();
     test_all_round();
