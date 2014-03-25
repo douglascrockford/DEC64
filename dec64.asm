@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2014-03-17
+; 2014-03-25
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -316,89 +316,70 @@ pack:
 ; The coefficient is in r0.
 ; The exponent is in r8.
 
-    mov     r10,10          ; r10 is the divisor
-
 ; If the exponent is greater than 127, then the number is too big.
 ; But it might still be possible to salvage a value.
 
     cmp     r8,127          ; compare exponent with 127
-    jg      pack_salvage
+    jg      pack_decrease   ; it might be possible to decrease it
 
-; If the exponent is greater than or equal to -127 and the top 9 bits of r0 are
-; all the same, then we are ready to pack. If the top nine bits are all the
-; same then the coefficient can survive the final left shift of 8 bits without
-; a loss of significance. If the exponent is between -127 and 127, then it will
-; fit too.
-
-    mov     r11,r0          ; r11 is the coefficient
-    cmp     r8,-127         ; compare the exponent with -127
-    setge   r1_b            ; r1_b is 1 if the exponent is not less than -127
-    sar     r11,56          ; shift out all except the top 8 bits
-    adc     r11,0           ; add the 9th bit and see if the result is 0
-    setz    r1_h            ; r1_h is 1 if the top bits are all the same
-    test    r1_h,r1_b       ; ready to pack?
-    jz      pack_loop       ; not yet
+; If the exponent is too small, or if the coefficient is too large, then some
+; division is necessary. The absolute value of the coefficient is off by one
+; for the negative because 
+;   negative_extreme_coefficent = -(extreme_coefficent + 1)
+    
+    mov     r10,r0          ; r10 is the coefficient
+    mov     r1,3602879701896396800 ; the ultimate coefficient * 100
+    not     r10             ; r10 is -coefficient
+    xor     r11,r11         ; r11 is zero
+    test    r10,r10         ; look at the sign bit
+    cmovs   r10,r0          ; r10 is the absolute value of the coefficient
+    cmp     r10,r1          ; compare with the actual coefficient
+    jae     pack_large      ; deal with the very large coefficient
+    mov     r1,36028797018963967 ; the ultimate coefficient 
+    mov     r9,-127         ; r9 is the ultimate exponent
+    cmp     r1,r10          ; compare with the actual coefficient
+    adc     r11,0           ; add 1 to r11 if 1 digit too big
+    mov     r1,360287970189639679 ; the ultimate coefficient * 10
+    sub     r9,r8           ; r9 is the difference from the actual exponent
+    cmp     r1,r10          ; compare with the actual coefficient
+    adc     r11,0           ; add 1 to r11 if 2 digits too big
+    cmp     r9,r11          ; which excess is larger?
+    cmovl   r9,r11          ; take the max
+    test    r9,r9           ; if neither was zero
+    jnz     pack_increase   ;   then increase the exponent by the excess
     shl     r0,8            ; shift the exponent into position
-    cmovz   r8,r0           ; if the coefficient is zero, also zero the exponent
-    mov     r0_b,r8_b       ; mix in the exponent
-    ret
-    pad
-
-pack_loop:
-
-; Either the coefficient is too large or the exponent is too small.
-; Divide the coefficient by 10 and add one to the exponent.
-
-    cqo                     ; sign extend r0 into r2
-    idiv    r10             ; divide r2:r0 by 10
-    add     r8,1            ; increment the exponent
-
-; Does it fit now?
-
-    cmp     r8,-127         ; compare the exponent with -127
-    setge   r1_b            ; r1_b is 1 if the exponent is not less than -127
-    mov     r11,r0          ; r11 is the coefficient
-    sar     r11,56          ; shift out all except the top 8 bits
-    adc     r11,0           ; add in the ninth bit
-    setz    r1_h            ; r1_h is 1 if the top bits are all the same
-    test    r1_h,r1_b       ; ready to pack?
-    jz      pack_loop       ; until the number fits
-
-; Examine the remainder to determine if the coefficient should be rounded up
-; or down. We will shift before adding in the rounding bit to get the cheap
-; overflow check. If rounding does not cause overflow, pack up and get out.
-
-    cmp     r8,127          ; compare the exponent with 127
-    jg      dec64_nan       ; if 128 or more, the result is nan
-    xor     r1,r1           ; r1 is zero
-    cmp     r2,-5           ; compare the remainder to -5
-    setle   r1_b            ; r1 is 1 if remainder <= -5
-    cmp     r2,5            ; compare the remainder to 5
-    setge   r2_b            ; if the remainder is greater than or equal to 5
-    neg     r1              ; r1 is -1 or 0
-    or      r1_b,r2_b       ; r1 is the rounding: -1, 0, or 1
-
-; Incorporate the rounding and pack it up.
-
-    shl     r0,8            ; shift the exponent into position
-    shl     r1,8            ; shift the rounding into position
-    add     r0,r1           ; round away
-    jo      pack_overflow   ; did rounding cause overflow?
     cmovz   r8,r0           ; if the coefficient is zero, also zero the exponent
     mov     r0_b,r8_b       ; mix in the exponent
     ret                     ; whew
-
-pack_overflow:
-
-; If rounding caused the coefficient to overflow, then go one more time
-; through the loop. This is extremely unlikely.
-
-    rcr     r0,1            ; repair sign bit
-    sar     r0,7            ; undo the rest of the shift
-    jmp     pack_loop       ; try again
     pad
 
-pack_salvage:
+pack_large:
+
+    mov     r10,10          ; r10 is 10
+    cqo                     ; sign extend r0 into r2
+    idiv    r10             ; divide r0 by ten
+    add     r8,1            ; add 1 to the exponent
+    jmp     pack            ; start over
+    pad
+
+pack_increase:
+
+    mov     r10,power[r9*8] ; r10 is 10^r9
+    cmp     r9,20           ; is the difference more than 20?
+    jae     dec64_zero      ; if so, the result is zero (rare)
+    mov     r11,r10         ; r11 is the power of ten
+    neg     r11             ; r11 is the negation of the power of ten
+    test    r0,r0           ; examine the sign of the coefficient
+    cmovns  r11,r10         ; r11 has the sign of the coefficient
+    sar     r11,1           ; r11 is half the signed power of ten
+    add     r0,r11          ; r0 is the coefficient plus the rounding fudge
+    cqo                     ; sign extend r0 into r2
+    idiv    r10             ; divide by the power of ten
+    add     r8,r9           ; increase the exponent
+    jmp     pack            ; start over
+    pad     
+
+pack_decrease:
 
 ; The exponent is too big. We can attempt to reduce it by scaling back.
 ; This can salvage values in a small set of cases.
@@ -407,7 +388,7 @@ pack_salvage:
     jo      dec64_nan       ; if it overflows, we failed to salvage
     sub     r8,1            ; decrement the exponent
     cmp     r8,127          ; test the exponent
-    jg      pack_salvage    ; until the exponent is less than 127
+    jg      pack_decrease   ; until the exponent is less than 127
     mov     r9,r0           ; r9 is the coefficient
     xor     r1,r1           ; the rounding flag is zero
     sar     r9,56           ; r9 is top 8 bits of the coefficient
@@ -608,6 +589,17 @@ add_begin:
     ret                     ; no need to pack
     pad
 
+add_overflow:
+
+; If there was an overflow (extremely unlikely) then we must make it fit.
+; pack knows how to do that.
+
+    rcr     r0,1            ; divide the sum by 2 and repair its sign
+    movsx   r8,r1_b         ; r8 is the exponent
+    sar     r0,7            ; r0 is the coefficient of the sum
+    jmp     pack            ; pack it up
+    pad
+
 add_slow:
 
 ; The slow path is taken if the two operands do not both have zero exponents.
@@ -710,16 +702,6 @@ add_underflow:
 
     mov     r0,r1           ; r0 is the original number
     ret
-
-add_overflow:
-
-; If there was an overflow (extremely unlikely) then we must make it fit.
-; pack knows how to do that.
-
-    rcr     r0,1            ; divide the sum by 2 and repair its sign
-    movsx   r8,r1_b         ; r8 is the exponent
-    sar     r0,7            ; r0 is the coefficient of the sum
-    jmp     pack            ; pack it up
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
