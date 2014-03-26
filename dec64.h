@@ -14,6 +14,7 @@ typedef int64 dec64;
 
 extern dec64 dec64_abs(dec64 number)                           /* absolution */;
 extern dec64 dec64_add(dec64 augend, dec64 addend)                    /* sum */;
+extern dec64 dec64_ceiling(dec64 number)                          /* integer */;
 extern int64 dec64_coefficient(dec64 number)                  /* coefficient */;
 extern dec64 dec64_divide(dec64 dividend, dec64 divisor)         /* quotient */;
 extern dec64 dec64_equal(dec64 comparahend, dec64 comparator)  /* comparison */;

@@ -38,6 +38,7 @@ dec64 maxnum;
 dec64 minnum;
 dec64 epsilon;
 dec64 almost_one;
+dec64 almost_negative_one;
 dec64 e;
 dec64 pi;
 dec64 half;
@@ -91,6 +92,8 @@ void define_constants() {
                                     /* the largest negative normal integer */
     negative_maxnum = dec64_new(-36028797018963968, 127);
                                     /* the largest possible negative number */
+    almost_negative_one = dec64_new(-9999999999999999, -16);
+                                    /* -0.9999999999999999 */
 }
 
 
@@ -212,6 +215,11 @@ void test_add(dec64 first, dec64 second, dec64 expected, char * comment) {
     judge_communitive(first, second, expected, actual, "add", "+", comment);
 }
 
+void test_ceiling(dec64 first, dec64 expected, char * comment) {
+    dec64 actual = dec64_ceiling(first);
+    judge_unary(first, expected, actual, "ceiling", "c", comment);
+}
+
 void test_divide(dec64 first, dec64 second, dec64 expected, char * comment) {
     dec64 actual = dec64_divide(first, second);
     judge_binary(first, second, expected, actual, "divide", "/", comment);
@@ -300,8 +308,10 @@ void test_all_abs() {
     test_abs(100, zero, "zero alias");
     test_abs(one, one, "one");
     test_abs(negative_one, one, "-1");
+    test_abs(almost_negative_one, almost_one, "almost_negative_one");
     test_abs(negative_maxint, maxint_plus, "-maxint");
     test_abs(negative_maxnum, nan, "-maxnum");
+    test_abs(maxnum, maxnum, "maxnum");
 }
 
 void test_all_add() {
@@ -326,6 +336,7 @@ void test_all_add() {
     test_add(dec64_new(199, -2), dec64_new(299, -2), dec64_new(498, -2), "1.99 + 2.99");
     test_add(dec64_new(36028797018963967, 126), dec64_new(36028797018963967, 126), dec64_new(7205759403792793, 127), "test overflow with big exponents");
     test_add(dec64_new(9999999999999999, 0), one, dec64_new(10000000000000000, 0), "9999999999999999 + 1");
+    test_add(negative_one, epsilon, almost_negative_one, zero, "-1 + epsilon");
     test_add(negative_pi, pi, zero, "-pi + pi");
     test_add(maxint, one, maxint_plus, "maxint + one");
     test_add(maxint, half, maxint_plus, "maxint + half");
@@ -347,6 +358,58 @@ void test_all_add() {
     test_add(maxnum, dec64_new(500, 124), nan, "overflow the exponent");
     test_add(maxnum, maxnum, nan, "overflow the exponent");
     test_add(maxnum, dec64_new(-36028797018963967, 127), zero, "extreme zero");
+    test_add(almost_negative_one, one, epsilon, "almost_negative_one + one");
+}
+
+void test_all_ceiling() {
+    test_ceiling(nan, nan, "nan");
+    test_ceiling(nannan, nan, "nannan");
+    test_ceiling(zero, zero, "zero");
+    test_ceiling(zip, zero, "zero");
+    test_ceiling(minnum, one, "minnum");
+    test_ceiling(epsilon, one, "epsilon");
+    test_ceiling(cent, one, "cent");
+    test_ceiling(half, one, "half");
+    test_ceiling(one, one, "one");
+    test_ceiling(negative_one, negative_one, "negative_one");
+    test_ceiling(dec64_new(20000000000000000, -16), two, "two");
+    test_ceiling(e, three, "e");
+    test_ceiling(pi, four, "pi");
+    test_ceiling(negative_pi, dec64_new(-3, 0), "-pi");
+    test_ceiling(maxint, maxint, "maxint");
+    test_ceiling(maxnum, maxnum, "maxnum");
+    test_ceiling(negative_maxint, negative_maxint, "negative_maxint");
+    test_ceiling(dec64_new(11111111111111111, -17), one, "0.1...");
+    test_ceiling(dec64_new(22222222222222222, -17), one, "0.2...");
+    test_ceiling(dec64_new(33333333333333333, -17), one, "0.3...");
+    test_ceiling(dec64_new(4444444444444444, -16), one, "0.4...");
+    test_ceiling(dec64_new(5555555555555556, -16), one, "0.5...");
+    test_ceiling(dec64_new(6666666666666667, -16), one, "0.6...");
+    test_ceiling(dec64_new(7777777777777778, -16), one, "0.7...");
+    test_ceiling(dec64_new(8888888888888889, -16), one, "0.8...");
+    test_ceiling(dec64_new(10000000000000000, -16), one, "1");
+    test_ceiling(dec64_new(-12500000000000000, -16), dec64_new(-1, 0), "-1.25");
+    test_ceiling(dec64_new(-1500000000000000, -15), dec64_new(-1, 0), "-1.5");
+    test_ceiling(dec64_new(-1560000000000000, -15), dec64_new(-1, 0), "-1.56");
+    test_ceiling(dec64_new(-11111111111111111, -17), zero, "-0.1...");
+    test_ceiling(dec64_new(-22222222222222222, -17), zero, "-0.2...");
+    test_ceiling(dec64_new(-33333333333333333, -17), zero, "-0.3...");
+    test_ceiling(dec64_new(-4444444444444444, -16), zero, "-0.4...");
+    test_ceiling(dec64_new(-5555555555555556, -16), zero, "-0.5...");
+    test_ceiling(dec64_new(-6666666666666667, -16), zero, "-0.6...");
+    test_ceiling(dec64_new(-7777777777777778, -16), zero, "-0.7...");
+    test_ceiling(dec64_new(-8888888888888889, -16), zero, "-0.8...");
+    test_ceiling(dec64_new(-10000000000000000, -16), negative_one, "-0.9...");
+    test_ceiling(dec64_new(449, -2), five, "4.49");
+    test_ceiling(dec64_new(-449, -2), dec64_new(-4, 0), "-4.49");
+    test_ceiling(dec64_new(450, -2), five, "4.50");
+    test_ceiling(dec64_new(-450, -2), dec64_new(-4, 0), "-4.50");
+    test_ceiling(dec64_new(9, -1), one, "0.9");
+    test_ceiling(dec64_new(-9, -1), zero, "-0.9");
+    test_ceiling(almost_one, one, "almost_one");
+    test_ceiling(almost_negative_one, zero, "almost_negative_one");
+    test_ceiling(dec64_new(-999999999999999, -15), zero, "-0.9...");
+    test_ceiling(dec64_new(-9999999999999998, -16), zero, "-0.9...8");
 }
 
 void test_all_divide() {
@@ -475,6 +538,7 @@ void test_all_floor() {
     test_floor(dec64_new(6666666666666667, -16), zero, "0.6...");
     test_floor(dec64_new(7777777777777778, -16), zero, "0.7...");
     test_floor(dec64_new(8888888888888889, -16), zero, "0.8...");
+    test_floor(dec64_new(9999999999999999, -16), zero, "0.9...");
     test_floor(dec64_new(10000000000000000, -16), one, "1");
     test_floor(dec64_new(-12500000000000000, -16), dec64_new(-2, 0), "-1.25");
     test_floor(dec64_new(-1500000000000000, -15), dec64_new(-2, 0), "-1.5");
@@ -487,11 +551,24 @@ void test_all_floor() {
     test_floor(dec64_new(-6666666666666667, -16), negative_one, "-0.6...");
     test_floor(dec64_new(-7777777777777778, -16), negative_one, "-0.7...");
     test_floor(dec64_new(-8888888888888889, -16), negative_one, "-0.8...");
+    test_floor(dec64_new(-9999999999999999, -16), negative_one, "-0.9...");
     test_floor(dec64_new(-10000000000000000, -16), negative_one, "-0.9...");
     test_floor(dec64_new(449, -2), four, "4.49");
     test_floor(dec64_new(-449, -2), dec64_new(-5, 0), "-4.49");
     test_floor(dec64_new(450, -2), four, "4.50");
     test_floor(dec64_new(-450, -2), dec64_new(-5, 0), "-4.50");
+    test_floor(dec64_new(-1, -127), negative_one, "-1e-127");
+    test_floor(dec64_new(-1, -13), negative_one, "-1e-13");
+    test_floor(dec64_new(-1, -12), negative_one, "-1e-12");
+    test_floor(dec64_new(-1, -11), negative_one, "-1e-11");
+    test_floor(dec64_new(-1, -1), negative_one, "-1e-1");
+    test_floor(dec64_new(-10, -3), negative_one, "-10e-3");
+    test_floor(dec64_new(9, -1), zero, "0.9");
+    test_floor(dec64_new(-9, -1), negative_one, "-0.9");
+    test_floor(almost_one, zero, "almost_one");
+    test_floor(almost_negative_one, negative_one, "almost_negative_one");
+    test_floor(dec64_new(-999999999999999, -15), negative_one, "-0.9...");
+    test_floor(dec64_new(-9999999999999998, -16), negative_one, "-0.9...8");
 }
 
 void test_all_integer_divide() {
@@ -949,9 +1026,10 @@ void test_all_subtract() {
     test_subtract(maxnum, maxint, maxnum, "maxnum - maxint");
     test_subtract(maxnum, negative_maxint, maxnum, "maxnum - -maxint");
     test_subtract(maxnum, maxnum, zero, "maxnum - maxnum");
+    test_subtract(almost_negative_one, almost_negative_one, zero, "almost_negative_one - almost_negative_one");
 }
 
-int do_tests(int lvl) {
+int do_tests(int level_of_detail) {
 /*
     Level of detail:
         3 full
@@ -959,12 +1037,13 @@ int do_tests(int lvl) {
         1 error summary
         0 none
 */
-    level = lvl;
+    level = level_of_detail;
     nr_fail = 0;
     nr_pass = 0;
 
     test_all_abs();
     test_all_add();
+    test_all_ceiling();
     test_all_divide();
     test_all_equal();
     test_all_floor();

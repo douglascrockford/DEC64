@@ -22,6 +22,7 @@ comment "This file implements the elementary arithmetic operations for DEC64,
     These operations will produce a result of nan:
 
         dec64_abs(nan)
+        dec64_ceiling(nan)
         dec64_floor(nan)
         dec64_neg(nan)
         dec64_normal(nan)
@@ -74,6 +75,9 @@ public dec64_abs;(number: dec64)
 
 public dec64_add;(augend: dec64, addend: dec64)
 ;      returns sum: dec64
+
+public dec64_ceiling;(number: dec64)
+;      returns integer: dec64
 
 public dec64_coefficient;(number: dec64)
 ;      returns coefficient: int64
@@ -469,6 +473,47 @@ normal_multiply_done:
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 
+dec64_ceiling: function_with_one_parameter
+;(number: dec64) returns integer: dec64
+
+; Produce the smallest integer that is greater than or equal to the number. In
+; the result, the exponent will be greater than or equal to zero unless it is
+; nan. Numbers with positive exponents will not be modified, even if the
+; numbers are outside of the safe integer range.
+
+    mov     r0,r1           ; r0 is the number
+    cmp     r1_b,128        ; compare the exponent to nan
+    je      dec64_nan       ; if the exponent is nan, the result is nan
+    sar     r0,8            ; r0 is the coefficient
+    cmovz   r1,r0           ; if the coefficient is zero, the number is zero
+    movsx   r8,r1_b         ; r8 is the exponent
+    neg     r8              ; negate the exponent
+    test    r1_b,r1_b       ; examine the original exponent
+    jns     return_r1       ; nothing to do unless the exponent was negative
+    cqo                     ; sign extend r0 into r2
+    cmp     r8,20           ; is the exponent too extreme
+    jae     ceiling_low     ; deal with teensie numbers
+    mov     r10,power[r8*8] ; r10 is the power of ten
+    xor     r11,r11         ; r11 is zero
+    mov     r9,r10          ; r9 is the power of ten
+    sub     r9,1            ; r9 is the power of ten minus one
+    test    r0,r0           ; examine the coefficient
+    cmovs   r9,r11          ; fudge only for the positive case
+    add     r0,r9           ; add the power of 10 to the decremented coefficient
+    idiv    r10             ; divide r2:r0 by 10 
+    shl     r0,8            ; r0 is the result
+    ret
+    pad
+
+ceiling_low:
+
+    add     r2,1
+    mov     r0,r2
+    shl     r0,8
+    ret
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
 dec64_floor: function_with_one_parameter
 ;(number: dec64) returns integer: dec64
 
@@ -488,12 +533,23 @@ dec64_floor: function_with_one_parameter
     neg     r8              ; negate the exponent
     test    r1_b,r1_b       ; examine the exponent
     jns     return_r1       ; nothing to do unless the exponent was negative
-    cmp     r8,20           ; if the exponent is too extreme
-    jae     dec64_zero      ;   then the result is zero
-    mov     r10,power[r8*8] ; r10 is the power of ten
     cqo                     ; sign extend r0 into r2
+    cmp     r8,20           ; if the exponent is too extreme
+    jae     floor_low       ;   then the result is zero
+    mov     r10,power[r8*8] ; r10 is the power of ten
+    mov     r9,r10          ; r9 is the power of 10
+    sub     r9,1            ; r9 is the power of 10 minus 1
+    and     r9,r2           ; fudge only if the coefficient is negative
+    sub     r0,r9           ; add the round down fudge
     idiv    r10             ; divide r2:r0 by 10
     and     r0,r11          ; clear the exponent
+    ret
+    pad
+
+floor_low:
+
+    mov r0,r2               ; r0 is -1 or 0
+    shl r0,8                ; convert to dec64
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
