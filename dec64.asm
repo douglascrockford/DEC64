@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2014-03-25
+; 2014-03-26
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -22,7 +22,7 @@ comment "This file implements the elementary arithmetic operations for DEC64,
     These operations will produce a result of nan:
 
         dec64_abs(nan)
-        dec64_integer(nan)
+        dec64_floor(nan)
         dec64_neg(nan)
         dec64_normal(nan)
         dec64_not(nan)
@@ -87,7 +87,7 @@ public dec64_equal;(comparahend: dec64, comparator: dec64)
 public dec64_exponent;(number: dec64)
 ;      returns exponent: int64
 
-public dec64_integer;(number: dec64)
+public dec64_floor;(number: dec64)
 ;      returns integer: dec64
 
 public dec64_integer_divide;(dividend: dec64, divisor: dec64)
@@ -324,9 +324,9 @@ pack:
 
 ; If the exponent is too small, or if the coefficient is too large, then some
 ; division is necessary. The absolute value of the coefficient is off by one
-; for the negative because 
+; for the negative because
 ;   negative_extreme_coefficent = -(extreme_coefficent + 1)
-    
+
     mov     r10,r0          ; r10 is the coefficient
     mov     r1,3602879701896396800 ; the ultimate coefficient * 100
     not     r10             ; r10 is -coefficient
@@ -335,7 +335,7 @@ pack:
     cmovs   r10,r0          ; r10 is the absolute value of the coefficient
     cmp     r10,r1          ; compare with the actual coefficient
     jae     pack_large      ; deal with the very large coefficient
-    mov     r1,36028797018963967 ; the ultimate coefficient 
+    mov     r1,36028797018963967 ; the ultimate coefficient
     mov     r9,-127         ; r9 is the ultimate exponent
     cmp     r1,r10          ; compare with the actual coefficient
     adc     r11,0           ; add 1 to r11 if 1 digit too big
@@ -377,7 +377,7 @@ pack_increase:
     idiv    r10             ; divide by the power of ten
     add     r8,r9           ; increase the exponent
     jmp     pack            ; start over
-    pad     
+    pad
 
 pack_decrease:
 
@@ -469,33 +469,31 @@ normal_multiply_done:
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 
-dec64_integer: function_with_one_parameter
+dec64_floor: function_with_one_parameter
 ;(number: dec64) returns integer: dec64
 
 ; Produce the largest integer that is less than or equal to the number. This
-; is sometimes called the floor function or the entier function. In the result,
-; the exponent will be greater than or equal to zero unless it is nan.
-; Numbers with positive exponents will not be modified, even if the numbers
-; are outside of the safe integer range.
+; is sometimes called the entier function. In the result, the exponent will be
+; greater than or equal to zero unless it is nan. Numbers with positive
+; exponents will not be modified, even if the numbers are outside of the safe
+; integer range.
 
+    mov     r11,-256        ; r11 is the coefficient mask
     cmp     r1_b,128        ; compare the exponent to nan
     je      dec64_nan       ; if the exponent is nan, the result is nan
-    xor     r2,r2           ; r2 is zero
-    test    r1,-256         ; examine the coefficient
-    cmovz   r1,r2           ; the number is zero if the coefficient is zero
-    mov     r10,10          ; r10 is the divisor
     mov     r0,r1           ; r0 is the number
+    and     r0,r11          ; r0 is the shifted coefficient
+    cmovz   r1,r0           ; if the coefficient is zero, the number is zero
+    movsx   r8,r1_b         ; r8 is the exponent
+    neg     r8              ; negate the exponent
     test    r1_b,r1_b       ; examine the exponent
-    jns     return          ; no rounding required
-    pad
-
-integer_loop:
-
+    jns     return_r1       ; nothing to do unless the exponent was negative
+    cmp     r8,20           ; if the exponent is too extreme
+    jae     dec64_zero      ;   then the result is zero
+    mov     r10,power[r8*8] ; r10 is the power of ten
     cqo                     ; sign extend r0 into r2
     idiv    r10             ; divide r2:r0 by 10
-    xor     r0_b,r0_b       ; clear the bottom byte, truncating
-    add     r1_b,1          ; increment the exponent
-    jnz     integer_loop    ; loop if the exponent has not reached zero
+    and     r0,r11          ; clear the exponent
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -685,12 +683,12 @@ add_slower_increase:
     sub     r2,r9           ; r2 is the remaining exponent difference
     mov     r0,r11          ; r0 is the second coefficient
     cmp     r2,17           ; 17 is the max digits in a packed coefficient
-    ja      add_underflow   ; too small to matter
+    ja      return_r1       ; too small to matter
     mov     r9,power[r2*8]  ; r9 is the power of ten
     cqo                     ; sign extend r0 into r2
     idiv    r9              ; divide the second coefficient by the power of 10
     test    r0,r0           ; examine the scaled coefficient
-    jz      add_underflow   ; too insignificant to add?
+    jz      return_r1       ; too insignificant to add?
 
 ; The exponents are now equal, so the coefficients may be added.
 
@@ -698,7 +696,7 @@ add_slower_increase:
     jmp     pack
     pad
 
-add_underflow:
+return_r1:
 
     mov     r0,r1           ; r0 is the original number
     ret
@@ -947,7 +945,7 @@ dec64_integer_divide: function_with_two_parameters
 ;(dividend: dec64, divisor: dec64) returns quotient: dec64
 
 ; Divide, with a floored integer result. It produces the same result as
-;   dec64_integer(dec64_divide(dividend, divisor))
+;   dec64_floor(dec64_divide(dividend, divisor))
 ; but can sometimes produce that result more quickly.
 
     cmp     r1_b,r2_b       ; are the exponents equal?
@@ -978,7 +976,7 @@ integer_divide_slow:
 
     call_with_two_parameters dec64_divide
     mov     r1,r0
-    tail_with_one_parameter dec64_integer
+    tail_with_one_parameter dec64_floor
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 

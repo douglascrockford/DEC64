@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2014-03-25
+2014-03-26
 Public Domain
 
 No warranty.
@@ -80,7 +80,7 @@ void define_constants() {
                                     /* the smallest number larger than maxint */
     maxnum = dec64_new(36028797018963967, 127);
                                     /* the largest possible number */
-    negative_minnum = dec64_new(-1, -127);    
+    negative_minnum = dec64_new(-1, -127);
                                     /* the smallest possible negative number */
     negative_one = dec64_new(-1, 0);/* -1 */
     negative_nine = dec64_new(-9, 0);
@@ -222,9 +222,9 @@ void test_equal(dec64 first, dec64 second, dec64 expected, char * comment) {
     judge_communitive(first, second, expected, actual, "equal", "=", comment);
 }
 
-void test_integer(dec64 first, dec64 expected, char * comment) {
-    dec64 actual = dec64_integer(first);
-    judge_unary(first, expected, actual, "integer", "i", comment);
+void test_floor(dec64 first, dec64 expected, char * comment) {
+    dec64 actual = dec64_floor(first);
+    judge_unary(first, expected, actual, "floor", "f", comment);
 }
 
 void test_integer_divide(dec64 first, dec64 second, dec64 expected, char * comment) {
@@ -449,49 +449,49 @@ void test_all_equal() {
     test_equal(negative_maxint, negative_one, zero, "-maxint = -1");
 }
 
-void test_all_integer() {
-    test_integer(nan, nan, "nan");
-    test_integer(nannan, nan, "nannan");
-    test_integer(zero, zero, "zero");
-    test_integer(zip, zero, "zero");
-    test_integer(minnum, zero, "minnum");
-    test_integer(epsilon, zero, "epsilon");
-    test_integer(cent, zero, "cent");
-    test_integer(half, zero, "half");
-    test_integer(one, one, "one");
-    test_integer(negative_one, negative_one, "negative_one");
-    test_integer(dec64_new(20000000000000000, -16), two, "two");
-    test_integer(e, two, "e");
-    test_integer(pi, three, "pi");
-    test_integer(negative_pi, dec64_new(-4, 0), "-pi");
-    test_integer(maxint, maxint, "maxint");
-    test_integer(maxnum, maxnum, "maxnum");
-    test_integer(negative_maxint, negative_maxint, "negative_maxint");
-    test_integer(dec64_new(11111111111111111, -17), zero, "0.1...");
-    test_integer(dec64_new(22222222222222222, -17), zero, "0.2...");
-    test_integer(dec64_new(33333333333333333, -17), zero, "0.3...");
-    test_integer(dec64_new(4444444444444444, -16), zero, "0.4...");
-    test_integer(dec64_new(5555555555555556, -16), zero, "0.5...");
-    test_integer(dec64_new(6666666666666667, -16), zero, "0.6...");
-    test_integer(dec64_new(7777777777777778, -16), zero, "0.7...");
-    test_integer(dec64_new(8888888888888889, -16), zero, "0.8...");
-    test_integer(dec64_new(10000000000000000, -16), one, "1");
-    test_integer(dec64_new(-12500000000000000, -16), dec64_new(-2, 0), "-1.25");
-    test_integer(dec64_new(-1500000000000000, -15), dec64_new(-2, 0), "-1.5");
-    test_integer(dec64_new(-1560000000000000, -15), dec64_new(-2, 0), "-1.56");
-    test_integer(dec64_new(-11111111111111111, -17), negative_one, "-0.1...");
-    test_integer(dec64_new(-22222222222222222, -17), negative_one, "-0.2...");
-    test_integer(dec64_new(-33333333333333333, -17), negative_one, "-0.3...");
-    test_integer(dec64_new(-4444444444444444, -16), negative_one, "-0.4...");
-    test_integer(dec64_new(-5555555555555556, -16), negative_one, "-0.5...");
-    test_integer(dec64_new(-6666666666666667, -16), negative_one, "-0.6...");
-    test_integer(dec64_new(-7777777777777778, -16), negative_one, "-0.7...");
-    test_integer(dec64_new(-8888888888888889, -16), negative_one, "-0.8...");
-    test_integer(dec64_new(-10000000000000000, -16), negative_one, "-0.9...");
-    test_integer(dec64_new(449, -2), four, "4.49");
-    test_integer(dec64_new(-449, -2), dec64_new(-5, 0), "-4.49");
-    test_integer(dec64_new(450, -2), four, "4.50");
-    test_integer(dec64_new(-450, -2), dec64_new(-5, 0), "-4.50");
+void test_all_floor() {
+    test_floor(nan, nan, "nan");
+    test_floor(nannan, nan, "nannan");
+    test_floor(zero, zero, "zero");
+    test_floor(zip, zero, "zero");
+    test_floor(minnum, zero, "minnum");
+    test_floor(epsilon, zero, "epsilon");
+    test_floor(cent, zero, "cent");
+    test_floor(half, zero, "half");
+    test_floor(one, one, "one");
+    test_floor(negative_one, negative_one, "negative_one");
+    test_floor(dec64_new(20000000000000000, -16), two, "two");
+    test_floor(e, two, "e");
+    test_floor(pi, three, "pi");
+    test_floor(negative_pi, dec64_new(-4, 0), "-pi");
+    test_floor(maxint, maxint, "maxint");
+    test_floor(maxnum, maxnum, "maxnum");
+    test_floor(negative_maxint, negative_maxint, "negative_maxint");
+    test_floor(dec64_new(11111111111111111, -17), zero, "0.1...");
+    test_floor(dec64_new(22222222222222222, -17), zero, "0.2...");
+    test_floor(dec64_new(33333333333333333, -17), zero, "0.3...");
+    test_floor(dec64_new(4444444444444444, -16), zero, "0.4...");
+    test_floor(dec64_new(5555555555555556, -16), zero, "0.5...");
+    test_floor(dec64_new(6666666666666667, -16), zero, "0.6...");
+    test_floor(dec64_new(7777777777777778, -16), zero, "0.7...");
+    test_floor(dec64_new(8888888888888889, -16), zero, "0.8...");
+    test_floor(dec64_new(10000000000000000, -16), one, "1");
+    test_floor(dec64_new(-12500000000000000, -16), dec64_new(-2, 0), "-1.25");
+    test_floor(dec64_new(-1500000000000000, -15), dec64_new(-2, 0), "-1.5");
+    test_floor(dec64_new(-1560000000000000, -15), dec64_new(-2, 0), "-1.56");
+    test_floor(dec64_new(-11111111111111111, -17), negative_one, "-0.1...");
+    test_floor(dec64_new(-22222222222222222, -17), negative_one, "-0.2...");
+    test_floor(dec64_new(-33333333333333333, -17), negative_one, "-0.3...");
+    test_floor(dec64_new(-4444444444444444, -16), negative_one, "-0.4...");
+    test_floor(dec64_new(-5555555555555556, -16), negative_one, "-0.5...");
+    test_floor(dec64_new(-6666666666666667, -16), negative_one, "-0.6...");
+    test_floor(dec64_new(-7777777777777778, -16), negative_one, "-0.7...");
+    test_floor(dec64_new(-8888888888888889, -16), negative_one, "-0.8...");
+    test_floor(dec64_new(-10000000000000000, -16), negative_one, "-0.9...");
+    test_floor(dec64_new(449, -2), four, "4.49");
+    test_floor(dec64_new(-449, -2), dec64_new(-5, 0), "-4.49");
+    test_floor(dec64_new(450, -2), four, "4.50");
+    test_floor(dec64_new(-450, -2), dec64_new(-5, 0), "-4.50");
 }
 
 void test_all_integer_divide() {
@@ -704,9 +704,6 @@ void test_all_new() {
     test_new(-1, 144, nan, "-1e144");
     test_new(10, -128, minnum, "10e-128");
     test_new(100, -129, minnum, "100e-129");
-    test_new(1000000000000000000, -145, minnum, "1000000000000000000e-145");
-    test_new(1000000000000000000, -146, zero, "1000000000000000000e-146");
-    test_new(-10000000000000000000, -147, zero, "-10000000000000000000e-147");
     test_new(1152921504606846975,  0,  (1152921504606847 << 8) + 3, "1152921504606846975");
     test_new(-1152921504606846975, 0, (-1152921504606847 << 8) + 3, "-1152921504606846975");
     test_new(144115188075855871,  0,  (14411518807585587 << 8) + 1, "144115188075855871");
@@ -970,7 +967,7 @@ int do_tests(int lvl) {
     test_all_add();
     test_all_divide();
     test_all_equal();
-    test_all_integer();
+    test_all_floor();
     test_all_integer_divide();
     test_all_is_nan();
     test_all_is_zero();
