@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2014-03-26
+2014-03-29
 Public Domain
 
 No warranty.
@@ -372,6 +372,8 @@ void test_all_ceiling() {
     test_ceiling(half, one, "half");
     test_ceiling(one, one, "one");
     test_ceiling(negative_one, negative_one, "negative_one");
+    test_ceiling(dec64_new(10000000000000001, -16), two, "1.0000000000000001");
+    test_ceiling(dec64_new(-10000000000000001, -16), negative_one, "-1.0000000000000001");
     test_ceiling(dec64_new(20000000000000000, -16), two, "two");
     test_ceiling(e, three, "e");
     test_ceiling(pi, four, "pi");
@@ -399,7 +401,7 @@ void test_all_ceiling() {
     test_ceiling(dec64_new(-6666666666666667, -16), zero, "-0.6...");
     test_ceiling(dec64_new(-7777777777777778, -16), zero, "-0.7...");
     test_ceiling(dec64_new(-8888888888888889, -16), zero, "-0.8...");
-    test_ceiling(dec64_new(-10000000000000000, -16), negative_one, "-0.9...");
+    test_ceiling(dec64_new(-10000000000000000, -16), negative_one, "-10000000000000000e-16");
     test_ceiling(dec64_new(449, -2), five, "4.49");
     test_ceiling(dec64_new(-449, -2), dec64_new(-4, 0), "-4.49");
     test_ceiling(dec64_new(450, -2), five, "4.50");
@@ -523,6 +525,8 @@ void test_all_floor() {
     test_floor(half, zero, "half");
     test_floor(one, one, "one");
     test_floor(negative_one, negative_one, "negative_one");
+    test_floor(dec64_new(10000000000000001, -16), one, "1.0000000000000001");
+    test_floor(dec64_new(-10000000000000001, -16), dec64_new(-2, 0), "-1.0000000000000001");
     test_floor(dec64_new(20000000000000000, -16), two, "two");
     test_floor(e, two, "e");
     test_floor(pi, three, "pi");
@@ -557,10 +561,16 @@ void test_all_floor() {
     test_floor(dec64_new(-449, -2), dec64_new(-5, 0), "-4.49");
     test_floor(dec64_new(450, -2), four, "4.50");
     test_floor(dec64_new(-450, -2), dec64_new(-5, 0), "-4.50");
+    test_floor(dec64_new(-400, -2), dec64_new(-4, 0), "-4.00");
+    test_floor(dec64_new(-400, -3), negative_one, "-0.400");
     test_floor(dec64_new(-1, -127), negative_one, "-1e-127");
     test_floor(dec64_new(-1, -13), negative_one, "-1e-13");
+    test_floor(dec64_new(1, -12), zero, "1e-12");
     test_floor(dec64_new(-1, -12), negative_one, "-1e-12");
     test_floor(dec64_new(-1, -11), negative_one, "-1e-11");
+    test_floor(dec64_new(-11, -11), negative_one, "-11e-11");
+    test_floor(dec64_new(-111, -11), negative_one, "-111e-11");
+    test_floor(dec64_new(-22, -11), negative_one, "-22e-11");
     test_floor(dec64_new(-1, -1), negative_one, "-1e-1");
     test_floor(dec64_new(-10, -3), negative_one, "-10e-3");
     test_floor(dec64_new(9, -1), zero, "0.9");
@@ -781,14 +791,7 @@ void test_all_new() {
     test_new(-1, 144, nan, "-1e144");
     test_new(10, -128, minnum, "10e-128");
     test_new(100, -129, minnum, "100e-129");
-    test_new(1152921504606846975,  0,  (1152921504606847 << 8) + 3, "1152921504606846975");
-    test_new(-1152921504606846975, 0, (-1152921504606847 << 8) + 3, "-1152921504606846975");
-    test_new(144115188075855871,  0,  (14411518807585587 << 8) + 1, "144115188075855871");
-    test_new(-144115188075855871, 0, (-14411518807585587 << 8) + 1, "-144115188075855871");
-    test_new(2305843009213693951,  0,  (2305843009213694 << 8) + 3, "2305843009213693951");
-    test_new(-2305843009213693951, 0, (-2305843009213694 << 8) + 3, "-2305843009213693951");
-    test_new(288230376151711743,  0,  (28823037615171174 << 8) + 1, "288230376151711743");
-    test_new(-288230376151711743, 0, (-28823037615171174 << 8) + 1, "-288230376151711743");
+    test_new(10000000000000001, -16, (10000000000000001 << 8) + (0xff & -16), "10000000000000001, -16");
     test_new(36028797018963967,  0, (36028797018963967 << 8), "3602879701896397e0");
     test_new(-36028797018963967, 0, -36028797018963967 << 8, "-3602879701896397e0");
     test_new(36028797018963967, -128, (3602879701896397 << 8) + (0xff & -127), "36028797018963967e-128");
