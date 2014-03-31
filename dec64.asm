@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2014-03-29
+; 2014-03-30
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -680,8 +680,9 @@ dec64_ceiling: function_with_one_parameter
 ; numbers are outside of the safe integer range.
 
     mov     r11,1           ; r11 is the round up flag
-    jmp     cf
-    pad
+    jmp     floor_begin
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 dec64_floor: function_with_one_parameter
 ;(number: dec64) returns integer: dec64
@@ -695,7 +696,7 @@ dec64_floor: function_with_one_parameter
     xor     r11,-1          ; r11 is the round down flag
     pad
 
-cf:
+floor_begin:
 
     cmp     r1_b,128        ; compare the exponent to nan
     je      dec64_nan       ; if the exponent is nan, the result is nan
@@ -707,23 +708,23 @@ cf:
     test    r1_b,r1_b       ; examine the exponent
     jns     return_r1       ; nothing to do unless the exponent was negative
     cmp     r8,17           ; is the exponent is too extreme?
-    jae     cf_micro        ; deal with a micro number
+    jae     floor_micro     ; deal with a micro number
     mov     r10,power[r8*8] ; r10 is the power of ten
     cqo                     ; sign extend r0 into r2
     idiv    r10             ; divide r2:r0 by 10
     test    r2,r2           ; examine the remainder
-    jnz     cf_remains      ; deal with the remainder
+    jnz     floor_remains   ; deal with the remainder
     shl     r0,8            ; pack the coefficient
     ret
     pad
 
-cf_micro:
+floor_micro:
 
     mov     r2,r0           ; r2 is the coefficient
     xor     r0,r0           ; r0 is zero
     pad
 
-cf_remains:
+floor_remains:
 
 ; If the remainder is negative and the rounding flag is negative, then we need
 ; to decrement r0. But if the remainder and the rounding flag are both
