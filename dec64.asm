@@ -240,11 +240,7 @@ pad macro
 
 ;  -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-    .data
-
-; This data may be placed in read only memory.
-
-    pad
+dec64_data segment para read
 
 power:                          ; the powers of 10
 
@@ -269,14 +265,11 @@ power:                          ; the powers of 10
     qword  1000000000000000000  ; 18
     qword  10000000000000000000 ; 19
 
+dec64_data ends
+
 ;  -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-   .code
-
-; This code may be placed in read only memory.
-; The only writes are to the stack.
-
-    pad
+dec64_code segment para execute
 
 dec64_coefficient: function_with_one_parameter
 ;(number: dec64) returns coefficient: int64
@@ -1365,5 +1358,7 @@ int_divide:
     add     r1_b,1          ; increment the exponent
     jnz     int_divide      ; until the exponent is zero
     ret
+
+dec64_code ends
 
     end
