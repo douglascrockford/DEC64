@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2014-03-29
+2014-04-11
 Public Domain
 
 No warranty.
@@ -12,45 +12,45 @@ No warranty.
 #include <stdio.h>
 #include "dec64.h"
 
-int level;
-int nr_fail;
-int nr_pass;
+static int level;
+static int nr_fail;
+static int nr_pass;
 
 /* constants */
 
-dec64 nan;
-dec64 nannan;
-dec64 zero;
-dec64 zip;
-dec64 one;
-dec64 two;
-dec64 three;
-dec64 four;
-dec64 five;
-dec64 six;
-dec64 seven;
-dec64 eight;
-dec64 nine;
-dec64 ten;
-dec64 maxint;
-dec64 maxint_plus;
-dec64 maxnum;
-dec64 minnum;
-dec64 epsilon;
-dec64 almost_one;
-dec64 almost_negative_one;
-dec64 e;
-dec64 pi;
-dec64 half;
-dec64 cent;
-dec64 negative_one;
-dec64 negative_nine;
-dec64 negative_minnum;
-dec64 negative_maxint;
-dec64 negative_maxnum;
-dec64 negative_pi;
+static dec64 nan;
+static dec64 nannan;
+static dec64 zero;
+static dec64 zip;
+static dec64 one;
+static dec64 two;
+static dec64 three;
+static dec64 four;
+static dec64 five;
+static dec64 six;
+static dec64 seven;
+static dec64 eight;
+static dec64 nine;
+static dec64 ten;
+static dec64 maxint;
+static dec64 maxint_plus;
+static dec64 maxnum;
+static dec64 minnum;
+static dec64 epsilon;
+static dec64 almost_one;
+static dec64 almost_negative_one;
+static dec64 e;
+static dec64 pi;
+static dec64 half;
+static dec64 cent;
+static dec64 negative_one;
+static dec64 negative_nine;
+static dec64 negative_minnum;
+static dec64 negative_maxint;
+static dec64 negative_maxnum;
+static dec64 negative_pi;
 
-void define_constants() {
+static void define_constants() {
     nan = dec64_nan();              /* not a number */
     nannan = 32896;                 /* a non-normal nan */
     zero = dec64_zero();            /* 0 */
@@ -96,8 +96,7 @@ void define_constants() {
                                     /* -0.9999999999999999 */
 }
 
-
-void print_dec64(dec64 number) {
+static void print_dec64(dec64 number) {
     int64 exponent = dec64_exponent(number);
     int64 coefficient = dec64_coefficient(number);
     printf("%20lli", coefficient);
@@ -108,16 +107,15 @@ void print_dec64(dec64 number) {
     }
 }
 
-int compare(dec64 first, dec64 second) {
+static int compare(dec64 first, dec64 second) {
     if (first != 0 && second != 0 && (first & 255) != 128 && (second & 255) != 128) {
         first = dec64_normal(first);
         second = dec64_normal(second);
     }
     return first == second;
-
 }
 
-void judge_not(dec64 expected, dec64 actual, char * name, char * comment) {
+static void judge_not(dec64 expected, dec64 actual, char * name, char * comment) {
     if (compare(expected, actual)) {
         nr_pass += 1;
         if (level >= 3) {
@@ -137,10 +135,9 @@ void judge_not(dec64 expected, dec64 actual, char * name, char * comment) {
             }
         }
     }
-
 }
 
-void judge_unary(dec64 first, dec64 expected, dec64 actual, char * name, char * op, char * comment) {
+static void judge_unary(dec64 first, dec64 expected, dec64 actual, char * name, char * op, char * comment) {
     if (compare(expected, actual)) {
         nr_pass += 1;
         if (level >= 3) {
@@ -164,10 +161,9 @@ void judge_unary(dec64 first, dec64 expected, dec64 actual, char * name, char * 
             }
         }
     }
-
 }
 
-void judge_binary(dec64 first, dec64 second, dec64 expected, dec64 actual, char * name, char * op, char * comment) {
+static void judge_binary(dec64 first, dec64 second, dec64 expected, dec64 actual, char * name, char * op, char * comment) {
     if (compare(expected, actual)) {
         nr_pass += 1;
         if (level >= 3) {
@@ -195,112 +191,111 @@ void judge_binary(dec64 first, dec64 second, dec64 expected, dec64 actual, char 
             }
         }
     }
-
 }
 
-void judge_communitive(dec64 first, dec64 second, dec64 expected, dec64 actual, char * name, char * op, char * comment) {
+static void judge_communitive(dec64 first, dec64 second, dec64 expected, dec64 actual, char * name, char * op, char * comment) {
     judge_binary(first, second, expected, actual, name, op, comment);
     if (first != second) {
         judge_binary(second, first, expected, actual, name, op, comment);
     }
 }
 
-void test_abs(dec64 first, dec64 expected, char * comment) {
+static void test_abs(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_abs(first);
     judge_unary(first, expected, actual, "abs", "a", comment);
 }
 
-void test_add(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_add(dec64 first, dec64 second, dec64 expected, char * comment) {
     dec64 actual = dec64_add(first, second);
     judge_communitive(first, second, expected, actual, "add", "+", comment);
 }
 
-void test_ceiling(dec64 first, dec64 expected, char * comment) {
+static void test_ceiling(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_ceiling(first);
     judge_unary(first, expected, actual, "ceiling", "c", comment);
 }
 
-void test_divide(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_divide(dec64 first, dec64 second, dec64 expected, char * comment) {
     dec64 actual = dec64_divide(first, second);
     judge_binary(first, second, expected, actual, "divide", "/", comment);
 }
 
-void test_equal(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_equal(dec64 first, dec64 second, dec64 expected, char * comment) {
     dec64 actual = dec64_equal(first, second);
     judge_communitive(first, second, expected, actual, "equal", "=", comment);
 }
 
-void test_floor(dec64 first, dec64 expected, char * comment) {
+static void test_floor(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_floor(first);
     judge_unary(first, expected, actual, "floor", "f", comment);
 }
 
-void test_integer_divide(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_integer_divide(dec64 first, dec64 second, dec64 expected, char * comment) {
     dec64 actual = dec64_integer_divide(first, second);
     judge_binary(first, second, expected, actual, "integer_divide", "/", comment);
 }
 
-void test_is_nan(dec64 first, dec64 expected, char * comment) {
+static void test_is_nan(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_is_nan(first);
     judge_unary(first, expected, actual, "is_nan", "n", comment);
 }
 
-void test_is_zero(dec64 first, dec64 expected, char * comment) {
+static void test_is_zero(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_is_zero(first);
     judge_unary(first, expected, actual, "is_zero", "0", comment);
 }
 
-void test_less(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_less(dec64 first, dec64 second, dec64 expected, char * comment) {
     dec64 actual = dec64_less(first, second);
     judge_binary(first, second, expected, actual, "less", "<", comment);
 }
 
-void test_modulo(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_modulo(dec64 first, dec64 second, dec64 expected, char * comment) {
     dec64 actual = dec64_modulo(first, second);
     judge_binary(first, second, expected, actual, "modulo", "%", comment);
 }
 
-void test_multiply(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_multiply(dec64 first, dec64 second, dec64 expected, char * comment) {
     dec64 actual = dec64_multiply(first, second);
     judge_communitive(first, second, expected, actual, "multiply", "*", comment);
 }
 
-void test_neg(dec64 first, dec64 expected, char * comment) {
+static void test_neg(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_neg(first);
     judge_unary(first, expected, actual, "neg", "n", comment);
 }
 
-void test_new(int64 coefficient, int64 exponent, dec64 expected, char * comment) {
+static void test_new(int64 coefficient, int64 exponent, dec64 expected, char * comment) {
     dec64 actual = dec64_new(coefficient, exponent);
     judge_not(expected, actual, "new", comment);
 }
 
-void test_normal(dec64 first, dec64 expected, char * comment) {
+static void test_normal(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_normal(first);
     judge_unary(first, expected, actual, "normal", "n", comment);
 }
 
-void test_not(dec64 first, dec64 expected, char * comment) {
+static void test_not(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_not(first);
     judge_unary(first, expected, actual, "not", "!", comment);
 }
 
-void test_round(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_round(dec64 first, dec64 second, dec64 expected, char * comment) {
     dec64 actual = dec64_round(first, second);
     judge_binary(first, second, expected, actual, "round", "r", comment);
 }
 
-void test_signum(dec64 first, dec64 expected, char * comment) {
+static void test_signum(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_signum(first);
     judge_unary(first, expected, actual, "signum", "s", comment);
 }
 
-void test_subtract(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_subtract(dec64 first, dec64 second, dec64 expected, char * comment) {
     dec64 actual = dec64_subtract(first, second);
     judge_binary(first, second, expected, actual, "subtract", "-", comment);
 }
 
-void test_all_abs() {
+static void test_all_abs() {
     test_abs(nan, nan, "nan");
     test_abs(nannan, nan, "nannan");
     test_abs(zero, zero, "zero");
@@ -314,7 +309,7 @@ void test_all_abs() {
     test_abs(maxnum, maxnum, "maxnum");
 }
 
-void test_all_add() {
+static void test_all_add() {
     test_add(nan, zero, nan, "nan + zero");
     test_add(nan, nan, nan, "nan + nan");
     test_add(nannan, one, nan, "nannan + 1");
@@ -361,7 +356,7 @@ void test_all_add() {
     test_add(almost_negative_one, one, epsilon, "almost_negative_one + one");
 }
 
-void test_all_ceiling() {
+static void test_all_ceiling() {
     test_ceiling(nan, nan, "nan");
     test_ceiling(nannan, nan, "nannan");
     test_ceiling(zero, zero, "zero");
@@ -414,7 +409,7 @@ void test_all_ceiling() {
     test_ceiling(dec64_new(-9999999999999998, -16), zero, "-0.9...8");
 }
 
-void test_all_divide() {
+static void test_all_divide() {
     test_divide(dec64_new(4195835, 0), dec64_new(3145727, 0), dec64_new(13338204491362410, -16), "4195835 / 3145727");
     test_divide(nan, nan, nan, "nan / nan");
     test_divide(nan, three, nan, "nan / 3");
@@ -491,7 +486,7 @@ void test_all_divide() {
     test_divide(dec64_new(10000000000000000, -16), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 16");
 }
 
-void test_all_equal() {
+static void test_all_equal() {
     test_equal(nan, nan, one, "nan = nan");
     test_equal(nan, zero, zero, "nan = zero");
     test_equal(nan, nannan, one, "nan = nannan");
@@ -514,7 +509,7 @@ void test_all_equal() {
     test_equal(negative_maxint, negative_one, zero, "-maxint = -1");
 }
 
-void test_all_floor() {
+static void test_all_floor() {
     test_floor(nan, nan, "nan");
     test_floor(nannan, nan, "nannan");
     test_floor(zero, zero, "zero");
@@ -581,7 +576,7 @@ void test_all_floor() {
     test_floor(dec64_new(-9999999999999998, -16), negative_one, "-0.9...8");
 }
 
-void test_all_integer_divide() {
+static void test_all_integer_divide() {
     test_integer_divide(nan, three, nan, "nan / 3");
     test_integer_divide(six, nan, nan, "6 / nan");
     test_integer_divide(nan, nan, nan, "nan / nan");
@@ -628,7 +623,7 @@ void test_all_integer_divide() {
     test_integer_divide(dec64_new(10, -1), maxint, zero, "one / maxint");
 }
 
-void test_all_is_nan() {
+static void test_all_is_nan() {
     test_is_nan(nan, one, "nan");
     test_is_nan(nannan, one, "nannan");
     test_is_nan(zero, zero, "zero");
@@ -639,7 +634,7 @@ void test_all_is_nan() {
     test_is_nan(negative_maxnum, zero, "-maxnum");
 }
 
-void test_all_is_zero() {
+static void test_all_is_zero() {
     test_is_zero(nan, zero, "nan");
     test_is_zero(nannan, zero, "nannan");
     test_is_zero(zero, one, "zero");
@@ -650,7 +645,7 @@ void test_all_is_zero() {
     test_is_zero(negative_maxnum, zero, "-maxnum");
 }
 
-void test_all_less() {
+static void test_all_less() {
     test_less(nan, nan, zero, "nan < nan");
     test_less(nan, nannan, zero, "nan < nannan");
     test_less(nan, zero, zero, "nan < zero");
@@ -675,7 +670,7 @@ void test_all_less() {
     test_less(maxnum, nan, one, "maxnum < nan");
 }
 
-void test_all_modulo() {
+static void test_all_modulo() {
     test_modulo(nan, nan, nan, "nan % nan");
     test_modulo(nan, three, nan, "nan % 3");
     test_modulo(nannan, nannan, nan, "nannan % nannan");
@@ -725,7 +720,7 @@ void test_all_modulo() {
     test_modulo(maxnum, maxnum, zero, "maxnum % maxnum");
 }
 
-void test_all_multiply() {
+static void test_all_multiply() {
     test_multiply(nan, nan, nan, "nan * nan");
     test_multiply(nan, zero, zero, "nan * zero");
     test_multiply(nannan, nannan, nan, "nannan * nannan");
@@ -763,7 +758,8 @@ void test_all_multiply() {
     test_multiply(maxnum, maxnum, nan, "maxnum * maxnum");
     test_multiply(maxnum, minnum, maxint, "maxnum * minnum");
 }
-void test_all_neg() {
+
+static void test_all_neg() {
     test_neg(nan, nan, "nan");
     test_neg(nannan, nan, "nannan");
     test_neg(100, zero, "zero alias");
@@ -777,7 +773,7 @@ void test_all_neg() {
     test_neg(negative_maxnum, nan, "-maxnum");
 }
 
-void test_all_new() {
+static void test_all_new() {
     test_new(0, 0, zero, "zero");
     test_new(0, 1000, zero, "0e1000");
     test_new(0, -1000, zero, "0e-1000");
@@ -861,7 +857,7 @@ void test_all_new() {
     test_new(9223372036854775807, -146, (1LL << 8) + (0xff & -127), "9223372036854775807e-146");
 }
 
-void test_all_normal() {
+static void test_all_normal() {
     test_normal(nan, nan, "nan");
     test_normal(nannan, nan, "nannan");
     test_normal(zero, zero, "zero");
@@ -889,7 +885,7 @@ void test_all_normal() {
     test_normal(dec64_new(-12500000000000000, -16), dec64_new(-125, -2), "-1.25");
 }
 
-void test_all_not() {
+static void test_all_not() {
     test_not(nan, nan, "nan");
     test_not(nannan, nan, "nannan");
     test_not(zero, one, "zero");
@@ -901,7 +897,7 @@ void test_all_not() {
     test_not(negative_maxnum, zero, "-maxnum");
 }
 
-void test_all_round() {
+static void test_all_round() {
     test_round(nan, nan, nan, "nan");
     test_round(nannan, nannan, nan, "nannan nannan");
     test_round(nannan, 0, nan, "nannan 0");
@@ -976,7 +972,7 @@ void test_all_round() {
     test_round(maxint, dec64_new(17, 0), zero, "maxint 17");
 }
 
-void test_all_signum() {
+static void test_all_signum() {
     test_signum(nan, nan, "nan");
     test_signum(nannan, nan, "nannan");
     test_signum(zero, zero, "zero");
@@ -999,7 +995,7 @@ void test_all_signum() {
     test_signum(maxnum, one, "maxnum");
 }
 
-void test_all_subtract() {
+static void test_all_subtract() {
     test_subtract(nan, three, nan, "nan - 3");
     test_subtract(nannan, nannan, nan, "nannan - nannan");
     test_subtract(nannan, one, nan, "nannan - 1");
@@ -1032,7 +1028,7 @@ void test_all_subtract() {
     test_subtract(almost_negative_one, almost_negative_one, zero, "almost_negative_one - almost_negative_one");
 }
 
-int do_tests(int level_of_detail) {
+static int do_tests(int level_of_detail) {
 /*
     Level of detail:
         3 full
