@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2014-04-13
+; 2014-03-30
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -397,6 +397,74 @@ pack_decrease:
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+dec64_normal: function_with_one_parameter
+;(number: int64) returns normalization: int64
+
+; Make the exponent as close to zero as possible without losing any signficance.
+; Usually normalization is not needed since it does not materially change the
+; value of a number, but it can make string conversion easier.
+
+    cmp     r1_b,128        ; compare the exponent to nan
+    jz      dec64_nan       ; if exponent is nan, the result is nan
+    mov     r0,r1           ; r0 is the number
+    and     r0,-256         ; r0 is the coefficient shifted 8 bits
+    mov     r8,10           ; r8 is the divisor
+    cmovz   r1,r0           ; r1 is zero if r0 is zero
+    mov     r10,r0          ; r10 is the coefficient shifted 8 bits
+    test    r1_b,r1_b       ; examine the exponent
+    jz      return          ; if the exponent is zero, return r0
+    jns     normal_multiply ; if the exponent is positive
+    sar     r0,8            ; r0 is the coefficient
+    sar     r10,8           ; r10 is the coefficient
+    pad
+
+normal_divide:
+
+; While the exponent is less than zero, divide the coefficient by 10 and
+; increment the exponent.
+
+    cqo                     ; sign extend r0 into r2
+    idiv    r8              ; divide r2:r0 by 10
+    test    r2,r2           ; examine the remainder
+    jnz     normal_divide_done ; if r2 is not zero, we are done
+    mov     r10,r0          ; r10 is the coefficient
+    add     r1_b,1          ; increment the exponent
+    jnz     normal_divide   ; until the exponent is zero
+    pad
+
+normal_divide_done:
+
+    mov     r0,r10          ; r0 is the finished coefficient
+    shl     r0,8            ; put it in position
+    cmovz   r1,r0           ; the exponent is zero if the coefficient is zero
+    mov     r0_b,r1_b       ; mix in the exponent
+    ret
+    pad
+
+normal_multiply:
+
+; While the exponent is greater than zero, multiply the coefficient by 10 and
+; decrement the exponent. If the coefficient gets too large, wrap it up.
+
+    imul    r0,10           ; r0 is r0 * 10
+    jo      normal_multiply_done ; return zero if overflow
+    mov     r10,r0          ; r10 is the coefficient
+    sub     r1_b,1          ; decrement the exponent
+    jnz     normal_multiply ; until the exponent is zero
+    ret
+    pad
+
+normal_multiply_done:
+
+    mov     r0,r10          ; r0 is the finished positioned coefficient
+    or      r0,r0           ; examine the coefficient
+    cmovz   r1,r0           ; the exponent is zero if the coefficient is zero
+    mov     r0_b,r1_b       ; mix in the exponent
+    ret
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
 
 dec64_round: function_with_two_parameters
 ;(number: dec64, place: dec64) returns roundation: dec64

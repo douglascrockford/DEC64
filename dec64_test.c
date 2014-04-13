@@ -299,6 +299,11 @@ static void test_new(int64 coefficient, int64 exponent, dec64 expected, char * c
     judge_not(expected, actual, "new", comment);
 }
 
+static void test_normal(dec64 first, dec64 expected, char * comment) {
+    dec64 actual = dec64_normal(first);
+    judge_unary(first, expected, actual, "normal", "n", comment);
+}
+
 static void test_not(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_not(first);
     judge_unary(first, expected, actual, "not", "!", comment);
@@ -881,6 +886,34 @@ static void test_all_new() {
     test_new(9223372036854775807, -146, (1LL << 8) + (0xff & -127), "9223372036854775807e-146");
 }
 
+static void test_all_normal() {
+    test_normal(nan, nan, "nan");
+    test_normal(nannan, nan, "nannan");
+    test_normal(zero, zero, "zero");
+    test_normal(zip, zero, "zip");
+    test_normal(epsilon, epsilon, "epsilon");
+    test_normal(ten, ten, "ten");
+    test_normal(dec64_new(-10000000000000000, -16), negative_one, "-1");
+    test_normal(one, one, "one");
+    test_normal(dec64_new(10, -1), one, "one alias 1");
+    test_normal(dec64_new(100, -2), one, "one alias 2");
+    test_normal(dec64_new(1000, -3), one, "one alias 3");
+    test_normal(dec64_new(10000, -4), one, "one alias 4");
+    test_normal(dec64_new(100000, -5), one, "one alias 5");
+    test_normal(dec64_new(1000000, -6), one, "one alias 6");
+    test_normal(dec64_new(10000000, -7), one, "one alias 7");
+    test_normal(dec64_new(100000000, -8), one, "one alias 8");
+    test_normal(dec64_new(1000000000, -9), one, "one alias 9");
+    test_normal(dec64_new(10000000000, -10), one, "one alias 10");
+    test_normal(dec64_new(100000000000, -11), one, "one alias 11");
+    test_normal(dec64_new(1000000000000, -12), one, "one alias 12");
+    test_normal(dec64_new(10000000000000, -13), one, "one alias 13");
+    test_normal(dec64_new(100000000000000, -14), one, "one alias 14");
+    test_normal(dec64_new(1000000000000000, -15), one, "one alias 15");
+    test_normal(dec64_new(10000000000000000, -16), one, "one alias 16");
+    test_normal(dec64_new(-12500000000000000, -16), dec64_new(-125, -2), "-1.25");
+}
+
 static void test_all_not() {
     test_not(nan, nan, "nan");
     test_not(nannan, nan, "nannan");
@@ -1050,6 +1083,7 @@ static int do_tests(int level_of_detail) {
     test_all_multiply();
     test_all_neg();
     test_all_new();
+    test_all_normal();
     test_all_not();
     test_all_round();
     test_all_signum();

@@ -3,7 +3,7 @@
 The DEC64 header file. This is the companion to dec64.asm.
 
 dec64.com
-2014-04-13
+2014-03-26
 Public Domain
 
 No warranty.
@@ -29,6 +29,7 @@ extern dec64 dec64_multiply(dec64 multiplicand, dec64 multiplier) /* product */;
 extern dec64 dec64_nan()                                              /* nan */;
 extern dec64 dec64_neg(dec64 number)                             /* negation */;
 extern dec64 dec64_new(int64 coefficient, int64 exponent)          /* number */;
+extern dec64 dec64_normal(dec64 number)                     /* normalization */;
 extern dec64 dec64_not(dec64 number)                             /* notation */;
 extern dec64 dec64_one()                                              /* one */;
 extern dec64 dec64_round(dec64 number, dec64 place)            /* roundation */;
