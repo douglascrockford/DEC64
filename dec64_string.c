@@ -558,7 +558,7 @@ dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
     If everything is ok, return the number.
 */
     return ok
-        ? dec64_normal(dec64_new(sign * coefficient, exponent))
+        ? dec64_new(sign * coefficient, exponent)
         : dec64_nan();
 }
 
