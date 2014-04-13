@@ -3,7 +3,7 @@
 This is a test of dec64_string.c.
 
 dec64.com
-2014-04-12
+2014-04-13
 Public Domain
 
 No warranty.
@@ -11,6 +11,7 @@ No warranty.
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "dec64.h"
 #include "dec64_string.h"
 
