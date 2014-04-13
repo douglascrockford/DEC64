@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2014-04-11
+2014-04-13
 Public Domain
 
 No warranty.
@@ -107,10 +107,39 @@ static void print_dec64(dec64 number) {
     }
 }
 
+static dec64 normal(dec64 number) {
+    int64 coef;
+    int64 coefficient = dec64_coefficient(number);
+    int64 exponent = dec64_exponent(number);
+    if (exponent == 0) {
+        return number;
+    }
+    if (exponent < 0) {
+        do {
+            coef = coefficient / 10;
+            if (coefficient != coef * 10) {
+                break;
+            }
+            coefficient = coef;
+            exponent += 1;
+        } while (exponent < 0);
+    } else {
+        do {
+            coef = coefficient * 10;
+            if (coef >= 36028797018963968 || coef < -36028797018963968) {
+                break;
+            }
+            coefficient = coef;
+            exponent -= 1;
+        } while (exponent > 0);
+    }
+    return dec64_new(coefficient, exponent);
+}
+
 static int compare(dec64 first, dec64 second) {
     if (first != 0 && second != 0 && (first & 255) != 128 && (second & 255) != 128) {
-        first = dec64_normal(first);
-        second = dec64_normal(second);
+        first = normal(first);
+        second = normal(second);
     }
     return first == second;
 }
@@ -331,7 +360,7 @@ static void test_all_add() {
     test_add(dec64_new(199, -2), dec64_new(299, -2), dec64_new(498, -2), "1.99 + 2.99");
     test_add(dec64_new(36028797018963967, 126), dec64_new(36028797018963967, 126), dec64_new(7205759403792793, 127), "test overflow with big exponents");
     test_add(dec64_new(9999999999999999, 0), one, dec64_new(10000000000000000, 0), "9999999999999999 + 1");
-    test_add(negative_one, epsilon, almost_negative_one, zero, "-1 + epsilon");
+    test_add(negative_one, epsilon, almost_negative_one, "-1 + epsilon");
     test_add(negative_pi, pi, zero, "-pi + pi");
     test_add(maxint, one, maxint_plus, "maxint + one");
     test_add(maxint, half, maxint_plus, "maxint + half");
