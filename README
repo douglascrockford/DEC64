@@ -4,7 +4,7 @@ Douglas Crockford
 douglas@crockford.com
 
 dec64.com
-2014-03-08
+2014-04-14
 Public Domain
 
     NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
@@ -18,6 +18,13 @@ dec64.asm is an implementation of the elementary operators for x64.
 dec64.h is a companion header file for C.
 
 dec64_test.c is a test program.
+
+dec64_string.c is an implementation of functions for converting between DEC64
+and strings.
+
+dec64_string.h is a companion header file for C.
+
+dec64_string_test.c is a test program.
 
 dec64.html is a descriptive web page.
 
