@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2014-04-13
+; 2014-04-17
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -96,6 +96,9 @@ public dec64_floor;(number: dec64)
 
 public dec64_integer_divide;(dividend: dec64, divisor: dec64)
 ;      returns quotient: dec64
+
+public dec64_is_integer;(number: dec64)
+;      returns comparison: dec64
 
 public dec64_is_nan;(number: dec64)
 ;      returns comparison: dec64
@@ -1089,7 +1092,7 @@ dec64_abs: function_with_one_parameter
     mov     r0,r1           ; r0 is the number
     mov     r2,128          ; r2 is nan
     and     r10,-256        ; r10 is the coefficient without an exponent
-    cmovz   r0,r10          ; if the coefficient zero is zero, the number too
+    cmovz   r0,r10          ; if the coefficient is zero, the number is zero
     cmp     r1_b,r2_b       ; compare r1 to nan
     cmovz   r0,r2           ; is the number nan?
     ret                     ; return the number
@@ -1181,9 +1184,36 @@ less_slow:
 ; Otherwise we must do a subtraction.
 
     call_with_two_parameters dec64_subtract ; r0 is r1 - r2
-    or      r0,r0           ; examine the difference
+    test    r0,r0           ; examine the difference
     mov     r0,0            ; r0 is zero
     sets    r0_h            ; r0 is one if r1 is less than r2
+    ret
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+dec64_is_integer: function_with_one_parameter
+;(number: dec64) returns comparison: dec64
+
+; If the number contains a non-zero fractional part or if it is nan, return zero.
+; Otherwise, return one.
+
+    cmp     r1_b,128        ; nan exponent?
+    je      dec64_zero      ; nan is not an integer
+    mov     r0,r1           ; r0 is the number
+    sar     r0,8            ; r0 is the coefficient
+    cmovz   r1,r0           ; if the coefficient is zero, so is the exponent
+    movsx   r8,r1_b         ; r8 is the exponent
+    cmp     r1_b,0          ; examine the exponent
+    jge     dec64_one       ; if the exponent is not negative, then return one
+    neg     r8              ; negate the exponent
+    cmp     r8_b,17         ; extreme negative exponent cannot be integer
+    jae     dec64_zero
+    mov     r10,power[r8*8] ; r10 is 10^-exponent
+    cqo                     ; sign extend r0 into r2
+    idiv    r10             ; divide r2:r0 by the power of ten
+    xor     r0,r0           ; r0 is zero
+    test    r2,r2           ; examine the remainder
+    setz    r0_h            ; if the remainder is zero, then return one
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
