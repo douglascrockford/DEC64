@@ -44,8 +44,16 @@ td.bits {
 <body>
 <img src="DEC64.png" width="398" height="103" alt="DEC64">
 <h1>Overview</h1>
-<p><span class=dec64>DEC64</span> is a number type. It can precisely represent decimal fractions with  16 decimal places, which makes it well suited to all applications that are concerned with money. It can  represent values as large as <tt>3.6028797018963968E+143</tt> or as small as <tt>1.0E-127</tt>, which makes it well suited to most scientific applications. It can provide very fast performance on integer values, eliminating the need for a separate <tt>int</tt> type and avoiding the terrible errors than can result from <tt>int</tt> truncation.</p>
-<p><span class=dec64>DEC64</span> is intended to be the only number type in the next generation of application programming languages.</p>
+<p><span class=dec64>DEC64</span> is a number type. It can precisely represent 
+    decimal fractions with 16 decimal places, which makes it very well suited 
+    to all applications that are concerned with money. It can  represent 
+    values as gargantuan as <tt>3.6028797018963967E+143</tt> or as measly 
+    as <tt>1.0E-127</tt>, which makes it well suited to most scientific 
+    applications. It can provide very fast performance on integer values, 
+    eliminating the need for a separate <tt>int</tt> type and avoiding the 
+    terrible errors than can result from <tt>int</tt> truncation.</p>
+<p><span class=dec64>DEC64</span> is intended to be the only number type in the 
+    next generation of application programming languages.</p>
 <h1 id="representation">Representation</h1>
 <p><span class=dec64>DEC64</span> represents numbers as 64 bit values composed of 2 two&#8217;s complement components: a 56 bit <var>coefficient</var> and an 8 bit <var>exponent</var>. The <var>coefficient</var> is in the high order end, and the <var>exponent</var> is in the low order end. The <var>coefficient</var>&#8217;s decimal point is between bits 8 and 7.</p>
 <table cellspacing=1 cellpadding="0" width=100%><tbody>
