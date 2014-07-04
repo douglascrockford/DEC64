@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2014-06-28
+2014-07-04
 Public Domain
 
 No warranty.
@@ -259,6 +259,11 @@ static void test_floor(dec64 first, dec64 expected, char * comment) {
     judge_unary(first, expected, actual, "floor", "f", comment);
 }
 
+static void test_int(dec64 first, dec64 expected, char * comment) {
+    dec64 actual = dec64_int(first);
+    judge_unary(first, expected, actual, "int", "i", comment);
+}
+
 static void test_integer_divide(dec64 first, dec64 second, dec64 expected, char * comment) {
     dec64 actual = dec64_integer_divide(first, second);
     judge_binary(first, second, expected, actual, "integer_divide", "/", comment);
@@ -302,11 +307,6 @@ static void test_neg(dec64 first, dec64 expected, char * comment) {
 static void test_new(int64 coefficient, int64 exponent, dec64 expected, char * comment) {
     dec64 actual = dec64_new(coefficient, exponent);
     judge_not(expected, actual, "new", comment);
-}
-
-static void test_normal(dec64 first, dec64 expected, char * comment) {
-    dec64 actual = dec64_normal(first);
-    judge_unary(first, expected, actual, "normal", "n", comment);
 }
 
 static void test_not(dec64 first, dec64 expected, char * comment) {
@@ -608,6 +608,60 @@ static void test_all_floor() {
     test_floor(almost_negative_one, negative_one, "almost_negative_one");
     test_floor(dec64_new(-999999999999999, -15), negative_one, "-0.9...");
     test_floor(dec64_new(-9999999999999998, -16), negative_one, "-0.9...8");
+}
+
+void test_all_int() {
+    test_int(nan, nan, "nan");
+    test_int(nannan, nan, "nannan");
+    test_int(zero, zero, "zero");
+    test_int(zip, zero, "zip");
+    test_int(epsilon, 0, "epsilon");
+    test_int(ten, ten, "ten");
+    test_int(dec64_new(-10000000000000000, -16), negative_one, "-1");
+    test_int(one, one, "one");
+    test_floor(almost_one, zero, "almost_one");
+    test_floor(almost_negative_one, negative_one, "almost_negative_one");
+    test_int(dec64_new(1, 1), dec64_new(10, 0), "10");
+    test_int(dec64_new(1, 2), dec64_new(100, 0), "100");
+    test_int(dec64_new(1, 3), dec64_new(1000, 0), "1000");
+    test_int(dec64_new(1, 4), dec64_new(10000, 0), "10000");
+    test_int(dec64_new(1, 5), dec64_new(100000, 0), "100000");
+    test_int(dec64_new(1, 6), dec64_new(1000000, 0), "1000000");
+    test_int(dec64_new(1, 7), dec64_new(10000000, 0), "10000000");
+    test_int(dec64_new(1, 8), dec64_new(100000000, 0), "100000000");
+    test_int(dec64_new(1, 9), dec64_new(1000000000, 0), "1000000000");
+    test_int(dec64_new(1, 10), dec64_new(10000000000, 0), "100000000000");
+    test_int(dec64_new(1, 11), dec64_new(100000000000, 0), "1000000000000");
+    test_int(dec64_new(1, 12), dec64_new(1000000000000, 0), "10000000000000");
+    test_int(dec64_new(1, 13), dec64_new(10000000000000, 0), "100000000000000");
+    test_int(dec64_new(1, 14), dec64_new(100000000000000, 0), "1000000000000000");
+    test_int(dec64_new(1, 15), dec64_new(1000000000000000, 0), "10000000000000000");
+    test_int(dec64_new(1, 16), dec64_new(10000000000000000, 0), "100000000000000000");
+    test_int(dec64_new(1, 17), nan, "1000000000000000000");
+    test_int(cent, 0, "cent");
+    test_int(dec64_new(10, -1), one, "one alias 1");
+    test_int(dec64_new(100, -2), one, "one alias 2");
+    test_int(dec64_new(1000, -3), one, "one alias 3");
+    test_int(dec64_new(10000, -4), one, "one alias 4");
+    test_int(dec64_new(100000, -5), one, "one alias 5");
+    test_int(dec64_new(1000000, -6), one, "one alias 6");
+    test_int(dec64_new(10000000, -7), one, "one alias 7");
+    test_int(dec64_new(100000000, -8), one, "one alias 8");
+    test_int(dec64_new(1000000000, -9), one, "one alias 9");
+    test_int(dec64_new(10000000000, -10), one, "one alias 10");
+    test_int(dec64_new(100000000000, -11), one, "one alias 11");
+    test_int(dec64_new(1000000000000, -12), one, "one alias 12");
+    test_int(dec64_new(10000000000000, -13), one, "one alias 13");
+    test_int(dec64_new(100000000000000, -14), one, "one alias 14");
+    test_int(dec64_new(1000000000000000, -15), one, "one alias 15");
+    test_int(dec64_new(10000000000000000, -16), one, "one alias 16");
+    test_int(dec64_new(-12500000000000000, -16), dec64_new(-2, -0), "-1.25");
+    test_int(maxint, maxint, "maxint");
+    test_int(negative_maxint, negative_maxint, "negative_maxint");
+    test_int(maxint_plus, 36028797018963970 << 8, "maxint_plus");
+    test_int(maxnum, nan, "maxnum");
+    test_int(dec64_new(7205759403792793, 1), 72057594037927930 << 8, "7205759403792793e1");
+    test_int(dec64_new(7205759403792794, 1), nan, "7205759403792794e1");
 }
 
 static void test_all_integer_divide() {
@@ -959,52 +1013,6 @@ static void test_all_new() {
     test_new(9223372036854775807, -146, (1LL << 8) + (0xff & -127), "9223372036854775807e-146");
 }
 
-void test_all_normal() {
-    test_normal(nan, nan, "nan");
-    test_normal(nannan, nan, "nannan");
-    test_normal(zero, zero, "zero");
-    test_normal(zip, zero, "zip");
-    test_normal(epsilon, epsilon, "epsilon");
-    test_normal(ten, ten, "ten");
-    test_normal(dec64_new(-10000000000000000, -16), negative_one, "-1");
-    test_normal(one, one, "one");
-    test_normal(dec64_new(1, 1), dec64_new(10, 0), "10");
-    test_normal(dec64_new(1, 2), dec64_new(100, 0), "100");
-    test_normal(dec64_new(1, 3), dec64_new(1000, 0), "1000");
-    test_normal(dec64_new(1, 4), dec64_new(10000, 0), "10000");
-    test_normal(dec64_new(1, 5), dec64_new(100000, 0), "100000");
-    test_normal(dec64_new(1, 6), dec64_new(1000000, 0), "1000000");
-    test_normal(dec64_new(1, 7), dec64_new(10000000, 0), "10000000");
-    test_normal(dec64_new(1, 8), dec64_new(100000000, 0), "100000000");
-    test_normal(dec64_new(1, 9), dec64_new(1000000000, 0), "1000000000");
-    test_normal(dec64_new(1, 10), dec64_new(10000000000, 0), "100000000000");
-    test_normal(dec64_new(1, 11), dec64_new(100000000000, 0), "1000000000000");
-    test_normal(dec64_new(1, 12), dec64_new(1000000000000, 0), "10000000000000");
-    test_normal(dec64_new(1, 13), dec64_new(10000000000000, 0), "100000000000000");
-    test_normal(dec64_new(1, 14), dec64_new(100000000000000, 0), "1000000000000000");
-    test_normal(dec64_new(1, 15), dec64_new(1000000000000000, 0), "10000000000000000");
-    test_normal(dec64_new(1, 16), dec64_new(10000000000000000, 0), "100000000000000000");
-    test_normal(dec64_new(1, 17), dec64_new(100000000000000000, 0), "1000000000000000000");
-    test_normal(cent, cent, "cent");
-    test_normal(dec64_new(10, -1), one, "one alias 1");
-    test_normal(dec64_new(100, -2), one, "one alias 2");
-    test_normal(dec64_new(1000, -3), one, "one alias 3");
-    test_normal(dec64_new(10000, -4), one, "one alias 4");
-    test_normal(dec64_new(100000, -5), one, "one alias 5");
-    test_normal(dec64_new(1000000, -6), one, "one alias 6");
-    test_normal(dec64_new(10000000, -7), one, "one alias 7");
-    test_normal(dec64_new(100000000, -8), one, "one alias 8");
-    test_normal(dec64_new(1000000000, -9), one, "one alias 9");
-    test_normal(dec64_new(10000000000, -10), one, "one alias 10");
-    test_normal(dec64_new(100000000000, -11), one, "one alias 11");
-    test_normal(dec64_new(1000000000000, -12), one, "one alias 12");
-    test_normal(dec64_new(10000000000000, -13), one, "one alias 13");
-    test_normal(dec64_new(100000000000000, -14), one, "one alias 14");
-    test_normal(dec64_new(1000000000000000, -15), one, "one alias 15");
-    test_normal(dec64_new(10000000000000000, -16), one, "one alias 16");
-    test_normal(dec64_new(-12500000000000000, -16), dec64_new(-125, -2), "-1.25");
-}
-
 static void test_all_not() {
     test_not(nan, nan, "nan");
     test_not(nannan, nan, "nannan");
@@ -1166,6 +1174,7 @@ static int do_tests(int level_of_detail) {
     test_all_divide();
     test_all_equal();
     test_all_floor();
+    test_all_int();
     test_all_integer_divide();
     test_all_is_integer();
     test_all_is_nan();
@@ -1175,7 +1184,6 @@ static int do_tests(int level_of_detail) {
     test_all_multiply();
     test_all_neg();
     test_all_new();
-    test_all_normal();
     test_all_not();
     test_all_round();
     test_all_signum();

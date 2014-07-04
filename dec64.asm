@@ -1,72 +1,73 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2014-06-28
+; 2014-07-04
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
 
-comment "This file implements the elementary arithmetic operations for DEC64,
-    a decimal floating point type. DEC64 uses 64 bits to represent a number.
-    The low order 8 bits contain an exponent that ranges from -127 to 127. The
-    exponent is not biased. The exponent -128 is reserved for nan (not a
-    number). The remaining 56 bits, including the sign bit, are the coefficient.
-    The exponent and the coefficient are both two's complement signed numbers.
-
-    The value of any non-nan DEC64 number is (coefficient * (10 ** exponent)).
-
-    Rounding is to the nearest value. Ties are rounded away from zero. Integer
-    division is floored. The result of modulo has the sign of the divisor.
-    There is no negative zero.
-
-    These operations will produce a result of nan:
-
-        dec64_abs(nan)
-        dec64_ceiling(nan)
-        dec64_floor(nan)
-        dec64_neg(nan)
-        dec64_normal(nan)
-        dec64_not(nan)
-        dec64_signum(nan)
-
-    These operations will produce a result of zero for all values of n,
-    even if n is nan:
-
-        dec64_divide(0, n)
-        dec64_integer_divide(0, n)
-        dec64_modulo(0, n)
-        dec64_multiply(0, n)
-        dec64_multiply(n, 0)
-
-    These operations will produce a result of nan for all values of n
-    except zero:
-
-        dec64_divide(n, 0)
-        dec64_divide(n, nan)
-        dec64_integer_divide(n, 0)
-        dec64_integer_divide(n, nan)
-        dec64_modulo(n, 0)
-        dec64_modulo(n, nan)
-        dec64_multiply(n, nan)
-        dec64_multiply(nan, n)
-
-    These operations will produce a result of nan for all values of n:
-
-        dec64_add(n, nan)
-        dec64_add(nan, n)
-        dec64_divide(nan, n)
-        dec64_integer_divide(nan, n)
-        dec64_modulo(nan, n)
-        dec64_round(n, nan)
-        dec64_round(nan, n)
-        dec64_subtract(n, nan)
-        dec64_subtract(nan, n)
-
-    This file can be processed with Microsoft's ML64.exe. There might be other
-    assemblers that can process this file, but that has not been tested.
-
-        You know what goes great with those defective pentium chips?
-        Defective pentium salsa! (David Letterman)"
+; This file implements the elementary arithmetic operations for DEC64,
+; a decimal floating point type. DEC64 uses 64 bits to represent a number.
+; The low order 8 bits contain an exponent that ranges from -127 thru 127. The
+; exponent is not biased. The exponent -128 is reserved for nan (not a
+; number). The remaining 56 bits, including the sign bit, are the coefficient
+; in the range -36028797018963968 thru 36028797018963967. The exponent and the
+; coefficient are both two's complement signed numbers.
+;
+; The value of any non-nan DEC64 number is coefficient * (10 ** exponent).
+;
+; Rounding is to the nearest value. Ties are rounded away from zero. Integer
+; division is floored. The result of modulo has the sign of the divisor.
+; There is no negative zero.
+;
+; These operations will produce a result of nan:
+;
+;     dec64_abs(nan)
+;     dec64_ceiling(nan)
+;     dec64_floor(nan)
+;     dec64_int(nan)
+;     dec64_neg(nan)
+;     dec64_not(nan)
+;     dec64_signum(nan)
+;
+; These operations will produce a result of zero for all values of n,
+; even if n is nan:
+;
+;     dec64_divide(0, n)
+;     dec64_integer_divide(0, n)
+;     dec64_modulo(0, n)
+;     dec64_multiply(0, n)
+;     dec64_multiply(n, 0)
+;
+; These operations will produce a result of nan for all values of n
+; except zero:
+;
+;     dec64_divide(n, 0)
+;     dec64_divide(n, nan)
+;     dec64_integer_divide(n, 0)
+;     dec64_integer_divide(n, nan)
+;     dec64_modulo(n, 0)
+;     dec64_modulo(n, nan)
+;     dec64_multiply(n, nan)
+;     dec64_multiply(nan, n)
+;
+; These operations will produce a result of nan for all values of n:
+;
+;     dec64_add(n, nan)
+;     dec64_add(nan, n)
+;     dec64_divide(nan, n)
+;     dec64_integer_divide(nan, n)
+;     dec64_modulo(nan, n)
+;     dec64_round(n, nan)
+;     dec64_round(nan, n)
+;     dec64_subtract(n, nan)
+;     dec64_subtract(nan, n)
+;
+; This file can be processed with Microsoft's ML64.exe. There might be other
+; assemblers that can process this file, but that has not been tested.
+;
+;     You know what goes great with those defective pentium chips?
+;     Defective pentium salsa! (David Letterman)
 
 ; All public symbols have a dec64_ prefix. All other symbols are private.
 
@@ -92,6 +93,9 @@ public dec64_exponent;(number: dec64)
 ;      returns exponent: int64
 
 public dec64_floor;(number: dec64)
+;      returns integer: dec64
+
+public dec64_int;(number: dec64)
 ;      returns integer: dec64
 
 public dec64_integer_divide;(dividend: dec64, divisor: dec64)
@@ -123,9 +127,6 @@ public dec64_neg;(number: dec64)
 
 public dec64_new;(coefficient: int64, exponent: int64)
 ;      returns number: dec64
-
-public dec64_normal;(number: dec64)
-;      returns normalization: dec64
 
 public dec64_not;(number: dec64)
 ;      returns notation: dec64
@@ -184,7 +185,7 @@ r1_w  equ cx
 ; There is painfully inadequate standardization around x64 calling conventions.
 ; On Win64, the first two arguments are passed in r1 and r2. On Unix, the first
 ; two arguments are passed in r7 and r6. We try to hide this behind macros. The
-; two systems also have different conventions on which registers may be
+; two systems also have different conventions about which registers may be
 ; clobbered and which must be preserved. This code lives in the intersection.
 
 ; This has not been tested on Unix.
@@ -335,11 +336,11 @@ pack:
     cmovs   r10,r0          ; r10 is the absolute value of the coefficient
     cmp     r10,r1          ; compare with the actual coefficient
     jae     pack_large      ; deal with the very large coefficient
-    mov     r1,36028797018963967 ; the ultimate coefficient
+    mov     r1,36028797018963967 ; the ultimate coefficient - 1
     mov     r9,-127         ; r9 is the ultimate exponent
     cmp     r1,r10          ; compare with the actual coefficient
     adc     r11,0           ; add 1 to r11 if 1 digit too big
-    mov     r1,360287970189639679 ; the ultimate coefficient * 10
+    mov     r1,360287970189639679 ; the ultimate coefficient * 10 - 1
     sub     r9,r8           ; r9 is the difference from the actual exponent
     cmp     r1,r10          ; compare with the actual coefficient
     adc     r11,0           ; add 1 to r11 if 2 digits too big
@@ -401,70 +402,6 @@ pack_decrease:
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-dec64_normal: function_with_one_parameter
-;(number: int64) returns normalization: int64
-
-; Make the exponent as close to zero as possible without losing any signficance.
-; Usually normalization is not needed since it does not materially change the
-; value of a number, but it can make string conversion easier.
-
-    mov     r0,r1           ; r0 is the number
-    cmp     r1_b,128        ; compare the exponent to nan
-    jz      dec64_nan       ; if exponent is nan, the result is nan
-    and     r0,-256         ; r0 is the coefficient shifted 8 bits
-    mov     r8,10           ; r8 is the divisor
-    cmovz   r1,r0           ; r1 is zero if r0 is zero
-    mov     r10,r0          ; r10 is the coefficient shifted 8 bits
-    test    r1_b,r1_b       ; examine the exponent
-    jz      return          ; if the exponent is zero, return r0
-    jns     normal_multiply ; if the exponent is positive
-    sar     r0,8            ; r0 is the coefficient
-    sar     r10,8           ; r10 is the coefficient
-    pad
-
-normal_divide:
-
-; While the exponent is less than zero, divide the coefficient by 10 and
-; increment the exponent.
-
-    cqo                     ; sign extend r0 into r2
-    idiv    r8              ; divide r2:r0 by 10
-    test    r2,r2           ; examine the remainder
-    jnz     normal_divide_done ; if r2 is not zero, we are done
-    mov     r10,r0          ; r10 is the coefficient
-    add     r1_b,1          ; increment the exponent
-    jnz     normal_divide   ; until the exponent is zero
-    pad
-
-normal_divide_done:
-
-    mov     r0,r10          ; r0 is the finished coefficient
-    shl     r0,8            ; put it in position
-    mov     r0_b,r1_b       ; mix in the exponent
-    ret
-    pad
-
-normal_multiply:
-
-; While the exponent is greater than zero, multiply the coefficient by 10 and
-; decrement the exponent. If the coefficient gets too large, wrap it up.
-
-    imul    r0,10           ; r0 is r0 * 10
-    jo      normal_multiply_done ; return zero if overflow
-    mov     r10,r0          ; r10 is the coefficient
-    sub     r1_b,1          ; decrement the exponent
-    jnz     normal_multiply ; until the exponent is zero
-    ret
-    pad
-
-normal_multiply_done:
-
-    mov     r0,r10          ; r0 is the finished positioned coefficient
-    mov     r0_b,r1_b       ; mix in the exponent
-    ret
-
-    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
 dec64_round: function_with_two_parameters
 ;(number: dec64, place: dec64) returns roundation: dec64
 
@@ -477,23 +414,22 @@ dec64_round: function_with_two_parameters
 
 ; The place should be between -16 and 16.
 
-    cmp     r1_b,128        ; is the first operand nan
-    sete    r0_b
-    cmp     r2_b,128        ; is the second operand nan?
-    sete    r0_h
-    or      r0_b,r0_h       ; is either nan?
-    jnz     dec64_nan
-
-; We need to get an int64 from the second argument.
-
     mov     r11,r1          ; preserve the number
-    mov     r0,r2           ; pass the place
-    call    int64           ; convert to an int64
-    mov     r9,r0           ; r9 is the target exponent
-    mov     r0,r11          ; r0 is the number
+    mov     r1,r2           ; pass the place
+    call_with_one_parameter dec64_int
+    mov     r9,r0           ; r9 is the normalized place
+    cmp     r11_b,128       ; is the first operand not nan?
+    setne   r1_b
+    sar     r9,8            ; r9 is the place as int64
+    cmp     r0_b,128        ; is the second operand nan?
+    setne   r1_h
     movsx   r8,r11_b        ; r8 is the current exponent
+    mov     r0,r11          ; r0 is the number
+    test    r1_b,r1_h       ; is either nan?
+    jz      dec64_nan       ; if so, the result is nan
+
     sar     r0,8            ; r0 is the coefficient
-    jz      dec64_zero      ; if the coefficient is zero, the result is zero
+    jz      return          ; if the coefficient is zero, the result is zero
     cmp     r8,r9           ; compare the exponents
     jge     pack            ; no rounding required
     mov     r10,10          ; r10 is the divisor
@@ -678,7 +614,9 @@ dec64_ceiling: function_with_one_parameter
 ; nan. Numbers with positive exponents will not be modified, even if the
 ; numbers are outside of the safe integer range.
 
-    mov     r11,1           ; r11 is the round up flag
+; Preserved: r11.
+
+    mov     r9,1            ; r9 is the round up flag
     jmp     floor_begin
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -692,7 +630,9 @@ dec64_floor: function_with_one_parameter
 ; exponents will not be modified, even if the numbers are outside of the safe
 ; integer range.
 
-    xor     r11,-1          ; r11 is the round down flag
+; Preserved: r11.
+
+    mov     r9,-1           ; r9 is the round down flag
     pad
 
 floor_begin:
@@ -730,9 +670,9 @@ floor_remains:
 ; positive, then we need to increment r0.
 
     xor     r10,r10         ; r10 is zero
-    xor     r2,r11          ; xor the remainder and the rounding
-    cmovs   r11,r10         ; if they had different signs, clear the rounding
-    add     r0,r11          ; add the rounding to the coefficient
+    xor     r2,r9           ; xor the remainder and the rounding
+    cmovs   r9,r10          ; if they had different signs, clear the rounding
+    add     r0,r9           ; add the rounding to the coefficient
     shl     r0,8            ; pack the coefficient
     ret
 
@@ -1308,6 +1248,43 @@ dec64_is_zero: function_with_one_parameter
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
+dec64_int: function_with_one_parameter
+;(number: dec64) returns integer: dec64
+
+; Convert the number such that the exponent will be zero, discarding the
+; fraction part. It will produce nan if the result cannot be represented in
+; 56 signed bits. This is used to extract an int64 from a dec64 for bitwise
+; operations. It accepts a broader range than the safe integer range:
+; -36028797018963968 thru 72057594037927935.
+
+; Preserved: r11
+
+    mov     r0,r1           ; r0 is the number
+    test    r1_b,r1_b       ; examine the exponent
+    jz      return          ; nothing to do it the exponent is zero
+    js      dec64_floor     ; shed the fraction part if exponent is negative
+    movzx   r8,r1_b         ; r8 is the exponent
+    mov     r2,18           ; r2 is 18
+    cmp     r1_b,18         ; is the exponent too enormous?
+    cmovae  r8,r2           ; r8 is min(exponent, 18)
+    and     r0,-256         ; r0 is the coefficient, shifted 8
+    mov     r10,power[r8*8] ; r10 is 10^exponent
+    imul    r10             ; r0 is coefficient * 10^exponent
+    sar     r2,1            ; shift the lsb of the overflow into carry
+    adc     r2,0            ; if r2 was 0 or -1, it is now 0
+    jnz     dec64_nan       ; was the coefficient too enormous?
+    ret
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+return:
+
+; Return whatever is in r0.
+
+    ret
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
 dec64_nan:
 
 ; Return nan. All of the dec64_ functions return only this form of nan.
@@ -1333,59 +1310,5 @@ dec64_zero:
     xor     r0,r0           ; zero
     ret
 
-    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
-return:
-
-; Return whatever is in r0.
-
-    ret
-
-    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
-int64:
-
-; Convert the dec64 in r0 into an int64 by any means necessary. It will try
-; to do the normal cases quickly. It will avoid total failure in the unlikely
-; cases. The only guarantee is that the result is 64 bits.
-
-; Preserved: r9 r10 r11
-
-    mov     r1_b,r0_b       ; r1_b is the exponent
-    sar     r0,8            ; r0 is the coefficient
-    test    r1_b,r1_b       ; examine the exponent
-    jnz     int_slow        ; if the exponent is not zero, take the slow path
-    ret
-    pad
-
-int_slow:
-
-    mov     r8,10           ; r8 is the divisor
-    js      int_divide      ; if exponent is negative, start dividing by 10
-    pad
-
-int_multiply:
-
-; While the exponent is greater than zero, multiply the coefficient by 10 and
-; decrement the exponent.
-
-    imul    r0,10           ; multiply r0 by 10
-    sub     r1_b,1          ; decrement the exponent
-    jnz     int_multiply    ; until the exponent is zero
-    ret
-    pad
-
-int_divide:
-
-; While the exponent is less than zero, divide the coefficient by 10 and
-; increment the exponent.
-
-    cqo                     ; sign extend r0 into r2
-    idiv    r8              ; divide r2:r0 by 10
-    add     r1_b,1          ; increment the exponent
-    jnz     int_divide      ; until the exponent is zero
-    ret
-
 dec64_code ends
-
     end
