@@ -772,7 +772,7 @@ dec64_multiply: function_with_two_parameters
 
 ; Multiply two dec64 numbers together.
 
-; Unpack the exponents in r8 and r9.
+; Unpack the exponents into r8 and r9.
 
     movsx   r8,r1_b         ; r8 is the first exponent
     movsx   r9,r2_b         ; r9 is the second exponent
