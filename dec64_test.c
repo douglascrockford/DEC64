@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2014-07-04
+2014-11-29
 Public Domain
 
 No warranty.
@@ -34,7 +34,9 @@ static dec64 nine;
 static dec64 ten;
 static dec64 maxint;
 static dec64 maxint_plus;
+static dec64 one_over_maxint;
 static dec64 maxnum;
+static dec64 googol;
 static dec64 minnum;
 static dec64 epsilon;
 static dec64 almost_one;
@@ -79,8 +81,12 @@ static void define_constants() {
                                     /* the largest normal integer */
     maxint_plus = dec64_new(3602879701896397, 1);
                                     /* the smallest number larger than maxint */
+    one_over_maxint = dec64_new(27755575615628914, -33);
+                                    /* one / maxint */
     maxnum = dec64_new(36028797018963967, 127);
                                     /* the largest possible number */
+    googol = dec64_new(1, 100);     /* googol */
+
     negative_minnum = dec64_new(-1, -127);
                                     /* the smallest possible negative number */
     negative_one = dec64_new(-1, 0);/* -1 */
@@ -498,26 +504,27 @@ static void test_all_divide() {
     test_divide(negative_pi, negative_pi, dec64_new(10000000000000000, -16), "-pi / -pi");
     test_divide(dec64_new(-16, 0), ten, dec64_new(-16, -1), "-16 / 10");
     test_divide(maxint, epsilon, dec64_new(36028797018963967, 16), "maxint / epsilon");
-    test_divide(one, maxint, dec64_new(27755575615628914, -33), "one / maxint");
+    test_divide(one, maxint, one_over_maxint, "one / maxint");
+    test_divide(one, one_over_maxint, maxint, "one / one / maxint");
     test_divide(one, negative_maxint, dec64_new(-27755575615628914, -33), "one / -maxint");
     test_divide(maxnum, epsilon, nan, "maxnum / epsilon");
     test_divide(maxnum, maxnum, dec64_new(10000000000000000, -16), "maxnum / maxnum");
-    test_divide(dec64_new(10, -1), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 1");
-    test_divide(dec64_new(100, -2), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 2");
-    test_divide(dec64_new(1000, -3), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 3");
-    test_divide(dec64_new(10000, -4), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 4");
-    test_divide(dec64_new(100000, -5), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 5");
-    test_divide(dec64_new(1000000, -6), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 6");
-    test_divide(dec64_new(10000000, -7), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 7");
-    test_divide(dec64_new(100000000, -8), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 8");
-    test_divide(dec64_new(1000000000, -9), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 9");
-    test_divide(dec64_new(10000000000, -10), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 10");
-    test_divide(dec64_new(100000000000, -11), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 11");
-    test_divide(dec64_new(1000000000000, -12), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 12");
-    test_divide(dec64_new(10000000000000, -13), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 13");
-    test_divide(dec64_new(100000000000000, -14), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 14");
-    test_divide(dec64_new(1000000000000000, -15), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 15");
-    test_divide(dec64_new(10000000000000000, -16), maxint, dec64_new(27755575615628914, -33), "one / maxint alias 16");
+    test_divide(dec64_new(10, -1), maxint, one_over_maxint, "one / maxint alias 1");
+    test_divide(dec64_new(100, -2), maxint, one_over_maxint, "one / maxint alias 2");
+    test_divide(dec64_new(1000, -3), maxint, one_over_maxint, "one / maxint alias 3");
+    test_divide(dec64_new(10000, -4), maxint, one_over_maxint, "one / maxint alias 4");
+    test_divide(dec64_new(100000, -5), maxint, one_over_maxint, "one / maxint alias 5");
+    test_divide(dec64_new(1000000, -6), maxint, one_over_maxint, "one / maxint alias 6");
+    test_divide(dec64_new(10000000, -7), maxint, one_over_maxint, "one / maxint alias 7");
+    test_divide(dec64_new(100000000, -8), maxint, one_over_maxint, "one / maxint alias 8");
+    test_divide(dec64_new(1000000000, -9), maxint, one_over_maxint, "one / maxint alias 9");
+    test_divide(dec64_new(10000000000, -10), maxint, one_over_maxint, "one / maxint alias 10");
+    test_divide(dec64_new(100000000000, -11), maxint, one_over_maxint, "one / maxint alias 11");
+    test_divide(dec64_new(1000000000000, -12), maxint, one_over_maxint, "one / maxint alias 12");
+    test_divide(dec64_new(10000000000000, -13), maxint, one_over_maxint, "one / maxint alias 13");
+    test_divide(dec64_new(100000000000000, -14), maxint, one_over_maxint, "one / maxint alias 14");
+    test_divide(dec64_new(1000000000000000, -15), maxint, one_over_maxint, "one / maxint alias 15");
+    test_divide(dec64_new(10000000000000000, -16), maxint, one_over_maxint, "one / maxint alias 16");
 }
 
 static void test_all_equal() {
@@ -909,6 +916,7 @@ static void test_all_multiply() {
     test_multiply(maxint, zero, zero, "maxint * zero");
     test_multiply(maxint, epsilon, dec64_new(36028797018963967, -16), "maxint * epsilon");
     test_multiply(maxint, maxint, dec64_new(12980742146337068, 17), "maxint * maxint");
+    test_multiply(maxint, one_over_maxint, one, "maxint * 1 / maxint");
     test_multiply(negative_maxint, nan, nan, "-maxint * nan");
     test_multiply(negative_maxint, maxint, dec64_new(-12980742146337069, 17), "-maxint * maxint");
     test_multiply(maxnum, maxnum, nan, "maxnum * maxnum");
