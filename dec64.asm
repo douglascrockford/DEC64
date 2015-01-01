@@ -405,7 +405,7 @@ pack_decrease:
 dec64_round: function_with_two_parameters
 ;(number: dec64, place: dec64) returns roundation: dec64
 
-; The exponent argument indicates at what decimal place to round.
+; The place argument indicates at what decimal place to round.
 ;       -2      nearest cent
 ;        0      nearest integer
 ;        3      nearest thousand
