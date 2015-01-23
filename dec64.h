@@ -3,29 +3,32 @@
 The DEC64 header file. This is the companion to dec64.asm.
 
 dec64.com
-2014-07-04
+2015-01-23
 Public Domain
 
 No warranty.
 */
 
 typedef long long int64;
+typedef int64 bool64;
 typedef int64 dec64;
+
+extern int64 dec64_coefficient(dec64 number)                  /* coefficient */;
+extern int64 dec64_exponent(dec64 number)                        /* exponent */;
+
+extern bool64 dec64_equal(dec64 comparahend, dec64 comparator) /* comparison */;
+extern bool64 dec64_is_integer(dec64 number)                   /* comparison */;
+extern bool64 dec64_is_nan(dec64 number)                       /* comparison */;
+extern bool64 dec64_is_zero(dec64 number)                      /* comparison */;
+extern bool64 dec64_less(dec64 comparahend, dec64 comparator)  /* comparison */;
 
 extern dec64 dec64_abs(dec64 number)                           /* absolution */;
 extern dec64 dec64_add(dec64 augend, dec64 addend)                    /* sum */;
 extern dec64 dec64_ceiling(dec64 number)                          /* integer */;
-extern int64 dec64_coefficient(dec64 number)                  /* coefficient */;
 extern dec64 dec64_divide(dec64 dividend, dec64 divisor)         /* quotient */;
-extern dec64 dec64_equal(dec64 comparahend, dec64 comparator)  /* comparison */;
-extern dec64 dec64_exponent(dec64 number)                        /* exponent */;
 extern dec64 dec64_floor(dec64 number)                            /* integer */;
 extern dec64 dec64_int(dec64 number)                              /* integer */;
 extern dec64 dec64_integer_divide(dec64 dividend, dec64 divisor) /* quotient */;
-extern int64 dec64_is_integer(dec64 number)                    /* comparison */;
-extern int64 dec64_is_nan(dec64 number)                        /* comparison */;
-extern int64 dec64_is_zero(dec64 number)                       /* comparison */;
-extern dec64 dec64_less(dec64 comparahend, dec64 comparator)   /* comparison */;
 extern dec64 dec64_modulo(dec64 dividend, dec64 divisor)       /* modulation */;
 extern dec64 dec64_multiply(dec64 multiplicand, dec64 multiplier) /* product */;
 extern dec64 dec64_nan()                                              /* nan */;
