@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2015-01-23
+; 2015-01-24
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -397,9 +397,6 @@ pack_decrease:
     jnz     dec64_nan       ; the number is still too large
     shl     r0,8            ; shift the exponent into position
     cmovz   r8,r0           ; if the coefficient is zero, also zero the exponent
-
-return_r8_b:
-
     mov     r0_b,r8_b       ; mix in the exponent
     ret
 
@@ -1175,7 +1172,7 @@ dec64_less: function_with_two_parameters
     setne   r9_b            ; r9_b is 1 if second is not nan
     xor     r0,r0           ; r0 is zero
     test    r8_b,r9_b       ; is either nan?
-    jz      return_r8_b     ; if so, then return r8_b
+    jz      less_r8_b       ; if so, then return r8_b
 
 ; If the exponents are the same, or the coefficient signs are different, then
 ; do a simple compare.
@@ -1183,7 +1180,6 @@ dec64_less: function_with_two_parameters
     mov     r10,r1          ; r10 is the first number
     cmp     r1_b,r2_b       ; are the two exponents equal?
     setne   r8_b            ; r8_b is 0 if the exponents are equal
-    setl    r9_b            ; r9_b is 1 if the first exponent is less
     xor     r10,r2          ; r10 is the two numbers xor together
     setns   r10_b           ; r10_b is 0 if the sign bits were different
     test    r10_b,r8_b      ; exponents equal or sign bits different
@@ -1196,18 +1192,15 @@ dec64_less: function_with_two_parameters
 less_slow:
 
 ; The coefficients have the same sign. If the second number has a coefficient
-; of 0, then the first number cannot be less.
+; of 0, then the first number cannot be less. Otherwise, if the first number
+; is zero, then it must be less.
 
-    mov     r11,r2          ; r11 is the second number
-    mov     r10,r1          ; r10 is the first number
-    sar     r11,8           ; r11 is the second coefficient
-    jz      dec64_zero      
-
-; The second number is greater than zero. If the first number is zero, then it
-; must be less.
-
-    sar     r10,8           ; r10 is the first coefficient
-    jz      return_true
+    test    r2,-256         ; is the second number zero?
+    setnz   r8_b            ; r8_b is 0 if second coefficient is 0
+    test    r1,-256         ; is the second number zero?
+    setnz   r10_b           ; r10_b is 0 if first coefficient is 0
+    test    r8_b,r10_b      ; is either coefficient 0?
+    jz      less_r8_b       ; if so, return r8_b
 
 ; Do it the hard way with a subtraction.
 
@@ -1216,6 +1209,13 @@ less_slow:
     mov     r0,0            ; r0 is zero
     sets    r0_b            ; r0 is 1 if r1 is less than r2
     ret
+    pad
+
+less_r8_b:
+
+    mov     r0_b,r8_b
+    ret
+
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
