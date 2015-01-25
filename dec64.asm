@@ -1189,18 +1189,13 @@ dec64_less: function_with_two_parameters
     ret
     pad
 
+less_r8_b:
+
+    mov     r0_b,r8_b
+    ret
+    pad
+
 less_slow:
-
-; The coefficients have the same sign. If the second number has a coefficient
-; of 0, then the first number cannot be less. Otherwise, if the first number
-; is zero, then it must be less.
-
-    test    r2,-256         ; is the second number zero?
-    setnz   r8_b            ; r8_b is 0 if second coefficient is 0
-    test    r1,-256         ; is the second number zero?
-    setnz   r10_b           ; r10_b is 0 if first coefficient is 0
-    test    r8_b,r10_b      ; is either coefficient 0?
-    jz      less_r8_b       ; if so, return r8_b
 
 ; Do it the hard way with a subtraction.
 
@@ -1209,13 +1204,6 @@ less_slow:
     mov     r0,0            ; r0 is zero
     sets    r0_b            ; r0 is 1 if r1 is less than r2
     ret
-    pad
-
-less_r8_b:
-
-    mov     r0_b,r8_b
-    ret
-
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
