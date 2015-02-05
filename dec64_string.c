@@ -383,7 +383,7 @@ dec64_string_char dec64_string_separator(
 dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
 /*
     Convert a string into a dec64. If conversion is not possible for any
-    reason, the result will be nan.
+    reason, the result will be NaN.
 */
     int at;
     int c;
@@ -486,7 +486,7 @@ dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
                 }
 /*
     There is a decimal point. If there is more than one decimal
-    point, return nan.
+    point, return NaN.
 */
             } else if (c == state->decimal_point) {
                 if (point) {
@@ -542,7 +542,7 @@ dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
                         );
                     }
 /*
-    If any other character is seen, return nan.
+    If any other character is seen, return NaN.
 */
                 }
                 return dec64_nan();
@@ -574,7 +574,7 @@ int dec64_to_string(
     no characters will be deposited, but a character count will be returned.
 
     dec64_to_string returns the number of characters actually deposited in the
-    string (not including the trailing \0). If the number is nan, then it
+    string (not including the trailing \0). If the number is NaN, then it
     returns 0.
 
     In standard mode, the number will be formatted conventionally unless it

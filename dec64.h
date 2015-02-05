@@ -31,7 +31,7 @@ extern dec64 dec64_int(dec64 number)                              /* integer */;
 extern dec64 dec64_integer_divide(dec64 dividend, dec64 divisor) /* quotient */;
 extern dec64 dec64_modulo(dec64 dividend, dec64 divisor)       /* modulation */;
 extern dec64 dec64_multiply(dec64 multiplicand, dec64 multiplier) /* product */;
-extern dec64 dec64_nan()                                              /* nan */;
+extern dec64 dec64_nan()                                              /* NaN */;
 extern dec64 dec64_neg(dec64 number)                             /* negation */;
 extern dec64 dec64_new(int64 coefficient, int64 exponent)          /* number */;
 extern dec64 dec64_not(dec64 number)                             /* notation */;

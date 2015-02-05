@@ -9,29 +9,29 @@ title   dec64.asm for x64.
 ; This file implements the elementary arithmetic operations for DEC64,
 ; a decimal floating point type. DEC64 uses 64 bits to represent a number.
 ; The low order 8 bits contain an exponent that ranges from -127 thru 127. The
-; exponent is not biased. The exponent -128 is reserved for nan (not a
+; exponent is not biased. The exponent -128 is reserved for NaN (not a
 ; number). The remaining 56 bits, including the sign bit, are the coefficient
 ; in the range -36028797018963968 thru 36028797018963967. The exponent and the
 ; coefficient are both two's complement signed numbers.
 ;
-; The value of any non-nan DEC64 number is coefficient * (10 ** exponent).
+; The value of any non-NaN DEC64 number is coefficient * (10 ** exponent).
 ;
 ; Rounding is to the nearest value. Ties are rounded away from zero. Integer
 ; division is floored. The result of modulo has the sign of the divisor.
 ; There is no negative zero.
 ;
-; These operations will produce a result of nan:
+; These operations will produce a result of NaN:
 ;
-;     dec64_abs(nan)
-;     dec64_ceiling(nan)
-;     dec64_floor(nan)
-;     dec64_int(nan)
-;     dec64_neg(nan)
-;     dec64_not(nan)
-;     dec64_signum(nan)
+;     dec64_abs(NaN)
+;     dec64_ceiling(NaN)
+;     dec64_floor(NaN)
+;     dec64_int(NaN)
+;     dec64_neg(NaN)
+;     dec64_not(NaN)
+;     dec64_signum(NaN)
 ;
 ; These operations will produce a result of zero for all values of n,
-; even if n is nan:
+; even if n is NaN:
 ;
 ;     dec64_divide(0, n)
 ;     dec64_integer_divide(0, n)
@@ -39,29 +39,29 @@ title   dec64.asm for x64.
 ;     dec64_multiply(0, n)
 ;     dec64_multiply(n, 0)
 ;
-; These operations will produce a result of nan for all values of n
+; These operations will produce a result of NaN for all values of n
 ; except zero:
 ;
 ;     dec64_divide(n, 0)
-;     dec64_divide(n, nan)
+;     dec64_divide(n, NaN)
 ;     dec64_integer_divide(n, 0)
-;     dec64_integer_divide(n, nan)
+;     dec64_integer_divide(n, NaN)
 ;     dec64_modulo(n, 0)
-;     dec64_modulo(n, nan)
-;     dec64_multiply(n, nan)
-;     dec64_multiply(nan, n)
+;     dec64_modulo(n, NaN)
+;     dec64_multiply(n, NaN)
+;     dec64_multiply(NaN, n)
 ;
-; These operations will produce a result of nan for all values of n:
+; These operations will produce a result of NaN for all values of n:
 ;
-;     dec64_add(n, nan)
-;     dec64_add(nan, n)
-;     dec64_divide(nan, n)
-;     dec64_integer_divide(nan, n)
-;     dec64_modulo(nan, n)
-;     dec64_round(n, nan)
-;     dec64_round(nan, n)
-;     dec64_subtract(n, nan)
-;     dec64_subtract(nan, n)
+;     dec64_add(n, NaN)
+;     dec64_add(NaN, n)
+;     dec64_divide(NaN, n)
+;     dec64_integer_divide(NaN, n)
+;     dec64_modulo(NaN, n)
+;     dec64_round(n, NaN)
+;     dec64_round(NaN, n)
+;     dec64_subtract(n, NaN)
+;     dec64_subtract(NaN, n)
 ;
 ; This file can be processed with Microsoft's ML64.exe. There might be other
 ; assemblers that can process this file, but that has not been tested.
@@ -120,7 +120,7 @@ public dec64_multiply;(multiplicand: dec64, multiplier: dec64)
 ;      returns product: dec64
 
 public dec64_nan;()
-;      returns nan: dec64
+;      returns NaN: dec64
 
 public dec64_neg;(number: dec64)
 ;      returns negation: dec64
@@ -311,7 +311,7 @@ dec64_new: function_with_two_parameters
 pack:
 
 ; The pack function will combine the coefficient and exponent into a dec64.
-; Numbers that are too large to be contained in this format become nan.
+; Numbers that are too large to be contained in this format become NaN.
 ; Numbers that are too small to be contained in this format become zero.
 
 ; The coefficient is in r0.
@@ -418,15 +418,15 @@ dec64_round: function_with_two_parameters
     mov     r1,r2           ; pass the place
     call_with_one_parameter dec64_int
     mov     r9,r0           ; r9 is the normalized place
-    cmp     r11_b,128       ; is the first operand not nan?
+    cmp     r11_b,128       ; is the first operand not NaN?
     setne   r1_b
     sar     r9,8            ; r9 is the place as int64
-    cmp     r0_b,128        ; is the second operand nan?
+    cmp     r0_b,128        ; is the second operand NaN?
     setne   r1_h
     movsx   r8,r11_b        ; r8 is the current exponent
     mov     r0,r11          ; r0 is the number
-    test    r1_b,r1_h       ; is either nan?
-    jz      dec64_nan       ; if so, the result is nan
+    test    r1_b,r1_h       ; is either NaN?
+    jz      dec64_nan       ; if so, the result is NaN
 
     sar     r0,8            ; r0 is the coefficient
     jz      return          ; if the coefficient is zero, the result is zero
@@ -505,7 +505,7 @@ add_slow:
 
 ; The slow path is taken if the two operands do not both have zero exponents.
 
-    cmp     r1_b,128        ; Is the first operand nan?
+    cmp     r1_b,128        ; Is the first operand NaN?
     je      dec64_nan
 
 ; Are the two exponents the same? This will happen often, especially with
@@ -529,12 +529,12 @@ add_slow:
 
 add_slower:
 
-; The slower path is taken when neither operand is nan, and their
+; The slower path is taken when neither operand is NaN, and their
 ; exponents are different. Before addition can take place, the exponents
 ; must be made to match. Swap the numbers if the second exponent is greater
 ; than the first.
 
-    cmp     r2_b,128        ; Is the second operand nan?
+    cmp     r2_b,128        ; Is the second operand NaN?
     je      dec64_nan
     cmp     r1_b,r2_b       ; compare the exponents
     cmovl   r1,r2           ; r1 is the number with the larger exponent
@@ -611,7 +611,7 @@ dec64_ceiling: function_with_one_parameter
 
 ; Produce the smallest integer that is greater than or equal to the number. In
 ; the result, the exponent will be greater than or equal to zero unless it is
-; nan. Numbers with positive exponents will not be modified, even if the
+; NaN. Numbers with positive exponents will not be modified, even if the
 ; numbers are outside of the safe integer range.
 
 ; Preserved: r11.
@@ -626,7 +626,7 @@ dec64_floor: function_with_one_parameter
 
 ; Produce the largest integer that is less than or equal to the number. This
 ; is sometimes called the entier function. In the result, the exponent will be
-; greater than or equal to zero unless it is nan. Numbers with positive
+; greater than or equal to zero unless it is NaN. Numbers with positive
 ; exponents will not be modified, even if the numbers are outside of the safe
 ; integer range.
 
@@ -637,8 +637,8 @@ dec64_floor: function_with_one_parameter
 
 floor_begin:
 
-    cmp     r1_b,128        ; compare the exponent to nan
-    je      dec64_nan       ; if the exponent is nan, the result is nan
+    cmp     r1_b,128        ; compare the exponent to NaN
+    je      dec64_nan       ; if the exponent is NaN, the result is NaN
     mov     r0,r1           ; r0 is the number
     movsx   r8,r1_b         ; r8 is the exponent
     sar     r0,8            ; r0 is the coefficient
@@ -694,11 +694,11 @@ dec64_subtract: function_with_two_parameters
 ; The subtrahend coefficient is -36028797018963968. This value cannot easily be
 ; complemented, so take the slower path. This should be extremely rare.
 
-    cmp     r1_b,128        ; is the first operand nan
+    cmp     r1_b,128        ; is the first operand NaN
     sete    r0_b
-    cmp     r2_b,128        ; is the second operand nan?
+    cmp     r2_b,128        ; is the second operand NaN?
     sete    r0_h
-    or      r0_b,r0_h       ; is either nan?
+    or      r0_b,r0_h       ; is either NaN?
     jnz     dec64_nan
     mov     r10,r1          ; r10 is the first coefficient
     movsx   r8,r1_b         ; r8 is the first exponent
@@ -777,12 +777,12 @@ dec64_multiply: function_with_two_parameters
     movsx   r8,r1_b         ; r8 is the first exponent
     movsx   r9,r2_b         ; r9 is the second exponent
 
-; Set flags in r0 if either operand is nan.
+; Set flags in r0 if either operand is NaN.
 
-    cmp     r1_b,128        ; is the first operand nan?
-    sete    r0_b            ; r0_b is 1 if the first operand is nan
-    cmp     r2_b,128        ; is the second operand nan?
-    sete    r0_h            ; r0_h is 1 if the second operand is nan
+    cmp     r1_b,128        ; is the first operand NaN?
+    sete    r0_b            ; r0_b is 1 if the first operand is NaN
+    cmp     r2_b,128        ; is the second operand NaN?
+    sete    r0_h            ; r0_h is 1 if the second operand is NaN
 
 ; Unpack the coefficients. Set flags in r1 if either is not zero.
 
@@ -792,10 +792,10 @@ dec64_multiply: function_with_two_parameters
     sar     r2,8            ; r2 is the second coefficient
     setnz   r1_h            ; r1_h is 1 if the second coefficient is not zero
 
-; The result is nan if one or both of the operands is nan and neither of the
+; The result is NaN if one or both of the operands is NaN and neither of the
 ; operands is zero.
 
-    or      r1_w,r0_w       ; is either coefficient zero and not nan?
+    or      r1_w,r0_w       ; is either coefficient zero and not NaN?
     xchg    r1_b,r1_h
     test    r0_w,r1_w
     jnz     dec64_nan
@@ -837,22 +837,22 @@ dec64_divide: function_with_two_parameters
     mov     r10,r1          ; r10 is the first number
     mov     r11,r2          ; r11 is the second number
 
-; Set nan flags in r0.
+; Set NaN flags in r0.
 
-    cmp     r1_b,128        ; is the first operand nan?
-    sete    r0_b            ; r0_b is 1 if the first operand is nan
-    cmp     r2_b,128        ; is the second operand nan?
-    sete    r0_h            ; r0_h is 1 if the second operand is nan
+    cmp     r1_b,128        ; is the first operand NaN?
+    sete    r0_b            ; r0_b is 1 if the first operand is NaN
+    cmp     r2_b,128        ; is the second operand NaN?
+    sete    r0_h            ; r0_h is 1 if the second operand is NaN
 
     sar     r10,8           ; r10 is the dividend coefficient
     setnz   r1_b            ; r1_b is 1 if the dividend coefficient is zero
     sar     r11,8           ; r11 is the divisor coefficient
     setz    r1_h            ; r1_h is 1 if dividing by zero
-    or      r0_h,r0_b       ; r0_h is 1 if either is nan
-    or      r1_b,r0_b       ; r1_b is zero if the dividend is zero and not nan
+    or      r0_h,r0_b       ; r0_h is 1 if either is NaN
+    or      r1_b,r0_b       ; r1_b is zero if the dividend is zero and not NaN
     jz      dec64_zero      ; if the dividend is zero, the quotient is zero
     sub     r8,r9           ; r8 is the quotient exponent
-    or      r0_b,r1_h       ; r0_b is 1 if either is nan or the divisor is zero
+    or      r0_b,r1_h       ; r0_b is 1 if either is NaN or the divisor is zero
     jnz     dec64_nan
     pad
 
@@ -930,14 +930,14 @@ dec64_integer_divide: function_with_two_parameters
     mov     r11,r2          ; r11 is the divisor
     sar     r1,8            ; r1 is the dividend coefficient
     setnz   r2_h            ; r2_h is 1 if the dividend coefficient is not zero
-    cmp     r0_b,128        ; are the operands nan?
-    sete    r2_b            ; r2_b is 1 if the operands are nan
+    cmp     r0_b,128        ; are the operands NaN?
+    sete    r2_b            ; r2_b is 1 if the operands are NaN
     xor     r0_b,r0_b       ; zero the dividend's exponent
-    or      r2_h,r2_b       ; r2_h is zero if the dividend is zero and not nan
+    or      r2_h,r2_b       ; r2_h is zero if the dividend is zero and not NaN
     jz      dec64_zero      ; the quotient is zero if the dividend is zero
     sar     r11,8           ; r11 is the divisor coefficient
     setz    r2_h            ; r2_h is 1 if the divisor coefficient is zero
-    or      r2_b,r2_h       ; r2_b is 1 if the result is nan
+    or      r2_b,r2_h       ; r2_b is 1 if the result is NaN
     jnz     dec64_nan
     cqo                     ; sign extend r0 into r2
     idiv    r11             ; r0 is the quotient
@@ -971,15 +971,15 @@ dec64_modulo: function_with_one_parameter
     jnz     modulo_slow     ; if not take the slow path
     mov     r0,r1           ; r0 is the dividend
     mov     r11,r2          ; r11 is the divisor
-    cmp     r1_b,128        ; is the first operand nan?
-    setne   r2_h            ; r2_h is 1 if the operands are not nan
+    cmp     r1_b,128        ; is the first operand NaN?
+    setne   r2_h            ; r2_h is 1 if the operands are not NaN
     sar     r0,8            ; r0 is the dividend coefficient
     setz    r2_b            ; r2_b is 1 if the dividend coefficient is zero
-    test    r2_b,r2_h       ; is the dividend is zero and not nan?
+    test    r2_b,r2_h       ; is the dividend is zero and not NaN?
     jnz     dec64_zero      ; the quotient is zero if the dividend is zero
     sar     r11,8           ; r11 is the divisor coefficient
     setnz   r2_b            ; r2_b is 1 if the divisor coefficient is not zero
-    test    r2_h,r2_b       ; is either operand nan or is the divisor zero?
+    test    r2_h,r2_b       ; is either operand NaN or is the divisor zero?
     jz      dec64_nan
     cqo                     ; sign extend r0 into r2
     idiv    r11             ; divide r2:r0 by the divisor
@@ -1020,7 +1020,7 @@ modulo_slow:
 dec64_signum: function_with_one_parameter
 ;(number: dec64) returns signature: dec64
 
-; If the number is nan, the result is nan.
+; If the number is NaN, the result is NaN.
 ; If the number is less than zero, the result is -1.
 ; If the number is zero, the result is 0.
 ; If the number is greater than zero, the result is 1.
@@ -1032,10 +1032,10 @@ dec64_signum: function_with_one_parameter
     sets    r2_h            ; r2 is one if r1 is negative
     setnz   r1_h            ; r1_h is 1 if the number was not zero
     sub     r0,r2           ; r0 is -one if the number was negative, otherwise 0
-    mov     r2,128          ; r2 is nan
+    mov     r2,128          ; r2 is NaN
     or      r0_h,r1_h       ; r0 is (-)one if the number was not zero
-    cmp     r1_b,r2_b       ; but if the original number was nan
-    cmove   r0,r2           ; then the result is nan
+    cmp     r1_b,r2_b       ; but if the original number was NaN
+    cmove   r0,r2           ; then the result is NaN
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -1043,17 +1043,17 @@ dec64_signum: function_with_one_parameter
 dec64_not: function_with_one_parameter
 ;(number: dec64) returns notation: dec64
 
-; If the number is nan, the result is nan.
+; If the number is NaN, the result is NaN.
 ; If the number is zero, the result is 1.
 ; Otherwise, the result is 0.
 
     xor     r0,r0           ; r0 is zero
     mov     r2_b,r1_b       ; r2_b is the exponent
-    mov     r8,128          ; r8 is nan
+    mov     r8,128          ; r8 is NaN
     sar     r1,8            ; r1 is the coefficient
     setz    r0_h            ; r0 is one if the coefficient is zero
-    cmp     r2_b,128        ; is the exponent nan?
-    cmove   r0,r8           ; if the exponent is nan the result is nan
+    cmp     r2_b,128        ; is the exponent NaN?
+    cmove   r0,r8           ; if the exponent is NaN the result is NaN
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -1064,8 +1064,8 @@ dec64_neg: function_with_one_parameter
 ; Negate a number. We need to negate the coefficient without changing the
 ; exponent.
 
-    cmp     r1_b,128        ; compare the exponent to nan
-    je      dec64_nan       ; is the number nan?
+    cmp     r1_b,128        ; compare the exponent to NaN
+    je      dec64_nan       ; is the number NaN?
     mov     r2,r1           ; r2 is the number
     mov     r0,-256         ; r0 is the coefficient mask
     sar     r2,8            ; r2 is the coefficient
@@ -1091,17 +1091,17 @@ dec64_abs: function_with_one_parameter
 ;(number: dec64) returns absolution: dec64
 
 ; Find the absolute value of a number. If the number is negative, hand it off
-; to dec64_neg. Otherwise, return the number unless it is nan or zero.
+; to dec64_neg. Otherwise, return the number unless it is NaN or zero.
 
     test    r1,r1           ; examine r1
     js      dec64_neg       ; is the number negative?
     mov     r10,r1          ; r10 is the number
     mov     r0,r1           ; r0 is the number
-    mov     r2,128          ; r2 is nan
+    mov     r2,128          ; r2 is NaN
     and     r10,-256        ; r10 is the coefficient without an exponent
     cmovz   r0,r10          ; if the coefficient is zero, the number is zero
-    cmp     r1_b,r2_b       ; compare r1 to nan
-    cmovz   r0,r2           ; is the number nan?
+    cmp     r1_b,r2_b       ; compare r1 to NaN
+    cmovz   r0,r2           ; is the number NaN?
     ret                     ; return the number
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -1110,10 +1110,10 @@ dec64_equal: function_with_two_parameters
 ;(comparahend: dec64, comparator: dec64) returns comparison: bool64
 
 ; Compare two dec64 numbers. If they are equal, return 1, otherwise return 0.
-; All nans are equal to each other.
+; All NaN are equal to each other.
 
 ; If the exponents match, then we can quickly determine if the numbers are
-; equal. If both operands are nan, or if they are trivally equal, then return
+; equal. If both operands are NaN, or if they are trivally equal, then return
 ; one, otherwise return zero.
 
     cmp     r1_b,r2_b       ; compare the two exponents
@@ -1121,9 +1121,9 @@ dec64_equal: function_with_two_parameters
     xor     r0,r0           ; r0 is zero
     cmp     r1,r2           ; compare the two numbers
     sete    r0_b            ; r0 is 1 if the numbers are trivally equal
-    cmp     r1_b,128        ; compare r1 to nan
-    sete    r2_b            ; r2_b is 1 if the numbers are nan
-    or      r0_b,r2_b       ; r0 is one if both are nan or obviously equal
+    cmp     r1_b,128        ; compare r1 to NaN
+    sete    r2_b            ; r2_b is 1 if the numbers are NaN
+    or      r0_b,r2_b       ; r0 is one if both are NaN or obviously equal
     ret
     pad
 
@@ -1149,7 +1149,7 @@ dec64_less: function_with_two_parameters
 ;(comparahend: dec64, comparator: dec64) returns comparison: bool64
 
 ; Compare two dec64 numbers. If the first is less than the second, return 1,
-; otherwise return 0. For this purpose, nan is considered to be larger than
+; otherwise return 0. For this purpose, NaN is considered to be larger than
 ; all numbers.
 
 ; The other 3 comparison functions are easily implemented with this one:
@@ -1158,20 +1158,20 @@ dec64_less: function_with_two_parameters
 ;       dec64_ge(a, b) = 1 - dec64_lt(a, b)
 ;       dec64_le(a, b) = 1 - dec64_lt(b, a)
 
-; There is a question of what to do about nan in this sort of inequality. One
-; option is to always return nan. That makes the writing of conditionals
+; There is a question of what to do about NaN in this sort of inequality. One
+; option is to always return NaN. That makes the writing of conditionals
 ; tricky because there is an expectation that a comparison should only return
-; one of two values because nan is not a boolean. Another option would be to
-; always return false if any of the operands are nan. That would not allow the
+; one of two values because NaN is not a boolean. Another option would be to
+; always return false if any of the operands are NaN. That would not allow the
 ; transforms to realize the other three operators. So this is the third
 ; alternative.
 
-    cmp     r1_b,128        ; is the first argument nan?
-    setne   r8_b            ; r8_b is 1 if first is not nan
-    cmp     r2_b,128        ; is the second argument nan?
-    setne   r9_b            ; r9_b is 1 if second is not nan
+    cmp     r1_b,128        ; is the first argument NaN?
+    setne   r8_b            ; r8_b is 1 if first is not NaN
+    cmp     r2_b,128        ; is the second argument NaN?
+    setne   r9_b            ; r9_b is 1 if second is not NaN
     xor     r0,r0           ; r0 is zero
-    test    r8_b,r9_b       ; is either nan?
+    test    r8_b,r9_b       ; is either NaN?
     jz      less_r8_b       ; if so, then return r8_b
 
 ; If the exponents are the same, or the coefficient signs are different, then
@@ -1210,11 +1210,11 @@ less_slow:
 dec64_is_integer: function_with_one_parameter
 ;(number: dec64) returns comparison: bool64
 
-; If the number contains a non-zero fractional part or if it is nan, return zero.
+; If the number contains a non-zero fractional part or if it is NaN, return zero.
 ; Otherwise, return one.
 
-    cmp     r1_b,128        ; nan exponent?
-    je      dec64_zero      ; nan is not an integer
+    cmp     r1_b,128        ; NaN exponent?
+    je      dec64_zero      ; NaN is not an integer
     mov     r0,r1           ; r0 is the number
     sar     r0,8            ; r0 is the coefficient
     cmovz   r1,r0           ; if the coefficient is zero, so is the exponent
@@ -1248,8 +1248,8 @@ dec64_is_nan: function_with_one_parameter
 ;(number: dec64) returns comparison: bool64
 
     xor     r0,r0           ; r0 is zero
-    cmp     r1_b,128        ; is r1 nan?
-    sete    r0_b            ; r0 is 1 if r1 is nan
+    cmp     r1_b,128        ; is r1 NaN?
+    sete    r0_b            ; r0 is 1 if r1 is NaN
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -1260,9 +1260,9 @@ dec64_is_zero: function_with_one_parameter
     xor     r0,r0           ; r0 is zero
     test    r1,-256         ; coefficient mask
     setz    r0_b            ; r0 is one if the coefficient is zero
-    cmp     r1_b,128        ; is the number nan?
-    setnz   r2_b            ; r2_b is 1 if the number is not nan
-    and     r0_b,r2_b       ; r0 is one if the coefficient is zero and not nan
+    cmp     r1_b,128        ; is the number NaN?
+    setnz   r2_b            ; r2_b is 1 if the number is not NaN
+    and     r0_b,r2_b       ; r0 is one if the coefficient is zero and not NaN
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -1271,7 +1271,7 @@ dec64_int: function_with_one_parameter
 ;(number: dec64) returns integer: dec64
 
 ; Convert the number such that the exponent will be zero, discarding the
-; fraction part. It will produce nan if the result cannot be represented in
+; fraction part. It will produce NaN if the result cannot be represented in
 ; 56 signed bits. This is used to extract an int64 from a dec64 for bitwise
 ; operations. It accepts a broader range than the safe integer range:
 ; -36028797018963968 thru 72057594037927935.
@@ -1306,9 +1306,9 @@ return:
 
 dec64_nan:
 
-; Return nan. All of the dec64_ functions return only this form of nan.
+; Return NaN. All of the dec64_ functions return only this form of NaN.
 
-    mov     r0,128          ; nan
+    mov     r0,128          ; NaN
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
