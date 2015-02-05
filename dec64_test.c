@@ -57,7 +57,7 @@ static dec64 negative_pi;
 
 static void define_constants() {
     nan = dec64_nan();              /* not a number */
-    nannan = 32896;                 /* a non-normal nan */
+    nannan = 32896;                 /* a non-normal NaN */
     zero = dec64_zero();            /* 0 */
     zip = 250;                      /* a non normal 0 */
     one = dec64_one();              /* 1 */
