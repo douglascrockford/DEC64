@@ -211,6 +211,32 @@ static void judge_unary(dec64 first, dec64 expected, dec64 actual, char * name, 
     }
 }
 
+static void judge_unary_exact(dec64 first, dec64 expected, dec64 actual, char * name, char * op, char * comment) {
+    if (expected == actual) {
+        nr_pass += 1;
+        if (level >= 3) {
+            printf("\n\npass %s: %s", name, comment);
+            printf("\n%-4s", op);
+            print_dec64(first);
+            printf("\n%-4s", "=");
+            print_dec64(actual);
+        }
+    } else {
+        nr_fail += 1;
+        if (level >= 1) {
+            printf("\n\nFAIL %s: %s", name, comment);
+            if (level >= 2) {
+                printf("\n%-4s", op);
+                print_dec64(first);
+                printf("\n%-4s", "?");
+                print_dec64(actual);
+                printf("\n%-4s", "=");
+                print_dec64(expected);
+            }
+        }
+    }
+}
+
 static void judge_unary_bool(dec64 first, bool64 expected, bool64 actual, char * name, char * op, char * comment) {
     if (expected == actual) {
         nr_pass += 1;
@@ -393,7 +419,7 @@ static void test_new(int64 coefficient, int64 exponent, dec64 expected, char * c
 
 static void test_normal(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_normal(first);
-    judge_unary(first, expected, actual, "normal", "n", comment);
+    judge_unary_exact(first, expected, actual, "normal", "n", comment);
 }
 
 static void test_not(dec64 first, dec64 expected, char * comment) {
