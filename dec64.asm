@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2015-01-24
+; 2015-07-16
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -27,6 +27,7 @@ title   dec64.asm for x64.
 ;     dec64_floor(nan)
 ;     dec64_int(nan)
 ;     dec64_neg(nan)
+;     dec64_normal(nan)
 ;     dec64_not(nan)
 ;     dec64_signum(nan)
 ;
@@ -127,6 +128,9 @@ public dec64_neg;(number: dec64)
 
 public dec64_new;(coefficient: int64, exponent: int64)
 ;      returns number: dec64
+
+public dec64_normal;(number: dec64)
+;      returns normalization: dec64
 
 public dec64_not;(number: dec64)
 ;      returns notation: dec64
@@ -1272,7 +1276,7 @@ dec64_int: function_with_one_parameter
 
 ; Convert the number such that the exponent will be zero, discarding the
 ; fraction part. It will produce nan if the result cannot be represented in
-; 56 signed bits. This is used to extract an int64 from a dec64 for bitwise
+; 56 signed bits. This is used to extract an int56 from a dec64 for bitwise
 ; operations. It accepts a broader range than the safe integer range:
 ; -36028797018963968 thru 72057594037927935.
 
@@ -1292,6 +1296,70 @@ dec64_int: function_with_one_parameter
     sar     r2,1            ; shift the lsb of the overflow into carry
     adc     r2,0            ; if r2 was 0 or -1, it is now 0
     jnz     dec64_nan       ; was the coefficient too enormous?
+    ret
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+dec64_normal: function_with_one_parameter
+;(number: int64) returns normalization: int64
+
+; Make the exponent as close to zero as possible without losing any signficance.
+; Usually normalization is not needed since it does not materially change the
+; value of a number.
+
+    mov     r0,r1           ; r0 is the number
+    cmp     r1_b,128        ; compare the exponent to nan
+    jz      dec64_nan       ; if exponent is nan, the result is nan
+    and     r0,-256         ; r0 is the coefficient shifted 8 bits
+    mov     r8,10           ; r8 is the divisor
+    cmovz   r1,r0           ; r1 is zero if r0 is zero
+    mov     r10,r0          ; r10 is the coefficient shifted 8 bits
+    test    r1_b,r1_b       ; examine the exponent
+    jz      return          ; if the exponent is zero, return r0
+    jns     normal_multiply ; if the exponent is positive
+    sar     r0,8            ; r0 is the coefficient
+    sar     r10,8           ; r10 is the coefficient
+    pad
+
+normal_divide:
+
+; While the exponent is less than zero, divide the coefficient by 10 and
+; increment the exponent.
+
+    cqo                     ; sign extend r0 into r2
+    idiv    r8              ; divide r2:r0 by 10
+    test    r2,r2           ; examine the remainder
+    jnz     normal_divide_done ; if r2 is not zero, we are done
+    mov     r10,r0          ; r10 is the coefficient
+    add     r1_b,1          ; increment the exponent
+    jnz     normal_divide   ; until the exponent is zero
+    pad
+
+normal_divide_done:
+
+    mov     r0,r10          ; r0 is the finished coefficient
+    shl     r0,8            ; put it in position
+    mov     r0_b,r1_b       ; mix in the exponent
+    ret
+    pad
+
+normal_multiply:
+
+; While the exponent is greater than zero, multiply the coefficient by 10 and
+; decrement the exponent. If the coefficient gets too large, wrap it up.
+
+    imul    r0,10           ; r0 is r0 * 10
+    jo      normal_multiply_done ; return zero if overflow
+    mov     r10,r0          ; r10 is the coefficient
+    sub     r1_b,1          ; decrement the exponent
+    jnz     normal_multiply ; until the exponent is zero
+    ret
+    pad
+
+normal_multiply_done:
+
+    mov     r0,r10          ; r0 is the finished positioned coefficient
+    mov     r0_b,r1_b       ; mix in the exponent
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
