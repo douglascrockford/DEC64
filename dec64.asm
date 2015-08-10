@@ -139,7 +139,7 @@ public dec64_one;()
 ;      returns one: dec64
 
 public dec64_round;(number: dec64, exponent: dec64)
-;      returns roundation: dec64
+;      returns quantization: dec64
 
 public dec64_signum;(number: dec64)
 ;      returns signature: dec64
@@ -407,7 +407,7 @@ pack_decrease:
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 dec64_round: function_with_two_parameters
-;(number: dec64, place: dec64) returns roundation: dec64
+;(number: dec64, place: dec64) returns quantization: dec64
 
 ; The place argument indicates at what decimal place to round.
 ;       -2      nearest cent

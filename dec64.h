@@ -37,7 +37,7 @@ extern dec64 dec64_new(int64 coefficient, int64 exponent)          /* number */;
 extern dec64 dec64_normal(dec64 number)                     /* normalization */; 
 extern dec64 dec64_not(dec64 number)                             /* notation */;
 extern dec64 dec64_one()                                              /* one */;
-extern dec64 dec64_round(dec64 number, dec64 place)            /* roundation */;
+extern dec64 dec64_round(dec64 number, dec64 place)          /* quantization */;
 extern dec64 dec64_signum(dec64 number)                         /* signature */;
 extern dec64 dec64_subtract(dec64 minuend, dec64 subtrahend)   /* difference */;
 extern dec64 dec64_zero()                                            /* zero */;
