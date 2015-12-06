@@ -4,7 +4,7 @@ Douglas Crockford
 douglas@crockford.com
 
 dec64.com
-2014-04-14
+2015-11-27
 Public Domain
 
     NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
@@ -29,3 +29,10 @@ dec64_string_test.c is a test program.
 dec64.html is a descriptive web page.
 
 dec64.png is a logo.
+
+Note: This project can be built in Visual Studio, but Visual Studio does not
+have good defaults for building MASM, and apparently provides no documentation.
+These hints may be useful:
+
+    Platform > x64
+    Solution Explorer > DEC64 > Build Dependencies > Build Customizations... > masm

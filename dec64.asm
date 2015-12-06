@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2015-07-16
+; 2015-12-05
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -22,133 +22,141 @@ title   dec64.asm for x64.
 ;
 ; These operations will produce a result of nan:
 ;
-;     dec64_abs(nan)
-;     dec64_ceiling(nan)
-;     dec64_floor(nan)
-;     dec64_int(nan)
-;     dec64_neg(nan)
-;     dec64_normal(nan)
-;     dec64_not(nan)
-;     dec64_signum(nan)
+;   dec64_abs(nan)
+;   dec64_ceiling(nan)
+;   dec64_dec(nan)
+;   dec64_floor(nan)
+;   dec64_inc(nan)
+;   dec64_int(nan)
+;   dec64_neg(nan)
+;   dec64_normal(nan)
+;   dec64_not(nan)
+;   dec64_signum(nan)
 ;
 ; These operations will produce a result of zero for all values of n,
 ; even if n is nan:
 ;
-;     dec64_divide(0, n)
-;     dec64_integer_divide(0, n)
-;     dec64_modulo(0, n)
-;     dec64_multiply(0, n)
-;     dec64_multiply(n, 0)
+;   dec64_divide(0, n)
+;   dec64_integer_divide(0, n)
+;   dec64_modulo(0, n)
+;   dec64_multiply(0, n)
+;   dec64_multiply(n, 0)
 ;
 ; These operations will produce a result of nan for all values of n
 ; except zero:
 ;
-;     dec64_divide(n, 0)
-;     dec64_divide(n, nan)
-;     dec64_integer_divide(n, 0)
-;     dec64_integer_divide(n, nan)
-;     dec64_modulo(n, 0)
-;     dec64_modulo(n, nan)
-;     dec64_multiply(n, nan)
-;     dec64_multiply(nan, n)
+;   dec64_divide(n, 0)
+;   dec64_divide(n, nan)
+;   dec64_integer_divide(n, 0)
+;   dec64_integer_divide(n, nan)
+;   dec64_modulo(n, 0)
+;   dec64_modulo(n, nan)
+;   dec64_multiply(n, nan)
+;   dec64_multiply(nan, n)
 ;
 ; These operations will produce a result of nan for all values of n:
 ;
-;     dec64_add(n, nan)
-;     dec64_add(nan, n)
-;     dec64_divide(nan, n)
-;     dec64_integer_divide(nan, n)
-;     dec64_modulo(nan, n)
-;     dec64_round(n, nan)
-;     dec64_round(nan, n)
-;     dec64_subtract(n, nan)
-;     dec64_subtract(nan, n)
+;   dec64_add(n, nan)
+;   dec64_add(nan, n)
+;   dec64_divide(nan, n)
+;   dec64_integer_divide(nan, n)
+;   dec64_modulo(nan, n)
+;   dec64_round(n, nan)
+;   dec64_round(nan, n)
+;   dec64_subtract(n, nan)
+;   dec64_subtract(nan, n)
 ;
 ; This file can be processed with Microsoft's ML64.exe. There might be other
 ; assemblers that can process this file, but that has not been tested.
 ;
-;     You know what goes great with those defective pentium chips?
-;     Defective pentium salsa! (David Letterman)
+;   You know what goes great with those defective pentium chips?
+;   Defective pentium salsa! (David Letterman)
 
 ; All public symbols have a dec64_ prefix. All other symbols are private.
 
 public dec64_abs;(number: dec64)
-;      returns absolution: dec64
+;   returns absolution: dec64
 
 public dec64_add;(augend: dec64, addend: dec64)
-;      returns sum: dec64
+;   returns sum: dec64
 
 public dec64_ceiling;(number: dec64)
-;      returns integer: dec64
+;   returns integer: dec64
 
 public dec64_coefficient;(number: dec64)
-;      returns coefficient: int64
+;   returns coefficient: int64
+
+public dec64_dec;(number: dec64)
+;   returns decrementation: dec64
 
 public dec64_divide;(dividend: dec64, divisor: dec64)
-;      returns quotient: dec64
+;   returns quotient: dec64
 
 public dec64_equal;(comparahend: dec64, comparator: dec64)
-;      returns comparison: bool64
+;   returns comparison: bool64
 
 public dec64_exponent;(number: dec64)
-;      returns exponent: int64
+;   returns exponent: int64
 
 public dec64_floor;(number: dec64)
-;      returns integer: dec64
+;   returns integer: dec64
+
+public dec64_inc;(number: dec64)
+;   returns incrementation: dec64
 
 public dec64_int;(number: dec64)
-;      returns integer: dec64
+;   returns integer: dec64
 
 public dec64_integer_divide;(dividend: dec64, divisor: dec64)
-;      returns quotient: dec64
+;   returns quotient: dec64
 
 public dec64_is_integer;(number: dec64)
-;      returns comparison: bool64
+;   returns comparison: bool64
 
 public dec64_is_nan;(number: dec64)
-;      returns comparison: bool64
+;   returns comparison: bool64
 
 public dec64_is_zero;(number: dec64)
-;      returns comparison: bool64
+;   returns comparison: bool64
 
 public dec64_less;(comparahend: dec64, comparator: dec64)
-;      returns comparison: bool64
+;   returns comparison: bool64
 
 public dec64_modulo;(dividend: dec64, divisor: dec64)
-;      returns modulus: dec64
+;   returns modulus: dec64
 
 public dec64_multiply;(multiplicand: dec64, multiplier: dec64)
-;      returns product: dec64
+;   returns product: dec64
 
 public dec64_nan;()
-;      returns nan: dec64
+;   returns nan: dec64
 
 public dec64_neg;(number: dec64)
-;      returns negation: dec64
+;   returns negation: dec64
 
 public dec64_new;(coefficient: int64, exponent: int64)
-;      returns number: dec64
+;   returns number: dec64
 
 public dec64_normal;(number: dec64)
-;      returns normalization: dec64
+;   returns normalization: dec64
 
 public dec64_not;(number: dec64)
-;      returns notation: dec64
+;   returns notation: dec64
 
 public dec64_one;()
-;      returns one: dec64
+;   returns one: dec64
 
 public dec64_round;(number: dec64, exponent: dec64)
-;      returns quantization: dec64
+;   returns quantization: dec64
 
 public dec64_signum;(number: dec64)
-;      returns signature: dec64
+;   returns signature: dec64
 
 public dec64_subtract;(minuend: dec64, subtrahend: dec64)
-;      returns difference: dec64
+;   returns difference: dec64
 
 public dec64_zero;()
-;      returns zero: dec64
+;   returns zero: dec64
 
 ;  -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
@@ -159,26 +167,26 @@ public dec64_zero;()
 ; to indicate the lower 16 bits. We would use _d to indicate the lower 32 bits,
 ; but that was not needed here.
 
-r0    equ rax
-r1    equ rcx
-r2    equ rdx
-r6    equ rsi
-r7    equ rdi
+r0      equ rax
+r1      equ rcx
+r2      equ rdx
+r6      equ rsi
+r7      equ rdi
 
-r0_b  equ al
-r1_b  equ cl
-r2_b  equ dl
-r8_b  equ r8b
-r9_b  equ r9b
-r10_b equ r10b
-r11_b equ r11b
+r0_b    equ al
+r1_b    equ cl
+r2_b    equ dl
+r8_b    equ r8b
+r9_b    equ r9b
+r10_b   equ r10b
+r11_b   equ r11b
 
-r0_h  equ ah
-r1_h  equ ch
-r2_h  equ dh
+r0_h    equ ah
+r1_h    equ ch
+r2_h    equ dh
 
-r0_w  equ ax
-r1_w  equ cx
+r0_w    equ ax
+r1_w    equ cx
 
 ; All of the public functions in this file accept up to two arguments, which
 ; are passed in registers (either r1, r2 or r7, r6), returning a result in r0.
@@ -194,47 +202,47 @@ r1_w  equ cx
 
 ; This has not been tested on Unix.
 
-UNIX equ 0                  ; calling convention: 0 for Windows, 1 for Unix
+UNIX    equ 0                   ; calling convention: 0 for Windows, 1 for Unix
 
 function_with_one_parameter macro
     if UNIX
-    mov     r1,r7           ;; UNIX
+    mov     r1,r7               ;; UNIX
     endif
     endm
 
 function_with_two_parameters macro
     if UNIX
-    mov     r1,r7           ;; UNIX
-    mov     r2,r6           ;; UNIX
+    mov     r1,r7               ;; UNIX
+    mov     r2,r6               ;; UNIX
     endif
     endm
 
 call_with_one_parameter macro function
     if UNIX
-    mov     r7,r1           ;; UNIX
+    mov     r7,r1               ;; UNIX
     endif
     call    function
     endm
 
 call_with_two_parameters macro function
     if UNIX
-    mov     r7,r1           ;; UNIX
-    mov     r6,r2           ;; UNIX
+    mov     r7,r1               ;; UNIX
+    mov     r6,r2               ;; UNIX
     endif
     call    function
     endm
 
 tail_with_one_parameter macro function
     if UNIX
-    mov     r7,r1           ;; UNIX
+    mov     r7,r1               ;; UNIX
     endif
     jmp     function
     endm
 
 tail_with_two_parameters macro function
     if UNIX
-    mov     r7,r1           ;; UNIX
-    mov     r6,r2           ;; UNIX
+    mov     r7,r1               ;; UNIX
+    mov     r6,r2               ;; UNIX
     endif
     jmp     function
     endm
@@ -243,35 +251,35 @@ tail_with_two_parameters macro function
 ; destinations are aligned on 16 byte boundaries.
 
 pad macro
-    align 16
+    align   16
     endm
 
 ;  -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 dec64_data segment para read
 
-power:                          ; the powers of 10
+power:                              ; the powers of 10
 
-    qword  1                    ; 0
-    qword  10                   ; 1
-    qword  100                  ; 2
-    qword  1000                 ; 3
-    qword  10000                ; 4
-    qword  100000               ; 5
-    qword  1000000              ; 6
-    qword  10000000             ; 7
-    qword  100000000            ; 8
-    qword  1000000000           ; 9
-    qword  10000000000          ; 10
-    qword  100000000000         ; 11
-    qword  1000000000000        ; 12
-    qword  10000000000000       ; 13
-    qword  100000000000000      ; 14
-    qword  1000000000000000     ; 15
-    qword  10000000000000000    ; 16
-    qword  100000000000000000   ; 17
-    qword  1000000000000000000  ; 18
-    qword  10000000000000000000 ; 19
+    qword   1                       ; 0
+    qword   10                      ; 1
+    qword   100                     ; 2
+    qword   1000                    ; 3
+    qword   10000                   ; 4
+    qword   100000                  ; 5
+    qword   1000000                 ; 6
+    qword   10000000                ; 7
+    qword   100000000               ; 8
+    qword   1000000000              ; 9
+    qword   10000000000             ; 10
+    qword   100000000000            ; 11
+    qword   1000000000000           ; 12
+    qword   10000000000000          ; 13
+    qword   100000000000000         ; 14
+    qword   1000000000000000        ; 15
+    qword   10000000000000000       ; 16
+    qword   100000000000000000      ; 17
+    qword   1000000000000000000     ; 18
+    qword   10000000000000000000    ; 19
 
 dec64_data ends
 
@@ -295,7 +303,7 @@ dec64_exponent: function_with_one_parameter
 
 ; Return the exponent part, sign extended to 64 bits, from a dec64 number.
 
-    movsx   r0,r1_b         ; r0 is the exponent
+    movsx   r0,r1_b             ; r0 is the exponent
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -305,8 +313,10 @@ dec64_new: function_with_two_parameters
 
 ; Construct a new dec64 number with a coefficient and an exponent.
 
-    mov     r0,r1           ; r0 is the coefficient
-    mov     r8,r2           ; r8 is the exponent
+    mov     r0,r1               ; r0 is the coefficient
+    test    r0,r0               ; is the coefficient zero?
+    jz      dec64_zero
+    mov     r8,r2               ; r8 is the exponent
 
 ; Fall into pack.
 
@@ -324,13 +334,13 @@ pack:
 ; If the exponent is greater than 127, then the number is too big.
 ; But it might still be possible to salvage a value.
 
-    cmp     r8,127          ; compare exponent with 127
-    jg      pack_decrease   ; it might be possible to decrease it
+    cmp     r8,127              ; compare exponent with 127
+    jg      pack_decrease       ; it might be possible to decrease it
 
 ; If the exponent is too small, or if the coefficient is too large, then some
 ; division is necessary. The absolute value of the coefficient is off by one
 ; for the negative because
-;   negative_extreme_coefficent = -(extreme_coefficent + 1)
+;    negative_extreme_coefficent = -(extreme_coefficent + 1)
 
     mov     r10,r0          ; r10 is the coefficient
     mov     r1,3602879701896396800 ; the ultimate coefficient * 100
@@ -351,10 +361,11 @@ pack:
     cmp     r9,r11          ; which excess is larger?
     cmovl   r9,r11          ; take the max
     test    r9,r9           ; if neither was zero
-    jnz     pack_increase   ;   then increase the exponent by the excess
+    jnz     pack_increase   ; then increase the exponent by the excess
     shl     r0,8            ; shift the exponent into position
-    cmovz   r8,r0           ; if the coefficient is zero, also zero the exponent
-    mov     r0_b,r8_b       ; mix in the exponent
+    cmovz   r8,r0           ; if the coefficient is zero, also zero the exp
+    movzx   r8,r8_b         ; zero out all but the bottom 8 bits of the exp
+    or      r0,r8           ; mix in the exponent
     ret                     ; whew
     pad
 
@@ -401,7 +412,8 @@ pack_decrease:
     jnz     dec64_nan       ; the number is still too large
     shl     r0,8            ; shift the exponent into position
     cmovz   r8,r0           ; if the coefficient is zero, also zero the exponent
-    mov     r0_b,r8_b       ; mix in the exponent
+    movzx   r8,r8_b         ; zero out all but the bottom 8 bits of the exponent
+    or      r0,r8           ; mix in the exponent
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -410,11 +422,11 @@ dec64_round: function_with_two_parameters
 ;(number: dec64, place: dec64) returns quantization: dec64
 
 ; The place argument indicates at what decimal place to round.
-;       -2      nearest cent
-;        0      nearest integer
-;        3      nearest thousand
-;        6      nearest million
-;        9      nearest billion
+;    -2        nearest cent
+;     0        nearest integer
+;     3        nearest thousand
+;     6        nearest million
+;     9        nearest billion
 
 ; The place should be between -16 and 16.
 
@@ -470,13 +482,13 @@ dec64_add: function_with_two_parameters
 ; Add two dec64 numbers together.
 
 ; Registers:
-; r0      result, imul/idiv
-; r1      first argument
-; r2      second argument, imul/idiv
-; r8      exponent of first argument
-; r9      exponent of second argument
-; r10     coefficient of first argument
-; r11     coefficient of second argument
+; r0        result, imul/idiv
+; r1        first argument
+; r2        second argument, imul/idiv
+; r8        exponent of first argument
+; r9        exponent of second argument
+; r10       coefficient of first argument
+; r11       coefficient of second argument
 
 ; If the two exponents are both zero (which is usually the case for integers)
 ; we can take the fast path. Since the exponents are both zero, we can simply
@@ -546,13 +558,13 @@ add_slower:
 
 ; Shift the coefficients of r1 and r2 into r10 and r11 and unpack the exponents.
 
-    mov     r10,r1         ; r10 is the first number
-    mov     r11,r2         ; r11 is the second number
-    movsx   r8,r1_b        ; r8 is the first exponent
-    movsx   r9,r2_b        ; r9 is the second exponent
-    sar     r10,8          ; r10 is the first coefficient
-    sar     r11,8          ; r11 is the second coefficient
-    mov     r0,r10         ; r0 is the first coefficient
+    mov     r10,r1          ; r10 is the first number
+    mov     r11,r2          ; r11 is the second number
+    movsx   r8,r1_b         ; r8 is the first exponent
+    movsx   r9,r2_b         ; r9 is the second exponent
+    sar     r10,8           ; r10 is the first coefficient
+    sar     r11,8           ; r11 is the second coefficient
+    mov     r0,r10          ; r0 is the first coefficient
     pad
 
 add_slower_decrease:
@@ -606,6 +618,113 @@ add_slower_increase:
 return_r1:
 
     mov     r0,r1           ; r0 is the original number
+    ret
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+dec64_inc: function_with_one_parameter
+;(number: dec64) returns incrementation: dec64
+
+; Increment a number. In most cases, this will be a faster way to add one than
+; dec64_add.
+
+    test    r1_b,r1_b       ; what is the exponent?
+    jnz     inc_not_integer
+
+
+; The number is an integer. This might be easy.
+
+    mov     r0,100h         ; r0 is one
+    add     r0,r1           ; r0 is the incrementation
+    jo      inc_hardway     ; overflow (very rare)
+    ret
+    pad
+
+inc_not_integer:
+
+    js      inc_negative_exponent
+
+    test    r1,-256         ; is the coefficient zero?
+    jz      dec64_one       ; if so, the result is one
+    cmp     r1_b,17         ; is the number too enormous to increment?
+    jge     return_r1       ; then return the number
+
+inc_hardway:
+
+    mov     r2,100h         ; r2 is one
+    tail_with_two_parameters dec64_add
+    pad
+
+inc_negative_exponent:
+
+    cmp     r1_b,128        ; is the number nan?
+    je      dec64_nan
+    cmp     r1_b,-17        ; is the number too small to increment?
+    jle     dec64_one       ; then return one
+
+    movsx   r8,r1_b         ; r8 is the negative exponent
+    neg     r8              ; flip the sign
+    mov     r0,power[r8*8]  ; r0 is 10^(-exponent)
+    shl     r0,8            ; convert to dec64
+    add     r0,r1           ; now we add
+    jo      inc_hardway     ; if it overflows, do it the hard way
+    ret
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+dec64_dec: function_with_one_parameter
+;(number: dec64) returns decrementation: dec64
+
+; Increment a number. In most cases, this will be a faster way to subtract one than
+; dec64_subtract.
+
+    test    r1_b,r1_b       ; what is the exponent?
+    jnz     dec_not_integer
+
+
+; The number is an integer. This might be easy.
+
+    mov     r0,-256         ; r0 is negative one
+    add     r0,r1           ; r0 is the decrementation
+    jo      dec_hardway     ; overflow (very rare)
+    ret
+    pad
+
+dec_not_integer:
+
+    js      dec_negative_exponent
+
+    test    r1,-256         ; is the coefficient zero?
+    jz      dec_neg_one     ; if so, the result is negative one
+    cmp     r1_b,17         ; is the number too enormous to decrement?
+    jge     return_r1       ; then return the number
+
+dec_hardway:
+
+    mov     r2,100h         ; r2 is one
+    tail_with_two_parameters dec64_subtract
+    pad
+
+dec_negative_exponent:
+
+    cmp     r1_b,128        ; is the number nan?
+    je      dec64_nan
+    cmp     r1_b,-17        ; is the number too small to decrement?
+    jle     dec_neg_one     ; then return negative one
+
+    movsx   r8,r1_b         ; r8 is the negative exponent
+    neg     r8              ; flip the sign
+    mov     r0,power[r8*8]  ; r0 is 10^(-exponent)
+    neg     r0              ; go negative
+    shl     r0,8            ; convert to dec64
+    add     r0,r1           ; now we subtract
+    jo      dec_hardway     ; if it overflows, do it the hard way
+    ret
+    pad
+
+dec_neg_one:
+
+    mov     r0,-256         ; r0 is -1
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -754,7 +873,7 @@ subtract_slower_increase:
     sub     r2,r9           ; r2 is the remaining exponent difference
     mov     r0,r11          ; r0 is the second coefficient
     cmp     r2,17           ; 17 is the max digits in a packed coefficient
-    ja      subtract_underflow   ; too small to matter
+    ja      subtract_underflow ; too small to matter
     mov     r9,power[r2*8]  ; r9 is the power of ten
     cqo                     ; sign extend r0 into r2
     idiv    r9              ; divide the second coefficient by the power of 10
@@ -824,7 +943,7 @@ dec64_multiply: function_with_two_parameters
     shr     r1,8            ;     convert a bit number to a digit number
     add     r1,2            ; add two extra digits to the scale
     add     r8,r1           ; increase the exponent
-    idiv    qword ptr power[r1*8]; divide by the power of ten
+    idiv    qword ptr power[r1*8] ; divide by the power of ten
     jmp     pack
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -924,7 +1043,7 @@ dec64_integer_divide: function_with_two_parameters
 ;(dividend: dec64, divisor: dec64) returns quotient: dec64
 
 ; Divide, with a floored integer result. It produces the same result as
-;   dec64_floor(dec64_divide(dividend, divisor))
+;    dec64_floor(dec64_divide(dividend, divisor))
 ; but can sometimes produce that result more quickly.
 
     cmp     r1_b,r2_b       ; are the exponents equal?
@@ -963,13 +1082,13 @@ dec64_modulo: function_with_one_parameter
 ;(dividend: dec64, divisor: dec64) returns modulus: dec64
 
 ; Modulo. It produces the same result as
-;   dec64_subtract(
-;       dividend,
-;       dec64_multiply(
-;           dec64_integer_divide(dividend, divisor),
-;           divisor
-;       )
-;   )
+;    dec64_subtract(
+;        dividend,
+;        dec64_multiply(
+;            dec64_integer_divide(dividend, divisor),
+;            divisor
+;        )
+;    )
 
     cmp     r1_b,r2_b       ; are the two exponents the same?
     jnz     modulo_slow     ; if not take the slow path
@@ -1158,9 +1277,9 @@ dec64_less: function_with_two_parameters
 
 ; The other 3 comparison functions are easily implemented with this one:
 
-;       dec64_gt(a, b) = dec64_lt(b, a)
-;       dec64_ge(a, b) = 1 - dec64_lt(a, b)
-;       dec64_le(a, b) = 1 - dec64_lt(b, a)
+;    dec64_gt(a, b) = dec64_lt(b, a)
+;    dec64_ge(a, b) = 1 - dec64_lt(a, b)
+;    dec64_le(a, b) = 1 - dec64_lt(b, a)
 
 ; There is a question of what to do about nan in this sort of inequality. One
 ; option is to always return nan. That makes the writing of conditionals
