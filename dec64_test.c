@@ -362,6 +362,11 @@ static void test_floor(dec64 first, dec64 expected, char * comment) {
     judge_unary(first, expected, actual, "floor", "f", comment);
 }
 
+static void test_half(dec64 first, dec64 expected, char * comment) {
+    dec64 actual = dec64_half(first);
+    judge_unary(first, expected, actual, "half", "h", comment);
+}
+
 static void test_inc(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_inc(first);
     judge_unary(first, expected, actual, "inc", "+", comment);
@@ -652,6 +657,7 @@ static void test_all_divide() {
     test_divide(dec64_new(100000000000000, -14), maxint, one_over_maxint, "one / maxint alias 14");
     test_divide(dec64_new(1000000000000000, -15), maxint, one_over_maxint, "one / maxint alias 15");
     test_divide(dec64_new(10000000000000000, -16), maxint, one_over_maxint, "one / maxint alias 16");
+    test_divide(minnum, two, minnum, "minnum / 2");
 }
 
 static void test_all_equal() {
@@ -742,6 +748,17 @@ static void test_all_floor() {
     test_floor(almost_negative_one, negative_one, "almost_negative_one");
     test_floor(dec64_new(-999999999999999, -15), negative_one, "-0.9...");
     test_floor(dec64_new(-9999999999999998, -16), negative_one, "-0.9...8");
+}
+
+static void test_all_half() {
+    test_half(nannan, nan, "nannan");
+    test_half(nan, nan, "nan");
+    test_half(zero, zero, "zero");
+    test_half(zip, zero, "zip");
+    test_half(one, half, "one");
+    test_half(two, one, "two");
+    test_half(ten, five, "ten");
+    test_half(minnum, minnum, "minnum");
 }
 
 static void test_all_inc() {
@@ -1389,6 +1406,7 @@ static int do_tests(int level_of_detail) {
     test_all_divide();
     test_all_equal();
     test_all_floor();
+    test_all_half();
     test_all_inc();
     test_all_int();
     test_all_integer_divide();

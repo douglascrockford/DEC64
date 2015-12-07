@@ -26,6 +26,7 @@ title   dec64.asm for x64.
 ;   dec64_ceiling(nan)
 ;   dec64_dec(nan)
 ;   dec64_floor(nan)
+;   dec64_half(nan)
 ;   dec64_inc(nan)
 ;   dec64_int(nan)
 ;   dec64_neg(nan)
@@ -86,7 +87,7 @@ public dec64_ceiling;(number: dec64)
 public dec64_coefficient;(number: dec64)
 ;   returns coefficient: int64
 
-public dec64_dec;(number: dec64)
+public dec64_dec;(augend: dec64)
 ;   returns decrementation: dec64
 
 public dec64_divide;(dividend: dec64, divisor: dec64)
@@ -101,7 +102,10 @@ public dec64_exponent;(number: dec64)
 public dec64_floor;(number: dec64)
 ;   returns integer: dec64
 
-public dec64_inc;(number: dec64)
+public dec64_half;(dividend: dec64)
+;   returns quotient: dec64
+
+public dec64_inc;(augend: dec64)
 ;   returns incrementation: dec64
 
 public dec64_int;(number: dec64)
@@ -623,7 +627,7 @@ return_r1:
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 dec64_inc: function_with_one_parameter
-;(number: dec64) returns incrementation: dec64
+;(augend: dec64) returns incrementation: dec64
 
 ; Increment a number. In most cases, this will be a faster way to add one than
 ; dec64_add.
@@ -673,7 +677,7 @@ inc_negative_exponent:
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 dec64_dec: function_with_one_parameter
-;(number: dec64) returns decrementation: dec64
+;(augend: dec64) returns decrementation: dec64
 
 ; Increment a number. In most cases, this will be a faster way to subtract one than
 ; dec64_subtract.
@@ -1137,6 +1141,46 @@ modulo_slow:
     pop     r1
     mov     r2,r0
     tail_with_two_parameters dec64_subtract
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+dec64_half: function_with_one_parameter
+;(dividend: dec64) returns quotient: dec64
+
+; Divide a dec64 number by two. This will always be faster than dec64_divide.
+
+    cmp     r1_b,128
+    je      dec64_nan
+    test    r1_h,1
+    jz      half_fast
+
+; Unpack the components into r8 and r1, multiply by 5 and divide by 10.
+
+    movsx   r8,r1_b         ; r8 is the exponent
+    sar     r1,8            ; r1 is the coefficient
+    sub     r8,1            ; bump down the exponent
+    imul    r0,r1,5         ; r0 is the coefficient * 5
+    jmp     pack
+    pad
+
+half_fast:
+
+; If the least significant bit of the coefficient is 0, then we can do this
+; the fast way. Shift the coefficient by 1 bit and restore the exponent. If
+; the shift produces zero, even easier.
+
+    mov     r0,-256         ; r0 is the coefficient mask
+    and     r0,r1           ; r0 is the coefficient shifted 8 bits
+    jz      half_zero
+    sar     r0,1            ; r0 is divided by 2
+    movzx   r1,r1_b         ; zero out r1 except lowest 8 bits
+    or      r0,r1           ; mix in the exponent
+    ret
+
+half_zero:
+
+    ret                     ; return zero
+    pad
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
