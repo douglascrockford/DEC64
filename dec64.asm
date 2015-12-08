@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2015-12-05
+; 2015-12-07
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -939,6 +939,7 @@ dec64_multiply: function_with_two_parameters
 ; We use 77/256 to convert log2 to log10.
 
     mov     r9,r2           ; r9 is the excess significance
+    xor     r1,r1           ; r1 is zero anticipating bsr
     neg     r9
     cmovs   r9,r2           ; r9 is absolute value of the excess significance
 
