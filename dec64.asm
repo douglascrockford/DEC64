@@ -1323,9 +1323,9 @@ dec64_less: function_with_two_parameters
 
 ; The other 3 comparison functions are easily implemented with this one:
 
-;    dec64_gt(a, b) = dec64_lt(b, a)
-;    dec64_ge(a, b) = 1 - dec64_lt(a, b)
-;    dec64_le(a, b) = 1 - dec64_lt(b, a)
+;    dec64_greater(a, b)          => dec64_less(b, a)
+;    dec64_greater_or_equal(a, b) => 1 - dec64_less(a, b)
+;    dec64_less_or_equal(a, b)    => 1 - dec64_less(b, a)
 
 ; There is a question of what to do about nan in this sort of inequality. One
 ; option is to always return nan. That makes the writing of conditionals
