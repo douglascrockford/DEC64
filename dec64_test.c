@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2015-12-05
+2015-12-08
 Public Domain
 
 No warranty.
@@ -507,6 +507,11 @@ static void test_all_add() {
     test_add(maxnum, dec64_new(-36028797018963967, 127), zero, "extreme zero");
     test_add(almost_negative_one, one, epsilon, "almost_negative_one + one");
     test_add(almost_negative_one, almost_one, zero, "almost_negative_one + almost_one");
+    test_add(dec64_new(1, -1), dec64_new(1, -3), dec64_new(101, -3), "0.1 + 0.001");
+    test_add(dec64_new(1, -1), dec64_new(1, -17), dec64_new(10000000000000001, -17), "0.1 + 1e-16");
+    test_add(dec64_new(7182818284590704, -16), one, dec64_new(17182818284590704, -16), "7182818284590704e-16 + 1");
+    test_add(dec64_new(7182818284590704, -16), dec64_new(10, -1), dec64_new(17182818284590704, -16), "7182818284590704e-16 + 10e-1");
+    test_add(dec64_new(4000000000000000, -16), dec64_new(10, -1), dec64_new(14000000000000000, -16), "4000000000000000e-16 + 10e-1");
 }
 
 static void test_all_ceiling() {
