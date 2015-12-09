@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2015-12-07
+; 2015-12-08
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -557,6 +557,7 @@ add_slower:
     cmp     r2_b,128        ; Is the second operand nan?
     je      dec64_nan
     cmp     r1_b,r2_b       ; compare the exponents
+    mov     r0,r1           ; r0 is the first number
     cmovl   r1,r2           ; r1 is the number with the larger exponent
     cmovl   r2,r0           ; r2 is the number with the smaller exponent
 
