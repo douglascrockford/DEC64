@@ -3,7 +3,7 @@ dec64_string.c
 Conversion between DEC64 and strings.
 
 dec64.com
-2014-04-12
+2015-12-09
 Public Domain
 
 No warranty.
@@ -17,7 +17,7 @@ configuration functions.
 #include "dec64_string.h"
 
 static const int e = 'e';
-static const int64 confirmed = 0xC02F193ED0FBADCELL;
+static const int64 confirmed = 0xFFDEADFACEC0DECELL;
 
 static const int64 power[17] = {
     1,
@@ -41,9 +41,7 @@ static const int64 power[17] = {
 
 /* functions in service to dec64_to_string */
 
-static void digitize(
-    dec64_string_state state
-) {
+static void digitize(dec64_string_state state) {
     int64 coefficient;
     int digit;
     int place;
@@ -70,10 +68,7 @@ static void digitize(
     }
 }
 
-static emit(
-    dec64_string_state state,
-    int c
-) {
+static emit(dec64_string_state state, int c) {
     if (state->string != NULL) {
         if (c > 0) {
             state->string[state->length] = (dec64_string_char)c;
@@ -82,16 +77,16 @@ static emit(
     }
 }
 
-static void emit_at(
-    dec64_string_state state,
-    int64 at
-) {
-    emit(state, at >= state->nr_digits || at < 0 ? '0' : state->digits[at]);
+static void emit_at(dec64_string_state state, int64 at) {
+    emit(
+        state, 
+        (at >= state->nr_digits || at < 0)
+            ? '0' 
+            : state->digits[at]
+    );
 }
 
-static void emit_decimal_point(
-    dec64_string_state state
-) {
+static void emit_decimal_point(dec64_string_state state) {
     emit(state, state->decimal_point);
 }
 
@@ -158,15 +153,11 @@ static emit_exponent(
     }
 }
 
-static emit_separator(
-    dec64_string_state state
-) {
+static emit_separator(dec64_string_state state) {
     emit(state, state->separator);
 }
 
-static void engineering(
-    dec64_string_state state
-) {
+static void engineering(dec64_string_state state) {
     int64 exponent = dec64_exponent(state->number) + state->nr_digits;
     int to = state->nr_digits - state->nr_zeros;
     int fudge = (int)exponent % 3;
@@ -181,9 +172,7 @@ static void engineering(
     emit_exponent(state, exponent - fudge);
 }
 
-static void scientific(
-    dec64_string_state state
-) {
+static void scientific(dec64_string_state state) {
     int64 exponent = dec64_exponent(state->number) + state->nr_digits;
     int nr_digits = (state->nr_digits - state->nr_zeros);
     int at = 1;
@@ -195,9 +184,7 @@ static void scientific(
     emit_exponent(state, exponent - 1);
 }
 
-static void standard(
-    dec64_string_state state
-) {
+static void standard(dec64_string_state state) {
     int from = 0;
     int to;
     int places;
@@ -244,9 +231,10 @@ static void standard(
 
 dec64_string_state dec64_string_begin() {
 /*
-    Create a state object. State objects are passed as the first argument to
-    other public functions. It holds state so that this module is reentrant
-    and thread safe. Do not manipulate this object directly.
+    Create a state object. State objects are passed as the first argument to 
+    the other public functions. It holds state so that this module is reentrant
+    and thread safe. Do not manipulate this object directly. Use the functions.
+    It can return NULL if memory allocation fails.
 */
     dec64_string_state state =
             (dec64_string_state)malloc(sizeof (struct dec64_string_state));
@@ -267,9 +255,7 @@ dec64_string_state dec64_string_begin() {
 
 /* destruction */
 
-void dec64_string_end(
-    dec64_string_state state
-) {
+void dec64_string_end(dec64_string_state state) {
 /*
     Dispose of the state object.
 */
@@ -282,9 +268,7 @@ void dec64_string_end(
     The modes are used by dec64_to_string and ignored by dec64_from_string.
 */
 
-void dec64_string_engineering(
-    dec64_string_state state
-) {
+void dec64_string_engineering(dec64_string_state state) {
 /*
     Put dec64_to_string into engineering mode, which is like scientific mode
     except that the exponent is constrained to be a multiple of 3. There can
@@ -293,20 +277,16 @@ void dec64_string_engineering(
     state->mode = engineering_mode;
 }
 
-void dec64_string_scientific(
-    dec64_string_state state
-) {
+void dec64_string_scientific(dec64_string_state state) {
 /*
     Put dec64_to_string into scientific mode, in which the coefficient is
-    displayed with one digit before the decimal point, and if necessary
-    an exponent prefixed with 'e' is appended.
+    displayed with one digit before the decimal point, and an exponent 
+    prefixed with 'e' is appended if necessary.
 */
     state->mode = scientific_mode;
 }
 
-void dec64_string_standard(
-    dec64_string_state state
-) {
+void dec64_string_standard(dec64_string_state state) {
 /*
     Put dec64_to_string into standard mode. Separators can be inserted between
     some digits if requested. If the number might be too long, then scientific
@@ -325,6 +305,8 @@ dec64_string_char dec64_string_decimal_point(
     Specify the decimal point character. The default is '.'. If it is '\0',
     then the decimal point will be suppressed. This is used by both
     dec64_to_string and dec64_from_string.
+
+    It returns the previous value.
 */
     int old_decimal_point = state->decimal_point;
     state->decimal_point = decimal_point;
@@ -338,6 +320,8 @@ int dec64_string_places(
 /*
     Specify the minimum number of decimal places output by dec64_to_string in
     standard mode. This is commonly used to format money values.
+
+    It returns the previous value.
 */
     int old_places = state->places;
     state->places = places;
@@ -352,6 +336,8 @@ int dec64_string_separation(
     Specify the number of digits output between separators by dec64_to_string
     in standard mode. The default is 3. If separation is 1 or less, then
     separation is suppressed.
+
+    It returns the previous value.
 */
     int old_separation = state->separation;
     if (separation < 2) {
@@ -372,6 +358,8 @@ dec64_string_char dec64_string_separator(
     then separation will be supressed. The default is '\0'.
 
     dec64_from_string will ignore this character in the coefficient.
+
+    It returns the previous value.
 */
     int old_separator = state->separator;
     state->separator = separator;
@@ -380,7 +368,10 @@ dec64_string_char dec64_string_separator(
 
 /* Action. */
 
-dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
+dec64 dec64_from_string(
+    dec64_string_state state, 
+    dec64_string_char string[]
+) {
 /*
     Convert a string into a dec64. If conversion is not possible for any
     reason, the result will be nan.
@@ -427,7 +418,7 @@ dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
 */
     while (c != 0) {
 /*
-    Skip separator character.
+    Skip the separator character.
 */
         if (c != state->separator) {
 /*
@@ -557,7 +548,7 @@ dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
 /*
     If everything is ok, return the number.
 */
-    return ok
+    return (ok)
         ? dec64_new(sign * coefficient, exponent)
         : dec64_nan();
 }
@@ -575,7 +566,7 @@ int dec64_to_string(
 
     dec64_to_string returns the number of characters actually deposited in the
     string (not including the trailing \0). If the number is nan, then it
-    returns 0.
+    returns 0 indicating an empty string.
 
     In standard mode, the number will be formatted conventionally unless it
     would require more than 17 digit, which would be due to excessive
