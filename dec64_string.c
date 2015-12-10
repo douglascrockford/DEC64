@@ -259,8 +259,10 @@ void dec64_string_end(dec64_string_state state) {
 /*
     Dispose of the state object.
 */
-    state->valid = 0;
-    free(state);
+    if (state->valid == confirmed) {
+        state->valid = 0;
+        free(state);
+    }
 }
 
 /*
