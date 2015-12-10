@@ -95,6 +95,7 @@ extern dec64 dec64_from_string(
 );
 
 extern int dec64_to_string(
-    dec64_string_state state, dec64 number,
+    dec64_string_state state, 
+    dec64 number,
     dec64_string_char string[]
 );
