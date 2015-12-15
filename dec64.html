@@ -14,6 +14,10 @@ body {
     padding: 10%;
 }
 
+code, pre {
+	font-weight: bold;
+}
+
 pre {
     border-left: 1em solid indianred;
     padding-left: 1em;
@@ -21,18 +25,34 @@ pre {
     padding-top: 0.25em;
 }
 
+table {
+	margin-top: -1em;
+}
+
 td {
     background-color: navajowhite;
     border: 2pt solid black;
+    text-align: center;
 }
 
-td.bits {
+th {
     background-color: inherit;
     border: 0;
+	font-weight: lighter;
+	padding-left: 3pt;
+	padding-right: 3pt;
+	position: relative;
+	text-align: justify;
+	top: 1em;
 }
 
-.center {
-    text-align: center;
+/* This terrible hack instead of text_align: force */
+
+th:after {
+	content: "";
+	display: inline-block;
+	height: 0;
+	width: 100%;
 }
 
 .dec64, h1, h2 {
@@ -47,34 +67,32 @@ td.bits {
 <p><span class=dec64>DEC64</span> is a number type. It can precisely represent 
     decimal fractions with 16 decimal places, which makes it very well suited 
     to all applications that are concerned with money. It can  represent 
-    values as gargantuan as <tt>3.6028797018963967E+143</tt> or as measly 
-    as <tt>1.0E-127</tt>, which makes it well suited to most scientific 
+    values as gargantuan as <code>3.6028797018963967E+143</code> or as measly 
+    as <code>1.0E-127</code>, which makes it well suited to most scientific 
     applications. It can provide very fast performance on integer values, 
-    eliminating the need for a separate <tt>int</tt> type and avoiding the 
-    terrible errors than can result from <tt>int</tt> truncation.</p>
+    eliminating the need for a separate <code>int</code> type and avoiding the 
+    terrible errors than can result from <code>int</code> truncation.</p>
 <p><span class=dec64>DEC64</span> is intended to be the only number type in the 
     next generation of application programming languages.</p>
 <h1 id="representation">Representation</h1>
 <p><span class=dec64>DEC64</span> represents numbers as 64 bit values composed of 2 two&#8217;s complement components: a 56 bit <var>coefficient</var> and an 8 bit <var>exponent</var>. The <var>coefficient</var> is in the high order end, and the <var>exponent</var> is in the low order end. The <var>coefficient</var>&#8217;s decimal point is between bits 8 and 7.</p>
 <table cellspacing=1 cellpadding="0" width=100%><tbody>
-<tr><td align="left" class=bits>&nbsp;63</td><td align="right" class=bits>8&nbsp;</td>
-<td align="left" class=bits>&nbsp;7</td><td align="right" class=bits>0&nbsp;</td></tr>
+  <tr><th>63 8</th><th>7 0</th></tr>
   <tr>
-    <td colspan="2" align="center" width=70%><em>coefficient</em></td>
-    <td colspan="2" align="center" width=10%><em>exponent</em></td>
+    <td width=70%><em>coefficient</em></td>
+    <td width=10%><em>exponent</em></td>
   </tr></tbody>
 </table>
-<p>&nbsp;</p>
-<p>The <var>coefficient</var> is in the range -<tt>36028797018963968</tt> .. <tt>36028797018963967. </tt>The <var>exponent</var> is in the range <tt>-127</tt> .. <tt>127</tt>. Numbers may not use an <var>exponent</var> containing <tt>-128</tt><tt></tt>. The <var>value</var> of a number is obtained from this formula:</p>
-<p class=center><var>value</var><tt> = </tt><var>coefficient</var><tt> * 10</tt><sup><var>exponent</var></sup></p>
-<p>Normalization is not required, and is usually not desired. Integers can have an <var>exponent</var> of <tt>0</tt> as long as the <var>coefficient</var> is less than 36 quadrillion. Addition of numbers with equal <var>exponents</var> could be performed in a single machine cycle.</p>
+<p>The <var>coefficient</var> is in the range -<code>36028797018963968</code> .. <code>36028797018963967. </code>The <var>exponent</var> is in the range <code>-127</code> .. <code>127</code>. Numbers may not use an <var>exponent</var> containing <code>-128</code><code></code>. The <var>value</var> of a number is obtained from this formula:</p>
+<blockquote><var>value</var><code> = </code><var>coefficient</var><code> * 10</code><sup><var>exponent</var></sup></blockquote>
+<p>Normalization is not required, and is usually not desired. Integers can have an <var>exponent</var> of <code>0</code> as long as the <var>coefficient</var> is less than 36 quadrillion. Addition of numbers with equal <var>exponents</var> could be performed in a single machine cycle.</p>
 <p>There are 255 possible representations of zero. They are all considered to be equal.</p>
-<p>There is a special value called <tt>nan</tt> that has a <var>coefficient</var> of <tt>0</tt> and an <var>exponent</var> of <tt>-128</tt>. The result of division by zero is <tt>nan</tt>. <tt>nan</tt> is also the result of operations that produce results that are too large to be represented. <tt>nan</tt> is equal to itself.</p>
-<p>When an arithmetic operation has an input with an <var>exponent</var> of <tt>-128</tt>, the result will be <tt>nan</tt>. Applications are free to use the <var>coefficient</var> as they wish when the <var>exponent</var> is <tt>-128</tt>, since in that case the <var>coefficient</var> has no arithmetic significance. One possible use is to store object pointers in the <var>coefficient</var>. </p>
+<p>There is a special value called <code>nan</code> that has a <var>coefficient</var> of <code>0</code> and an <var>exponent</var> of <code>-128</code>. The result of division by zero is <code>nan</code>. <code>nan</code> is also the result of operations that produce results that are too large to be represented. <code>nan</code> is equal to itself.</p>
+<p>When an arithmetic operation has an input with an <var>exponent</var> of <code>-128</code>, the result will be <code>nan</code>. Applications are free to use the <var>coefficient</var> as they wish when the <var>exponent</var> is <code>-128</code>, since in that case the <var>coefficient</var> has no arithmetic significance. One possible use is to store object pointers in the <var>coefficient</var>. </p>
 <h1 id="implementation">Implementation</h1>
 <p><span class=dec64>DEC64</span> can be implemented efficiently in hardware or software. </p>
-<p>Conversion to and from textual representations is simple and straightforward and free of the complexities that binary floating formats  must wrestle with to minimize the inevitable errors caused by the fundamental incompatibility of the binary and decimal systems. <span class=dec64>DEC64</span> instead uses an internal representation that is very compatible with the <tt>E</tt> notation.</p>
-<p>To convert an <tt>int</tt> to <span class=dec64>DEC64,</span> shift it left 8 bits. To unpack a <var>coefficient</var>, shift it right 8 bits with sign extension. The <var>exponent</var> can be unpacked at no cost on x64 architecture because the least significant byte can be accessed directly.</p>
+<p>Conversion to and from textual representations is simple and straightforward and free of the complexities that binary floating formats  must wrestle with to minimize the inevitable errors caused by the fundamental incompatibility of the binary and decimal systems. <span class=dec64>DEC64</span> instead uses an internal representation that is very compatible with the <code>E</code> notation.</p>
+<p>To convert an <code>int</code> to <span class=dec64>DEC64,</span> shift it left 8 bits. To unpack a <var>coefficient</var>, shift it right 8 bits with sign extension. The <var>exponent</var> can be unpacked at no cost on x64 architecture because the least significant byte can be accessed directly.</p>
 <p>There is a fast path for addition of integers that takes only 5 instructions:</p>
 <pre>; Add rdx to rax.
 
