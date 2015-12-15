@@ -680,8 +680,8 @@ inc_negative_exponent:
 dec64_dec: function_with_one_parameter
 ;(augend: dec64) returns decrementation: dec64
 
-; Increment a number. In most cases, this will be a faster way to subtract one than
-; dec64_subtract.
+; Increment a number. In most cases, this will be a faster way to subtract one
+; than dec64_subtract.
 
     test    r1_b,r1_b       ; what is the exponent?
     jnz     dec_not_integer
@@ -1379,8 +1379,8 @@ less_slow:
 dec64_is_integer: function_with_one_parameter
 ;(number: dec64) returns comparison: bool64
 
-; If the number contains a non-zero fractional part or if it is nan, return zero.
-; Otherwise, return one.
+; If the number contains a non-zero fractional part or if it is nan, return
+; zero. Otherwise, return one.
 
     cmp     r1_b,128        ; nan exponent?
     je      dec64_zero      ; nan is not an integer
