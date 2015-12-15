@@ -73,28 +73,28 @@ static void define_constants() {
     cent = dec64_new(1, -2);        /* 0.01 */
     half = dec64_new(5, -1);        /* 0.5 */
     almost_one = dec64_new(9999999999999999, -16);
-                                    /* 0.9999999999999999 */
+    								/* 0.9999999999999999 */
     pi = dec64_new(31415926535897932, -16);
-                                    /* pi */
+    								/* pi */
     maxint = dec64_new(36028797018963967, 0);
-                                    /* the largest normal integer */
+    								/* the largest normal integer */
     maxint_plus = dec64_new(3602879701896397, 1);
-                                    /* the smallest number larger than maxint */
+    								/* the smallest number larger than maxint */
     maxnum = dec64_new(36028797018963967, 127);
-                                    /* the largest possible number */
+    								/* the largest possible number */
     negative_minnum = dec64_new(-1, -127);
-                                    /* the smallest possible negative number */
+    								/* the smallest possible negative number */
     negative_one = dec64_new(-1, 0);/* -1 */
     negative_nine = dec64_new(-9, 0);
-                                    /* -9 */
+    								/* -9 */
     negative_pi = dec64_new(-31415926535897932, -16);
-                                    /* -pi */
+    								/* -pi */
     negative_maxint = dec64_new(-36028797018963968, 0);
-                                    /* the largest negative normal integer */
+    								/* the largest negative normal integer */
     negative_maxnum = dec64_new(-36028797018963968, 127);
-                                     /* the largest possible negative number */
+    								/* the largest possible negative number */
     almost_negative_one = dec64_new(-9999999999999999, -16);
-                                     /* -0.9999999999999999 */
+    								/* -0.9999999999999999 */
 }
 
 
@@ -572,7 +572,7 @@ static int do_tests(int level_of_detail) {
 
     test_all_from();
 
-    printf("\n\n%lli pass, %lli fail.\n", nr_pass, nr_fail);
+    printf("\n\n%i pass, %i fail.\n", nr_pass, nr_fail);
     dec64_string_end(state);
     return nr_fail;
 }
