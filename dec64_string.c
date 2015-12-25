@@ -3,7 +3,7 @@ dec64_string.c
 Conversion between DEC64 and strings.
 
 dec64.com
-2015-12-09
+2015-12-25
 Public Domain
 
 No warranty.
@@ -243,7 +243,7 @@ dec64_string_state dec64_string_begin() {
         state->mode = standard_mode;
         state->nr_digits = 0;
         state->nr_zeros = 0;
-        state->number = dec64_nan();
+        state->number = DEC64_NAN;
         state->places = 0;
         state->separation = 3;
         state->separator = 0;
@@ -483,7 +483,7 @@ dec64 dec64_from_string(
 */
             } else if (c == state->decimal_point) {
                 if (point) {
-                    return dec64_nan();
+                    return DEC64_NAN;
                 }
                 point = 1;
 /*
@@ -516,10 +516,10 @@ dec64 dec64_from_string(
                                 ok = 1;
                                 exp = exp * 10 + (c - '0');
                                 if (exp >= 1000) {
-                                    return dec64_nan();
+                                    return DEC64_NAN;
                                 }
                             } else {
-                                return dec64_nan();
+                                return DEC64_NAN;
                             }
                             at += 1;
                             c = string[at];
@@ -538,7 +538,7 @@ dec64 dec64_from_string(
     If any other character is seen, return nan.
 */
                 }
-                return dec64_nan();
+                return DEC64_NAN;
             }
         }
 /*
@@ -552,7 +552,7 @@ dec64 dec64_from_string(
 */
     return (ok)
         ? dec64_new(sign * coefficient, exponent)
-        : dec64_nan();
+        : DEC64_NAN;
 }
 
 int dec64_to_string(
@@ -581,7 +581,7 @@ int dec64_to_string(
 
     state->length = 0;
     state->string = string;
-    if (!dec64_is_nan(number)) {
+    if (!dec64_is_any_nan(number)) {
         if (dec64_is_zero(number)) {
             emit(state, '0');
         } else {

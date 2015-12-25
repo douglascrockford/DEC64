@@ -3,7 +3,7 @@
 This is a test of dec64_string.c.
 
 dec64.com
-2014-04-13
+2015-12-25
 Public Domain
 
 No warranty.
@@ -54,11 +54,11 @@ static dec64 negative_maxnum;
 static dec64 negative_pi;
 
 static void define_constants() {
-    nan = dec64_nan();              /* not a number */
+    nan = DEC64_NAN;                /* not a number */
     nannan = 32896;                 /* a non-normal nan */
-    zero = dec64_zero();            /* 0 */
+    zero = DEC64_ZERO;              /* 0 */
     zip = 1;                        /* a non normal 0 */
-    one = dec64_one();              /* 1 */
+    one = DEC64_ONE;                /* 1 */
     two = dec64_new(2, 0);          /* 2 */
     three = dec64_new(3, 0);        /* 3 */
     four = dec64_new(4, 0);         /* 4 */
@@ -577,7 +577,7 @@ static int do_tests(int level_of_detail) {
     return nr_fail;
 }
 
-int main(int argc, char* argv[]) {
+int mainstring(int argc, char* argv[]) {
     define_constants();
     return do_tests(2);
 }

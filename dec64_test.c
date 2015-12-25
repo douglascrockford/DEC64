@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2015-12-08
+2015-12-25
 Public Domain
 
 No warranty.
@@ -12,8 +12,8 @@ No warranty.
 #include <stdio.h>
 #include "dec64.h"
 
-#define false 0
-#define true 1
+#define false DEC64_FALSE
+#define true DEC64_TRUE
 
 static int level;
 static int nr_fail;
@@ -57,11 +57,11 @@ static dec64 negative_maxnum;
 static dec64 negative_pi;
 
 static void define_constants() {
-    nan = dec64_nan();              						/* not a number */
-    nannan = 32896;                 						/* a non-normal nan */
-    zero = dec64_zero();            						/* 0 */
-    zip = 250;                      						/* a non normal 0 */
-    one = dec64_one();              						/* 1 */
+    nan = DEC64_NAN;                                        /* not a number */
+    nannan = 32896;                                         /* a non-normal nan */
+    zero = DEC64_ZERO;                                      /* 0 */
+    zip = 250;                                              /* a non normal 0 */
+    one = DEC64_ONE;                						/* 1 */
     two = dec64_new(2, 0);          						/* 2 */
     three = dec64_new(3, 0);        						/* 3 */
     four = dec64_new(4, 0);         						/* 4 */
@@ -80,6 +80,7 @@ static void define_constants() {
     almost_one = dec64_new(9999999999999999, -16);          /* 0.9999999999999999 */
     e = dec64_new(27182818284590452, -16);                  /* e */
     pi = dec64_new(31415926535897932, -16);                 /* pi */
+
     maxint = dec64_new(36028797018963967, 0);               /* the largest normal integer */
     maxint_plus = dec64_new(3602879701896397, 1);           /* the smallest number larger than maxint */
     one_over_maxint = dec64_new(27755575615628914, -33);    /* one / maxint */
@@ -95,24 +96,22 @@ static void define_constants() {
     almost_negative_one = dec64_new(-9999999999999999, -16);/* -0.9999999999999999 */
 }
 
-static void print_bool64(bool64 number) {
-    if (number == 0) {
-        printf("                   false");
-    } else if (number == 1) {
-        printf("                   true");
-    } else if (number == 1) {
-        printf(" %lli", number);
-    }
-}
-
 static void print_dec64(dec64 number) {
     int64 exponent = dec64_exponent(number);
     int64 coefficient = dec64_coefficient(number);
-    printf("%20lli", coefficient);
-    if (exponent == -128) {
-        printf(" nan");
-    } else if (exponent != 0) {
-        printf("e%-+4lli", exponent);
+    if (number == DEC64_TRUE) {
+        printf("                   true");
+    } else if (number == DEC64_FALSE) {
+        printf("                   false");
+    } else if (number == DEC64_NAN) {
+        printf("                   nan");
+    } else {
+        printf("%20lli", coefficient);
+        if (exponent == -128) {
+            printf(" nan");
+        } else if (exponent != 0) {
+            printf("e%-+4lli", exponent);
+        }
     }
 }
 
@@ -227,32 +226,6 @@ static void judge_unary_exact(dec64 first, dec64 expected, dec64 actual, char * 
     }
 }
 
-static void judge_unary_bool(dec64 first, bool64 expected, bool64 actual, char * name, char * op, char * comment) {
-    if (expected == actual) {
-        nr_pass += 1;
-        if (level >= 3) {
-            printf("\n\npass %s: %s", name, comment);
-            printf("\n%-4s", op);
-            print_dec64(first);
-            printf("\n%-4s", "=");
-            print_bool64(actual);
-        }
-    } else {
-        nr_fail += 1;
-        if (level >= 1) {
-            printf("\n\nFAIL %s: %s", name, comment);
-            if (level >= 2) {
-                printf("\n%-4s", op);
-                print_dec64(first);
-                printf("\n%-4s", "?");
-                print_bool64(actual);
-                printf("\n%-4s", "=");
-                print_bool64(expected);
-            }
-        }
-    }
-}
-
 static void judge_binary(dec64 first, dec64 second, dec64 expected, dec64 actual, char * name, char * op, char * comment) {
     if (compare(expected, actual)) {
         nr_pass += 1;
@@ -283,47 +256,10 @@ static void judge_binary(dec64 first, dec64 second, dec64 expected, dec64 actual
     }
 }
 
-static void judge_binary_bool(dec64 first, dec64 second, bool64 expected, bool64 actual, char * name, char * op, char * comment) {
-    if (expected == actual) {
-        nr_pass += 1;
-        if (level >= 3) {
-            printf("\n\npass %s: %s", name, comment);
-            printf("\n%-4s", "");
-            print_dec64(first);
-            printf("\n%-4s", op);
-            print_dec64(second);
-            printf("\n%-4s", "=");
-            print_bool64(actual);
-        }
-    } else {
-        nr_fail += 1;
-        if (level >= 1) {
-            printf("\n\nFAIL %s: %s", name, comment);
-            if (level >= 2) {
-                printf("\n%-4s", "");
-                print_dec64(first);
-                printf("\n%-4s", op);
-                print_dec64(second);
-                printf("\n%-4s", "?");
-                print_bool64(actual);
-                printf("\n%-4s", "=");
-                print_bool64(expected);
-            }
-        }
-    }
-}
-
 static void judge_communitive(dec64 first, dec64 second, dec64 expected, dec64 actual, char * name, char * op, char * comment) {
     judge_binary(first, second, expected, actual, name, op, comment);
     if (first != second) {
         judge_binary(second, first, expected, actual, name, op, comment);
-    }
-}
-
-static void judge_communitive_bool(dec64 first, dec64 second, bool64 expected, bool64 actual, char * name, char * op, char * comment) {
-    judge_binary_bool(first, second, expected, actual, name, op, comment);
-    if (first != second) {
-        judge_binary_bool(second, first, expected, actual, name, op, comment);
     }
 }
 
@@ -352,7 +288,7 @@ static void test_divide(dec64 first, dec64 second, dec64 expected, char * commen
     judge_binary(first, second, expected, actual, "divide", "/", comment);
 }
 
-static void test_equal(dec64 first, bool64 second, bool64 expected, char * comment) {
+static void test_equal(dec64 first, dec64 second, dec64 expected, char * comment) {
     dec64 actual = dec64_equal(first, second);
     judge_communitive(first, second, expected, actual, "equal", "=", comment);
 }
@@ -382,24 +318,24 @@ static void test_integer_divide(dec64 first, dec64 second, dec64 expected, char 
     judge_binary(first, second, expected, actual, "integer_divide", "/", comment);
 }
 
-static void test_is_integer(dec64 first, bool64 expected, char * comment) {
-    bool64 actual = dec64_is_integer(first);
-    judge_unary_bool(first, expected, actual, "is_integer", "i", comment);
+static void test_is_any_nan(dec64 first, dec64 expected, char * comment) {
+    dec64 actual = dec64_is_any_nan(first);
+    judge_unary(first, expected, actual, "is_any_nan", "n", comment);
 }
 
-static void test_is_nan(dec64 first, bool64 expected, char * comment) {
-    bool64 actual = dec64_is_nan(first);
-    judge_unary_bool(first, expected, actual, "is_nan", "n", comment);
+static void test_is_integer(dec64 first, dec64 expected, char * comment) {
+    dec64 actual = dec64_is_integer(first);
+    judge_unary(first, expected, actual, "is_integer", "i", comment);
 }
 
-static void test_is_zero(dec64 first, bool64 expected, char * comment) {
-    bool64 actual = dec64_is_zero(first);
-    judge_unary_bool(first, expected, actual, "is_zero", "0", comment);
+static void test_is_zero(dec64 first, dec64 expected, char * comment) {
+    dec64 actual = dec64_is_zero(first);
+    judge_unary(first, expected, actual, "is_zero", "0", comment);
 }
 
-static void test_less(dec64 first, dec64 second, bool64 expected, char * comment) {
-    bool64 actual = dec64_less(first, second);
-    judge_binary_bool(first, second, expected, actual, "less", "<", comment);
+static void test_less(dec64 first, dec64 second, dec64 expected, char * comment) {
+    dec64 actual = dec64_less(first, second);
+    judge_binary(first, second, expected, actual, "less", "<", comment);
 }
 
 static void test_modulo(dec64 first, dec64 second, dec64 expected, char * comment) {
@@ -669,9 +605,9 @@ static void test_all_divide() {
 static void test_all_equal() {
     test_equal(nan, nan, true, "nan = nan");
     test_equal(nan, zero, false, "nan = zero");
-    test_equal(nan, nannan, true, "nan = nannan");
+    test_equal(nan, nannan, false, "nan = nannan");
     test_equal(nannan, nannan, true, "nannan = nannan");
-    test_equal(nannan, nan, true, "nannan = nan");
+    test_equal(nannan, nan, false, "nannan = nan");
     test_equal(nannan, one, false, "nannan = 1");
     test_equal(zero, nan, false, "zero = nan");
     test_equal(zero, nannan, false, "0 = nannan");
@@ -883,6 +819,17 @@ static void test_all_integer_divide() {
     test_integer_divide(dec64_new(10, -1), maxint, zero, "one / maxint");
 }
 
+static void test_all_is_any_nan() {
+    test_is_any_nan(nan, true, "nan");
+    test_is_any_nan(nannan, true, "nannan");
+    test_is_any_nan(zero, false, "zero");
+    test_is_any_nan(zip, false, "zip");
+    test_is_any_nan(one, false, "one");
+    test_is_any_nan(cent, false, "cent");
+    test_is_any_nan(maxnum, false, "maxnum");
+    test_is_any_nan(negative_maxnum, false, "-maxnum");
+}
+
 static void test_all_is_integer() {
     test_is_integer(nan, false, "nan");
     test_is_integer(nannan, false, "nannan");
@@ -950,17 +897,6 @@ static void test_all_is_integer() {
     test_is_integer(dec64_new(-9999999999999998, -16), false, "-0.9...8");
 }
 
-static void test_all_is_nan() {
-    test_is_nan(nan, true, "nan");
-    test_is_nan(nannan, true, "nannan");
-    test_is_nan(zero, false, "zero");
-    test_is_nan(zip, false, "zip");
-    test_is_nan(one, false, "one");
-    test_is_nan(cent, false, "cent");
-    test_is_nan(maxnum, false, "maxnum");
-    test_is_nan(negative_maxnum, false, "-maxnum");
-}
-
 static void test_all_is_zero() {
     test_is_zero(nan, false, "nan");
     test_is_zero(nannan, false, "nannan");
@@ -973,14 +909,14 @@ static void test_all_is_zero() {
 }
 
 static void test_all_less() {
-    test_less(nan, nan, false, "nan < nan");
-    test_less(nan, nannan, false, "nan < nannan");
-    test_less(nan, zero, false, "nan < zero");
-    test_less(nannan, nan, false, "nannan < nan");
-    test_less(nannan, nannan, false, "nannan < nannan");
-    test_less(nannan, one, false, "nannan < 1");
-    test_less(zero, nan, true, "zero < nan");
-    test_less(zero, nannan, true, "0 < nannan");
+    test_less(nan, nan, nan, "nan < nan");
+    test_less(nan, nannan, nan, "nan < nannan");
+    test_less(nan, zero, nan, "nan < zero");
+    test_less(nannan, nan, nan, "nannan < nan");
+    test_less(nannan, nannan, nan, "nannan < nannan");
+    test_less(nannan, one, nan, "nannan < 1");
+    test_less(zero, nan, nan, "zero < nan");
+    test_less(zero, nannan, nan, "0 < nannan");
     test_less(zero, zip, false, "zero < zip");
     test_less(zero, minnum, true, "zero < minnum");
     test_less(zero, one, true, "zero < one");
@@ -997,7 +933,7 @@ static void test_all_less() {
     test_less(maxnum, maxint, false, "maxnum < maxint");
     test_less(negative_maxint, maxint, true, "-maxint < maxint");
     test_less(negative_maxint, negative_one, true, "-maxint < -1");
-    test_less(maxnum, nan, true, "maxnum < nan");
+    test_less(maxnum, nan, nan, "maxnum < nan");
     test_less(nine, ten, true, "9 < 10");
     test_less(negative_nine, dec64_new(-1, 1), false, "-9 < -1E1");
     test_less(almost_negative_one, negative_one, false, "-0.9... < -1");
@@ -1251,15 +1187,15 @@ void test_all_normal() {
 }
 
 static void test_all_not() {
+    test_not(false, true, "false");
+    test_not(true, false, "true");
     test_not(nan, nan, "nan");
     test_not(nannan, nan, "nannan");
-    test_not(zero, one, "zero");
-    test_not(zip, one, "zip");
-    test_not(100, one, "zero alias");
-    test_not(one, zero, "one");
-    test_not(negative_one, zero, "-1");
-    test_not(negative_maxint, zero, "-maxint");
-    test_not(negative_maxnum, zero, "-maxnum");
+    test_not(zip, nan, "zip");
+    test_not(100, nan, "false alias");
+    test_not(negative_one, nan, "-1");
+    test_not(negative_maxint, nan, "-maxint");
+    test_not(negative_maxnum, nan, "-maxnum");
 }
 
 static void test_all_round() {
@@ -1416,8 +1352,8 @@ static int do_tests(int level_of_detail) {
     test_all_inc();
     test_all_int();
     test_all_integer_divide();
+    test_all_is_any_nan();
     test_all_is_integer();
-    test_all_is_nan();
     test_all_is_zero();
     test_all_less();
     test_all_modulo();
