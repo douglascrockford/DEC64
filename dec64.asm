@@ -386,7 +386,8 @@ pack_large:
 
 pack_increase:
 
-    mov     r10,power[r9*8] ; r10 is 10^r9
+    mov     r10,power
+    mov     r10,[r10][r9*8] ; r10 is 10^r9
     cmp     r9,20           ; is the difference more than 20?
     jae     return_zero     ; if so, the result is zero (rare)
     mov     r11,r10         ; r11 is the power of ten
@@ -610,7 +611,8 @@ add_slower_increase:
     mov     r0,r11          ; r0 is the second coefficient
     cmp     r2,17           ; 17 is the max digits in a packed coefficient
     ja      return_r1       ; too small to matter
-    mov     r9,power[r2*8]  ; r9 is the power of ten
+    mov     r9,power
+    mov     r9,[r9][r2*8]   ; r9 is the power of ten
     cqo                     ; sign extend r0 into r2
     idiv    r9              ; divide the second coefficient by the power of 10
     test    r0,r0           ; examine the scaled coefficient
@@ -670,7 +672,8 @@ inc_negative_exponent:
 
     movsx   r8,r1_b         ; r8 is the negative exponent
     neg     r8              ; flip the sign
-    mov     r0,power[r8*8]  ; r0 is 10^(-exponent)
+    mov     r9,power
+    mov     r0,[r9][r8*8]   ; r0 is 10^(-exponent)
     shl     r0,8            ; convert to dec64
     add     r0,r1           ; now we add
     jo      inc_hardway     ; if it overflows, do it the hard way
@@ -720,7 +723,8 @@ dec_negative_exponent:
 
     movsx   r8,r1_b         ; r8 is the negative exponent
     neg     r8              ; flip the sign
-    mov     r0,power[r8*8]  ; r0 is 10^(-exponent)
+    mov     r9,power
+    mov     r0,[r9][r8*8]   ; r0 is 10^(-exponent)
     neg     r0              ; go negative
     shl     r0,8            ; convert to dec64
     add     r0,r1           ; now we subtract
@@ -777,7 +781,8 @@ floor_begin:
     jns     return_r1       ; nothing to do unless the exponent was negative
     cmp     r8,17           ; is the exponent is too extreme?
     jae     floor_micro     ; deal with a micro number
-    mov     r10,power[r8*8] ; r10 is the power of ten
+    mov     r10,power
+    mov     r10,[r10][r8*8] ; r10 is the power of ten
     cqo                     ; sign extend r0 into r2
     idiv    r10             ; divide r2:r0 by 10
     test    r2,r2           ; examine the remainder
@@ -880,7 +885,8 @@ subtract_slower_increase:
     mov     r0,r11          ; r0 is the second coefficient
     cmp     r2,17           ; 17 is the max digits in a packed coefficient
     ja      subtract_underflow ; too small to matter
-    mov     r9,power[r2*8]  ; r9 is the power of ten
+    mov     r9,power
+    mov     r9,[r9][r2*8]   ; r9 is the power of ten
     cqo                     ; sign extend r0 into r2
     idiv    r9              ; divide the second coefficient by the power of 10
 
@@ -950,7 +956,8 @@ dec64_multiply: function_with_two_parameters
     shr     r1,8            ;     convert a bit number to a digit number
     add     r1,2            ; add two extra digits to the scale
     add     r8,r1           ; increase the exponent
-    idiv    qword ptr power[r1*8] ; divide by the power of ten
+    mov     r9,power
+    idiv    qword ptr [r9][r1*8] ; divide by the power of ten
     jmp     pack
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -1023,7 +1030,8 @@ divide_measure:
 ; of digits scaled.
 
     mov     r0,r10          ; r0 is the dividend coefficient
-    imul    qword ptr power[r1*8] ; r2:r0 is the dividend coefficient * 10**r1
+    mov     r9,power
+    imul    qword ptr [r9][r1*8] ; r2:r0 is the dividend coefficient * 10**r1
     idiv    r11             ; r0 is the quotient
     sub     r8,r1           ; r8 is the exponent
     jmp     pack            ; pack it up
@@ -1040,7 +1048,8 @@ divide_prescale:
     sub     r1,r0           ; r1 is the number of additional bits needed
     imul    r1,77           ; convert bits to digits
     shr     r1,8            ; shift 8 is cheaper than div 256
-    imul    r10,qword ptr power[r1*8] ; multiply the dividend by power of ten
+    mov     r9,power
+    imul    r10,qword ptr [r9][r1*8] ; multiply the dividend by power of ten
     sub     r8,r1           ; reduce the exponent
     jmp     divide_measure  ; try again
 
@@ -1386,7 +1395,8 @@ is_integer_frac:
     neg     r8              ; negate the exponent
     cmp     r8_b,17         ; extreme negative exponents can never be integer
     jae     return_false
-    mov     r10,power[r8*8] ; r10 is 10^-exponent
+    mov     r9,power
+    mov     r10,[r9][r8*8]  ; r10 is 10^-exponent
     cqo                     ; sign extend r0 into r2
     idiv    r10             ; divide r2:r0 by the power of ten
     xor     r0,r0           ; r0 is zero
@@ -1447,7 +1457,8 @@ dec64_int: function_with_one_parameter
     cmp     r1_b,18         ; is the exponent too enormous?
     cmovae  r8,r2           ; r8 is min(exponent, 18)
     and     r0,-256         ; r0 is the coefficient, shifted 8
-    mov     r10,power[r8*8] ; r10 is 10^exponent
+    mov     r9,power
+    mov     r10,[r9][r8*8]  ; r10 is 10^exponent
     imul    r10             ; r0 is coefficient * 10^exponent
     sar     r2,1            ; shift the lsb of the overflow into carry
     adc     r2,0            ; if r2 was 0 or -1, it is now 0
