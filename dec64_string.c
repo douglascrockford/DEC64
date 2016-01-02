@@ -3,7 +3,7 @@ dec64_string.c
 Conversion between DEC64 and strings.
 
 dec64.com
-2015-12-25
+2016-01-01
 Public Domain
 
 No warranty.
@@ -581,8 +581,8 @@ int dec64_to_string(
 
     state->length = 0;
     state->string = string;
-    if (!dec64_is_any_nan(number)) {
-        if (dec64_is_zero(number)) {
+    if (dec64_is_any_nan(number) != DEC64_TRUE) {
+        if (dec64_is_zero(number) == DEC64_TRUE) {
             emit(state, '0');
         } else {
             if (number != state->number) {
