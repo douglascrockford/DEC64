@@ -15,8 +15,6 @@ faster and more accurate.
 #include "dec64.h"
 #include "dec64_math.h"
 
-#define D_0                        DEC64_ZERO
-#define D_1                         DEC64_ONE
 #define D_2                           0x200LL
 #define D_E              0x6092A113D8D574F0LL
 #define D_HALF                        0x5FFLL
@@ -128,13 +126,13 @@ dec64 dec64_exp(dec64 x) {
 
 dec64 dec64_exponentiate(dec64 coefficient, dec64 exponent) {
     if (dec64_is_zero(exponent) == DEC64_TRUE) {
-        return D_1;
+        return DEC64_ONE;
     }
 
 // Adjust for a negative exponent.
 
     if (exponent < 0) {
-        coefficient = dec64_divide(D_1, coefficient);
+        coefficient = dec64_divide(DEC64_ONE, coefficient);
         exponent = dec64_neg(exponent);
     }
     if (dec64_is_any_nan(coefficient) == DEC64_TRUE) {
@@ -147,7 +145,7 @@ dec64 dec64_exponentiate(dec64 coefficient, dec64 exponent) {
 // If the exponent is an integer, then use the squaring method.
 
     if (exponent > 0 && dec64_exponent(exponent) == 0) {
-        dec64 aux = D_1;
+        dec64 aux = DEC64_ONE;
         int64 n = dec64_coefficient(exponent);
         if (n <= 1) {
             return coefficient;
@@ -174,35 +172,35 @@ dec64 dec64_exponentiate(dec64 coefficient, dec64 exponent) {
 
 dec64 dec64_log(dec64 x)
 {
-        if (x <= 0 || dec64_is_any_nan(x) == DEC64_TRUE) {
-            return DEC64_NAN;
+    if (x <= 0 || dec64_is_any_nan(x) == DEC64_TRUE) {
+        return DEC64_NAN;
+    }
+    if (dec64_equal(x, DEC64_ONE) == DEC64_TRUE) {
+        return DEC64_ZERO;
+    }
+    if (dec64_equal(x, D_HALF) == DEC64_TRUE) {
+        return dec64_new(-6931471805599453, -16);
+    }
+    if (x == D_E) {
+        return DEC64_ONE;
+    }
+    dec64 y = dec64_divide(dec64_dec(x), x);
+    dec64 factor = y;
+    dec64 result = factor;
+    dec64 divisor = D_2;
+    while (1) {
+        factor = dec64_multiply(factor, y);
+        dec64 progress = dec64_add(
+            result, 
+            dec64_divide(factor, divisor)
+        );
+        if (result == progress) {
+            break;
         }
-        if (dec64_equal(x, DEC64_ONE) == DEC64_TRUE) {
-            return DEC64_ZERO;
-        }
-        if (dec64_equal(x, D_HALF) == DEC64_TRUE) {
-            return dec64_new(-6931471805599453, -16);
-        }
-        if (x == D_E) {
-            return DEC64_ONE;
-        }
-        dec64 y = dec64_divide(dec64_dec(x), x);
-        dec64 factor = y;
-        dec64 result = factor;
-        dec64 divisor = D_2;
-        while (1) {
-            factor = dec64_multiply(factor, y);
-            dec64 progress = dec64_add(
-                result, 
-                dec64_divide(factor, divisor)
-            );
-            if (result == progress) {
-                break;
-            }
-            result = progress;
-            divisor = dec64_inc(divisor);
-        }
-        return result;
+        result = progress;
+        divisor = dec64_inc(divisor);
+    }
+    return result;
 }
 
 dec64 dec64_root(dec64 degree, dec64 radicand) {
@@ -224,7 +222,7 @@ dec64 dec64_root(dec64 degree, dec64 radicand) {
     if (dec64_is_zero(radicand) == DEC64_TRUE) {
         return DEC64_ZERO;
     }
-    if (degree == D_1) {
+    if (degree == DEC64_ONE) {
         return radicand;
     }
     if (degree == D_2) {
@@ -232,7 +230,7 @@ dec64 dec64_root(dec64 degree, dec64 radicand) {
     }
     dec64 degree_minus_one = dec64_dec(degree);
     repeat = 64;
-    result = D_1;
+    result = DEC64_ONE;
     while (repeat > 0) {
         dec64 progress = dec64_divide(
             dec64_add(
@@ -272,10 +270,10 @@ dec64 dec64_sin(dec64 x) {
     }
     dec64 result;
     if (x == D_HALF_PI) {
-        result = D_1;
+        result = DEC64_ONE;
     } else {
         dec64 x2 = dec64_multiply(x, x);
-        dec64 order = D_1;
+        dec64 order = DEC64_ONE;
         dec64 term = x;
         result = term;
         while (1) {
