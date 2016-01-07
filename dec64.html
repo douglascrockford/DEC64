@@ -93,7 +93,7 @@ th:after {
 <p><span class=dec64>DEC64</span> can be implemented efficiently in hardware or software. </p>
 <p>Conversion to and from textual representations is simple and straightforward and free of the complexities that binary floating formats  must wrestle with to minimize the inevitable errors caused by the fundamental incompatibility of the binary and decimal systems. <span class=dec64>DEC64</span> instead uses an internal representation that is very compatible with the <code>E</code> notation.</p>
 <p>To convert an <code>int</code> to <span class=dec64>DEC64,</span> shift it left 8 bits. To unpack a <var>coefficient</var>, shift it right 8 bits with sign extension. The <var>exponent</var> can be unpacked at no cost on x64 architecture because the least significant byte can be accessed directly.</p>
-<p>There is a fast path for addition of integers that takes only 5 instructions:</p>
+<p>There is a fast path for addition of integers in software that takes only 5 instructions while also providing for <i>not-a-number</i> and overflow protection.</p>
 <pre>; Add rdx to rax.
 
         mov     cl,al         ; load the exponent of rax into cl
