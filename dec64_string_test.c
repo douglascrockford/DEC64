@@ -577,7 +577,7 @@ static int do_tests(int level_of_detail) {
     return nr_fail;
 }
 
-int mainstring(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
     define_constants();
     return do_tests(2);
 }
