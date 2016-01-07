@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2015-12-25
+2015-12-26
 Public Domain
 
 No warranty.
@@ -600,6 +600,8 @@ static void test_all_divide() {
     test_divide(dec64_new(1000000000000000, -15), maxint, one_over_maxint, "one / maxint alias 15");
     test_divide(dec64_new(10000000000000000, -16), maxint, one_over_maxint, "one / maxint alias 16");
     test_divide(minnum, two, minnum, "minnum / 2");
+    test_divide(one, 0x1437EEECD800000LL, dec64_new(28114572543455208, -31), "1/17!");
+    test_divide(one, 0x52D09F700003LL, dec64_new(28114572543455208, -31), "1/17!");
 }
 
 static void test_all_equal() {
@@ -623,6 +625,7 @@ static void test_all_equal() {
     test_equal(maxint, maxnum, false, "maxint = maxnum");
     test_equal(negative_maxint, maxint, false, "-maxint = maxint");
     test_equal(negative_maxint, negative_one, false, "-maxint = -1");
+    test_equal(0x1437EEECD800000LL, 0x52D09F700003LL, true, "17!");
 }
 
 static void test_all_floor() {
