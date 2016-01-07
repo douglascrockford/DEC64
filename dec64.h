@@ -9,11 +9,12 @@ Public Domain
 No warranty.
 */
 
-#define DEC64_NAN   (0x80LL)
-#define DEC64_ZERO  (0x00LL)
-#define DEC64_ONE   (0x100LL)
-#define DEC64_TRUE  (0x380LL)
-#define DEC64_FALSE (0x280LL)
+#define DEC64_NAN           (0x80LL)
+#define DEC64_ZERO          (0x00LL)
+#define DEC64_ONE           (0x100LL)
+#define DEC64_TRUE          (0x380LL)
+#define DEC64_FALSE         (0x280LL)
+#define DEC64_NEGATIVE_ONE  (0xFFFFFFFFFFFFFF00LL)
 
 typedef long long int64;
 typedef int64 dec64;
