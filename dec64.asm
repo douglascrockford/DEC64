@@ -77,10 +77,13 @@ title   dec64.asm for x64.
 
 ; All public symbols have a dec64_ prefix. All other symbols are private.
 
-; When these functions return nan, they will always return 0B10000000.
+; When these functions return nan, they will always return 0x80, the normal
+; nan.
 
 ; There are 72057594037927936 possible nan values. Two are reserved to
-; represent true and false.
+; represent true and false. The comparison functions will return a boolean
+; encoded as a DEC64 nan. Be care when using these comparisons with C
+; because C thinks that the DEC64 false is truthy.
 
 true    equ 380h
 false   equ 280h
@@ -308,6 +311,7 @@ dec64_exponent: function_with_one_parameter
 ;(number: dec64) returns exponent: int64
 
 ; Return the exponent part, sign extended to 64 bits, from a dec64 number.
+; dec64_exponent(nan) returns -128.
 
     movsx   r0,r1_b             ; r0 is the exponent
     ret
