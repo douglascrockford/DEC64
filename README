@@ -13,7 +13,10 @@ Public Domain
 DEC64 is a decimal floating point format for the next generation of
 application programming languages.
 
-dec64.asm is an implementation of the elementary operators for x64.
+dec64.asm is an implementation of the elementary operators for x64, including
+    coefficient exponent equal is_any_nan is_integer is_zero less
+    abs add ceiling dec divide floor half inc int integer_divide modulo
+    multiply neg new normal not round signum subtract
 
 dec64.h is a companion header file for C.
 
@@ -32,7 +35,7 @@ dec64_math.c is an implementation of elementary functions, including
 
 dec64_math.h is a companion header file.
 
-dec64_math_test.c os a test program.
+dec64_math_test.c is a test program.
 
 dec64.html is a descriptive web page.
 
