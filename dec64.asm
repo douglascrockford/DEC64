@@ -82,7 +82,7 @@ title   dec64.asm for x64.
 
 ; There are 72057594037927936 possible nan values. Two are reserved to
 ; represent true and false. The comparison functions will return a boolean
-; encoded as a DEC64 nan. Be care when using these comparisons with C
+; encoded as a DEC64 nan. Be careful when using these comparisons with C
 ; because C thinks that the DEC64 false is truthy.
 
 true    equ 380h
