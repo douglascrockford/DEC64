@@ -158,7 +158,7 @@ public dec64_normal;(number: dec64)
 public dec64_not;(boolean: dec64)
 ;   returns notation: dec64
 
-public dec64_round;(number: dec64, exponent: dec64)
+public dec64_round;(number: dec64, place: dec64)
 ;   returns quantization: dec64
 
 public dec64_signum;(number: dec64)
