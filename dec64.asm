@@ -1376,7 +1376,7 @@ dec64_is_integer: function_with_one_parameter
 ;(number: dec64) returns comparison: dec64
 
 ; If the number contains a non-zero fractional part or if it is nan, return
-; zero. Otherwise, return one.
+; false. Otherwise, return true.
 
     cmp     r1_b,128        ; nan exponent?
     je      return_false    ; nan is not an integer
