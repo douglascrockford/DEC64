@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+<head><title>dec64.asm</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style>
+@import url(http://fonts.googleapis.com/css?family=Cousine:700);
+@import url(http://fonts.googleapis.com/css?family=Inika:400,700);
+body {
+    background-color: cornsilk;
+    border-left: 1em solid indianred;
+    font-family: 'Inika', serif;
+    margin-left: 1em;
+    max-width: 50em;
+    padding: 10%;
+}
+
+code, pre {
+    font-family: "Courier New", Courier, mono;
+    font-size: 100%;
+	font-weight: bold;
+}
+
+code var, pre var, h3 var {
+    font-family: 'Inika', serif;
+	font-style: italic;
+	font-weight: normal;
+}
+
+
+pre {
+    padding-left: 2em;
+    padding-bottom: 0.25em;
+    padding-top: 0.25em;
+}
+
+h3 {
+	border-top: 1pt solid black;
+}
+
+a {  /* link */
+    font-size: 100%;
+    font-variant: normal;
+    font-weight: normal;
+    text-decoration: none;
+}
+
+a:link {
+    color: midnightblue;
+}
+a:visited {
+    color: purple;
+}
+a:hover {
+	border-bottom: 1pt solid blue;
+    color: blue;
+}
+a:active {
+	border-bottom: 1pt dotted red;
+    color: red;
+}
+
+table {
+	margin-top: -1em;
+}
+
+td {
+    background-color: navajowhite;
+    border: 2pt solid black;
+    text-align: center;
+}
+
+th {
+    background-color: inherit;
+    border: 0;
+	font-weight: lighter;
+	padding-left: 3pt;
+	padding-right: 3pt;
+	position: relative;
+	text-align: justify;
+	top: 1em;
+}
+
+/* This terrible hack instead of text_align: force */
+
+th:after {
+	content: "";
+	display: inline-block;
+	height: 0;
+	width: 100%;
+}
+
+.dec64, h1, h2 {
+    font-family: 'Cousine', sans-serif;
+};
+
+</style>
+</head>
+
+<body>
+<img src="dec64.png" width="398" height="103" alt="DEC64">
+<h1>dec64.asm</h1>
+<p><a href="https://github.com/douglascrockford/DEC64/blob/master/dec64.asm">dec64.asm</a> is a software implementation of elementary operators of <span class=dec64><a href="http://www.DEC64.com/">DEC64</a></span> for <a href="https://en.wikipedia.org/wiki/X86-64">x64</a> processors. <a href="https://github.com/douglascrockford/DEC64/blob/master/dec64.h">dec64.h</a> includes C function prototypes for these functions:</p>
+<ul><li><a href="#dec64_abs"><code>dec64_abs(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>absolution</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_add"><code>dec64_add(</code><var>augend</var><code>:</code> <var>dec64</var><code>,</code> <var>addend</var><code>:</code> <var>dec64</var><code>) returns </code><var>sum</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_ceiling"><code>dec64_ceiling(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>integer</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_coefficient"><code>dec64_coefficient(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>coefficient</var><code>:</code> <var>int64</var></a></li>
+<li><a href="#dec64_dec"><code>dec64_dec(</code><var>augend</var><code>:</code> <var>dec64</var><code>) returns </code><var>decrementation</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_divide"><code>dec64_divide(</code><var>dividend</var><code>:</code> <var>dec64</var><code>,</code> <var>divisor</var><code>:</code> <var>dec64</var><code>) returns </code><var>quotient</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_equal"><code>dec64_equal(</code><var>comparahend</var><code>:</code> <var>dec64</var><code>,</code> <var>comparator</var><code>:</code> <var>dec64</var><code>) returns </code><var>comparison</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_exponent"><code>dec64_exponent(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>exponent</var><code>:</code> <var>int64</var></a></li>
+<li><a href="#dec64_floor"><code>dec64_floor(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>integer</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_half"><code>dec64_half(</code><var>dividend</var><code>:</code> <var>dec64</var><code>) returns </code><var>quotient</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_inc"><code>dec64_inc(</code><var>augend</var><code>:</code> <var>dec64</var><code>) returns </code><var>incrementation</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_int"><code>dec64_int(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>integer</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_integer_divide"><code>dec64_integer_divide(</code><var>dividend</var><code>:</code> <var>dec64</var><code>,</code> <var>divisor</var><code>:</code> <var>dec64</var><code>) returns </code><var>quotient</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_is_any_nan"><code>dec64_is_any_nan(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>comparison</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_is_integer"><code>dec64_is_integer(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>comparison</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_is_zero"><code>dec64_is_zero(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>comparison</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_less"><code>dec64_less(</code><var>comparahend</var><code>:</code> <var>dec64</var><code>,</code> <var>comparator</var><code>:</code> <var>dec64</var><code>) returns </code><var>comparison</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_modulo"><code>dec64_modulo(</code><var>dividend</var><code>:</code> <var>dec64</var><code>,</code> <var>divisor</var><code>:</code> <var>dec64</var><code>) returns </code><var>modulus</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_multiply"><code>dec64_multiply(</code><var>multiplicand</var><code>:</code> <var>dec64</var><code>,</code> <var>multiplier</var><code>:</code> <var>dec64</var><code>) returns </code><var>product</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_neg"><code>dec64_neg(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>negation</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_new"><code>dec64_new(</code><var>coefficient</var><code>:</code> <var>int64</var><code>,</code> <var>exponent</var><code>:</code> <var>int64</var><code>) returns </code><var>number</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_normal"><code>dec64_normal(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>normalization</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_not"><code>dec64_not(</code><var>boolean</var><code>:</code> <var>dec64</var><code>) returns </code><var>notation</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_round"><code>dec64_round(</code><var>number</var><code>:</code> <var>dec64</var><code>,</code> <var>place</var><code>:</code> <var>dec64</var><code>) returns </code><var>quantization</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_signum"><code>dec64_signum(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>signature</var><code>:</code> <var>dec64</var></a></li>
+<li><a href="#dec64_subtract"><code>dec64_subtract(</code><var>minuend</var><code>:</code> <var>dec64</var><code>,</code> <var>subtrahend</var><code>:</code> <var>dec64</var><code>) returns </code><var>difference</var><code>:</code> <var>dec64</var></a></li></ul>
+<p>Two types are provided:</p>
+<ul>
+  <li><code>dec64</code></li>
+  <li><code>int64</code></li>
+</ul>
+<p>These constants are also provided:</p>
+<ul>
+  <li><code>DEC64_NAN</code></li>
+  <li><code>DEC64_ZERO</code></li>
+  <li><code>DEC64_ONE</code></li>
+  <li><code>DEC64_NEGATIVE_ONE</code></li>
+  <li><code>DEC64_TRUE</code></li>
+  <li><code>DEC64_FALSE</code></li>
+</ul>
+<h2 id="nan"><var>nan</var></h2>
+<p><var>nan (not-a-number)</var> is a popular but poorly named concept in floating-point systems. It is a number value that represents numbers that are undefined or not representable. <span class=dec64>DEC64</span> has 72057594037927936 <var>nan</var> values. When these functions return a <var>nan</var> value, they will always return <code>DEC64_NAN</code>, the normal <var>nan</var>.  </p>
+<p>Two <var>nan</var> values are reserved to
+  represent <code>DEC64_TRUE</code> and <code>DEC64_FALSE</code>. The comparison functions will return either <code>DEC64_TRUE</code> or <code>DEC64_FALSE</code>. Be careful when using these comparisons with C
+  because C thinks that  <code>DEC64_FALSE</code> is truthy. </p>
+<p>The remaining <var>nan</var> values can be used to hold object pointers or other useful values.</p>
+<p>These operations will produce a result of <code>DEC64_NAN</code>:</p>
+<pre>dec64_abs(<var>nan</var>)
+dec64_ceiling(<var>nan</var>)
+dec64_dec(<var>nan</var>)
+dec64_floor(<var>nan</var>)
+dec64_half(<var>nan</var>)
+dec64_inc(<var>nan</var>)
+dec64_int(<var>nan</var>)
+dec64_neg(<var>nan</var>)
+dec64_normal(<var>nan</var>)
+dec64_not(<var>nan</var>)
+dec64_signum(<var>nan</var>)</pre>
+<p>These operations will produce a result of <code>DEC64_ZERO</code> for all values of <var>n</var>, even if <var>n</var> is <var>nan</var>:</p>
+<pre>dec64_divide(0, <var>n</var>)
+dec64_integer_divide(0, <var>n</var>)
+dec64_modulo(0, <var>n</var>)
+dec64_multiply(0, <var>n</var>)
+dec64_multiply(<var>n</var>, 0)</pre>
+<p>These operations will produce a result of <code>DEC64_NAN</code> for all values of <var>n</var> except <code>0</code>:</p>
+<pre>dec64_divide(<var>n</var>, 0)
+dec64_divide(<var>n</var>, <var>nan</var>)
+dec64_integer_divide(<var>n</var>, 0)
+dec64_integer_divide(<var>n</var>, <var>nan</var>)
+dec64_modulo(<var>n</var>, 0)
+dec64_modulo(<var>n</var>, <var>nan</var>)
+dec64_multiply(<var>n</var>, <var>nan</var>)
+dec64_multiply(<var>nan</var>, <var>n</var>)</pre>
+<p>These operations will produce a result of <code>DEC64_NAN</code> for all values of <var>n</var>:</p>
+<pre>dec64_add(<var>n</var>, <var>nan</var>)
+dec64_add(<var>nan</var>, <var>n</var>)
+dec64_divide(<var>nan</var>, <var>n</var>)
+dec64_integer_divide(<var>nan</var>, <var>n</var>)
+dec64_less(<var>n</var>, <var>nan</var>)
+dec64_less(<var>nan</var>, <var>n</var>)
+dec64_modulo(<var>nan</var>, <var>n</var>)
+dec64_round(<var>n</var>, <var>nan</var>)
+dec64_round(<var>nan</var>, <var>n</var>)
+dec64_subtract(<var>n</var>, <var>nan</var>)
+dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
+<h2 id="zero">Zero</h2>
+<p> <span class=dec64>DEC64</span> has 255  zero values. They are all equal to each other. The only zero value returned from these functions is the normal zero, <code>DEC64_ZERO</code>, which is the same as the native <code>int64</code> zero, <code>0</code>.</p>
+<h2 id="functions">Functions</h2>
+<p>Rounding is to the nearest value. Ties are rounded away from zero. Integer
+  division is floored. The result of <code>dec64_modulo</code> has the sign of the divisor.
+There is no negative zero.</p>
+<h3 id="dec64_abs"><code>dec64_abs(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>absolution</var><code>:</code> <var>dec64</var></h3>
+<p>The absolute value function removes the sign from a <var>number</var> value. </p>
+<table>
+  <tr>
+    <th>If <var>number</var> is</th>
+    <th>&nbsp;&nbsp;return</th>
+  </tr>
+  <tr>
+    <th>&nbsp;&nbsp;<var>nan</var></th>
+    <td><code>DEC64_NAN</code></td>
+  </tr>
+  <tr>
+    <th>&nbsp;&nbsp;zero</th>
+    <td><code>DEC64_ZERO</code></td>
+  </tr>
+  <tr>
+    <th>&nbsp;&nbsp;positive</th>
+    <td><var>number</var></td>
+  </tr>
+  <tr>
+    <th>&nbsp;&nbsp;negative</th>
+    <td><code>-</code><var>number</var></td>
+  </tr>
+</table>
+<h3 id="dec64_add"><code>dec64_add(</code><var>augend</var><code>:</code> <var>dec64</var><code>,</code> <var>addend</var><code>:</code> <var>dec64</var><code>) returns </code><var>sum</var><code>:</code> <var>dec64</var></h3>
+<p>The add function adds an <var>augend</var> and an <var>addend</var> and returns the sum. If either is <var>nan</var>, or if the sum is not representable, then the result is <code>DEC64_NAN</code>.</p>
+<h3 id="dec64_ceiling"><code>dec64_ceiling(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>integer</var><code>:</code> <var>dec64</var></h3>
+<p>The ceiling function returns the smallest integer that is greater than or equal to the <var>number</var>. If the <var>number</var> is <var>nan</var>, the result is <code>DEC64_NAN</code>. If the <var>number</var> is zero, the result is <code>DEC64_ZERO</code>. If the <var>number</var> is an integer, the result is the <var>number</var>.</p>
+<h3 id="dec64_coefficient"><code>dec64_coefficient(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>coefficient</var><code>:</code> <var>int64</var></h3>
+<p>A <span class=dec64>DEC64</span> <var>number</var> is made up of two parts: a <var>coefficient</var> and an <var>exponent</var>. </p>
+<table cellspacing=1 cellpadding="0" width=100%><tbody>
+  <tr><th>63 8</th><th>7 0</th></tr>
+  <tr>
+    <td width=70%><em>coefficient</em></td>
+    <td width=10%><em>exponent</em></td>
+  </tr></tbody>
+</table>
+<p>This function returns the <var>coefficient</var> part as an <code>int64</code>.  <code>dec64_exponent(DEC64_NAN)</code> returns <code>0</code>.</p>
+<h3 id="dec64_dec"><code>dec64_dec(</code><var>augend</var><code>:</code> <var>dec64</var><code>) returns </code><var>decrementation</var><code>:</code> <var>dec64</var></h3>
+<p>The decrement function subtracts <code>1</code> from a number. That can be faster than </p>
+<pre>dec64_subtract(<var>augend</var>, DEC64_ONE)</pre>
+<h3 id="dec64_divide"><code>dec64_divide(</code><var>dividend</var><code>:</code> <var>dec64</var><code>,</code> <var>divisor</var><code>:</code> <var>dec64</var><code>) returns </code><var>quotient</var><code>:</code> <var>dec64</var></h3>
+<p>This function divides the <var>dividend</var> by the <var>divisor</var>.</p>
+<h3 id="dec64_equal"><code>dec64_equal(</code><var>comparahend</var><code>:</code> <var>dec64</var><code>,</code> <var>comparator</var><code>:</code> <var>dec64</var><code>) returns </code><var>comparison</var><code>:</code> <var>dec64</var></h3>
+<p>Compare two  numbers. If either is <var>nan</var>, return <code>DEC64_NAN</code>. If they are exactly equal, return <code>DEC64_TRUE</code>, otherwise return <code>DEC64_FALSE</code>. Denormal zeros are equal but denormal nans are not.</p>
+<h3 id="dec64_exponent"><code>dec64_exponent(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>exponent</var><code>:</code> <var>int64</var></h3>
+<p>A <span class=dec64>DEC64</span> <var>number</var> is made up of two parts: a <var>coefficient</var> and an <var>exponent</var>.</p>
+<table cellspacing=1 cellpadding="0" width=100%><tbody>
+  <tr><th>63 8</th><th>7 0</th></tr>
+  <tr>
+    <td width=70%><em>coefficient</em></td>
+    <td width=10%><em>exponent</em></td>
+  </tr></tbody>
+</table>
+<p>This function returns the <var>exponent</var> part as an <code>int64</code>.  <code>dec64_exponent(<var>nan</var>)</code> returns <code>-128</code>.</p>
+<h3 id="dec64_floor"><code>dec64_floor(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>integer</var><code>:</code> <var>dec64</var></h3>
+<p>Produce the largest integer that is less than or equal to the number. This is sometimes called the <code>entier</code> function. In the result, the exponent will be greater than or equal to zero unless it is <code>DEC64_NAN</code>. Numbers with positive exponents will not be modified, even if the numbers are outside of the safe integer range.</p>
+<h3 id="dec64_half"><code>dec64_half(</code><var>dividend</var><code>:</code> <var>dec64</var><code>) returns </code><var>quotient</var><code>:</code> <var>dec64</var></h3>
+<p>Divide a dec64 number by two. This will always be faster than </p>
+<pre>dec64_divide(<var>dividend</var>, dec64_new(2, 0))</pre>
+<h3 id="dec64_inc"><code>dec64_inc(</code><var>augend</var><code>:</code> <var>dec64</var><code>) returns </code><var>incrementation</var><code>:</code> <var>dec64</var></h3>
+<p>The increment function adds <code>1</code> to a number. That can be faster than </p>
+<pre><code>dec64_add(</code><var>augend</var><code>, DEC64_ONE)</code></pre>
+<h3 id="dec64_int"><code>dec64_int(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>integer</var><code>:</code> <var>dec64</var></h3>
+<p>Convert the number such that the exponent will be zero, discarding the fraction part. It will produce <var>nan</var> if the result cannot be represented in 56 signed bits. This is used to extract an <code>int56</code> from a <code>dec64</code> for bitwise operations. It accepts a broader range than the safe integer range:</p>
+<pre>-36028797018963968 thru 72057594037927935</pre>
+<h3 id="dec64_integer_divide"><code>dec64_integer_divide(</code><var>dividend</var><code>:</code> <var>dec64</var><code>,</code> <var>divisor</var><code>:</code> <var>dec64</var><code>) returns </code><var>quotient</var><code>:</code> <var>dec64</var></h3>
+<p>Divide, with a floored integer result. It produces the same result as</p>
+<pre> dec64_floor(dec64_divide(<var>dividend</var>, <var>divisor</var>))</pre>
+<p> but can sometimes produce that result more quickly.<br>
+</p>
+<h3 id="dec64_is_any_nan"><code>dec64_is_any_nan(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>comparison</var><code>:</code> <var>dec64</var></h3>
+<p>If the <var>number</var> is any <var>nan</var>, return <code>DEC64_TRUE</code>, otherwise return <code>DEC64_FALSE</code>. To test if a <var>number</var> is <code>DEC64_NAN</code>, use <code>==</code>.</p>
+<h3 id="dec64_is_integer"><code>dec64_is_integer(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>comparison</var><code>:</code> <var>dec64</var></h3>
+<p>If the <var>number</var> contains a non-zero fractional part or if it is <var>nan</var>, return <code>DEC64_FALSE</code>. Otherwise, return <code>DEC64_TRUE</code>.</p>
+<h3 id="dec64_is_zero"><code>dec64_is_zero(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>comparison</var><code>:</code> <var>dec64</var></h3>
+<p>If the <var>number</var> is any zero, return <code>DEC64_TRUE</code>, otherwise return <code>DEC64_FALSE</code>. To test if a <var>number</var> is <code>DEC64_ZERO</code>, use <code>==</code>.</p>
+<h3 id="dec64_less"><code>dec64_less(</code><var>comparahend</var><code>:</code> <var>dec64</var><code>,</code> <var>comparator</var><code>:</code> <var>dec64</var><code>) returns </code><var>comparison</var><code>:</code> <var>dec64</var></h3>
+<p>Compare two  numbers. If either argument is any <var>nan</var>, then the result is <code>DEC64_NAN</code>. If the <var>comparahend</var> is less than the <var>comparator</var>, return <code>DEC64_TRUE</code>, otherwise return <code>DEC64_FALSE</code>.</p>
+<p>The other 3 comparison functions are easily implemented with <code>dec64_less</code>:</p>
+<pre>dec64_greater(<var>a</var>, <var>b</var>)</code>          =&gt; <code>dec64_less(<var>b</var>, <var>a</var>)</code>
+<code>dec64_greater_or_equal(<var>a</var>, <var>b</var>)</code> <code>=&gt; dec64_not(dec64_less(<var>a</var>, <var>b</var>))</code>
+<code>dec64_less_or_equal(<var>a</var>, <var>b</var>)</code>    =&gt; dec64_not(dec64_less(<var>b</var>, <var>a</var>))</pre>
+<h3 id="dec64_modulo"><code>dec64_modulo(</code><var>dividend</var><code>:</code> <var>dec64</var><code>,</code> <var>divisor</var><code>:</code> <var>dec64</var><code>) returns </code><var>modulus</var><code>:</code> <var>dec64</var></h3>
+<p>The modulo function  produces the same result as</p>
+<pre>dec64_subtract(
+    <var>dividend</var>,
+    dec64_multiply(
+        dec64_integer_divide(<var>dividend</var>, <var>divisor</var>),
+        <var>divisor</var>
+    )
+)</pre>
+<h3 id="dec64_multiply"><code>dec64_multiply(</code><var>multiplicand</var><code>:</code> <var>dec64</var><code>,</code> <var>multiplier</var><code>:</code> <var>dec64</var><code>) returns </code><var>product</var><code>:</code> <var>dec64</var></h3>
+<p>Multiply two numbers.</p>
+<h3 id="dec64_neg"><code>dec64_neg(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>negation</var><code>:</code> <var>dec64</var></h3>
+<p>Negate a <var>number</var>.</p>
+<h3 id="dec64_new"><code>dec64_new(</code><var>coefficient</var><code>:</code> <var>int64</var><code>,</code> <var>exponent</var><code>:</code> <var>int64</var><code>) returns </code><var>number</var><code>:</code> <var>dec64</var></h3>
+<p>A <span class=dec64>DEC64</span> <var>number</var> is made up of two parts: a <var>coefficient</var> and an <var>exponent</var>. </p>
+<table cellspacing=1 cellpadding="0" width=100%><tbody>
+  <tr><th>63 8</th><th>7 0</th></tr>
+  <tr>
+    <td width=70%><em>coefficient</em></td>
+    <td width=10%><em>exponent</em></td>
+  </tr></tbody>
+</table>
+<p>Construct a new dec64 number with a coefficient and an exponent.</p>
+<h3 id="dec64_normal"><code>dec64_normal(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>normalization</var><code>:</code> <var>dec64</var></h3>
+<p>Normalize the number by making  the exponent as close to zero as possible without losing any signficance. Usually normalization is not needed since it does not materially change the value of a number.</p>
+<h3 id="dec64_not"><code>dec64_not(</code><var>boolean</var><code>:</code> <var>dec64</var><code>) returns </code><var>notation</var><code>:</code> <var>dec64</var></h3>
+<p>If the <var>boolean</var> is <code>DEC64_TRUE</code>, the result is <code>DEC64_FALSE</code>. If the <var>boolean</var> is <code>DEC64_FALSE</code>, the result is <code>DEC64_TRUE</code>. Otherwise, the result is <code>DEC64_NAN</code>.</p>
+<h3 id="dec64_round"><code>dec64_round(</code><var>number</var><code>:</code> <var>dec64</var><code>,</code> <var>place</var><code>:</code> <var>dec64</var><code>) returns </code><var>quantization</var><code>:</code> <var>dec64</var></h3>
+<p>Round the number. The exponent determines which decimal place to round to.</p>
+<table>
+  <tr>
+    <th><var>place</var></th>
+    <th>round to nearest</th>
+  </tr>
+  <tr>
+    <td>-2</td>
+    <td> cent</td>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td> integer</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td> thousand</td>
+  </tr>
+  <tr>
+    <td>6</td>
+    <td> million</td>
+  </tr>
+  <tr>
+    <td>9</td>
+    <td> billion</td>
+  </tr>
+</table>
+<p>The <var>place</var> should be between -16 and 16.<br>
+</p>
+<h3 id="dec64_signum"><code>dec64_signum(</code><var>number</var><code>:</code> <var>dec64</var><code>) returns </code><var>signature</var><code>:</code> <var>dec64</var></h3>
+<p>If the number is <var>nan</var>, the result is <code>DEC64_NAN</code>. If the number is less than zero, the result is <code>DEC64_NEGATIVE_ONE</code>. If the number is zero, the result is <code>DEC64_ZERO</code>. If the number is greater than zero, the result is <code>DEC64_ONE</code>.</p>
+<h3 id="dec64_subtract"><code>dec64_subtract(</code><var>minuend</var><code>:</code> <var>dec64</var><code>,</code> <var>subtrahend</var><code>:</code> <var>dec64</var><code>) returns </code><var>difference</var><code>:</code> <var>dec64</var></h3>
+<p>Subtract one number from another.</p>
+<h2>MASM</h2>
+<p>This file can be processed with Microsoft's <a href="https://msdn.microsoft.com/en-us/library/hb5z4sxd.aspx">ML64.exe</a>. (<a href="http://dec64.com/dec64.listing">listing</a>) Visual Studio does not
+  have good defaults for building with MASM, and apparently provides no documentation.
+  These hints may be useful:</p>
+<pre>Platform &gt; x64
+Solution Explorer &gt; <var>DEC64</var> &gt; Build Dependencies &gt; Build Customizations... &gt; masm</pre>
+<p>There might be other assemblers that can process this file, but that has not been tested yet.</p>
+</body>
+</html>

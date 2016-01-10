@@ -18,6 +18,8 @@ dec64.asm is an implementation of the elementary operators for x64, including
     abs add ceiling dec divide floor half inc int integer_divide modulo
     multiply neg new normal not round signum subtract
 
+dec64.asm.html is a description of the functions in dec64.asm.
+
 dec64.h is a companion header file for C.
 
 dec64_test.c is a test program.
@@ -40,10 +42,3 @@ dec64_math_test.c is a test program.
 dec64.html is a descriptive web page.
 
 dec64.png is a logo.
-
-Note: This project can be built in Visual Studio, but Visual Studio does not
-have good defaults for building MASM, and apparently provides no documentation.
-These hints may be useful:
-
-    Platform > x64
-    Solution Explorer > DEC64 > Build Dependencies > Build Customizations... > masm
