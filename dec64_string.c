@@ -3,7 +3,7 @@ dec64_string.c
 Conversion between DEC64 and strings.
 
 dec64.com
-2016-01-01
+2016-01-10
 Public Domain
 
 No warranty.
@@ -359,7 +359,7 @@ dec64_string_char dec64_string_separator(
     point. Typical values include ',', ' ', '_', and '.'. If it is '\0',
     then separation will be supressed. The default is '\0'.
 
-    dec64_from_string will ignore this character in the coefficient.
+    dec64_from_string will ignore this character.
 
     It returns the previous value.
 */
@@ -512,14 +512,16 @@ dec64 dec64_from_string(
     The exponent itself.
 */
                         while (c != 0) {
-                            if (c >= '0' && c <= '9') {
-                                ok = 1;
-                                exp = exp * 10 + (c - '0');
-                                if (exp >= 1000) {
+                            if (c != state->separator) {
+                                if (c >= '0' && c <= '9') {
+                                    ok = 1;
+                                    exp = exp * 10 + (c - '0');
+                                    if (exp >= 1000) {
+                                        return DEC64_NAN;
+                                    }
+                                } else {
                                     return DEC64_NAN;
                                 }
-                            } else {
-                                return DEC64_NAN;
                             }
                             at += 1;
                             c = string[at];
@@ -571,7 +573,7 @@ int dec64_to_string(
     returns 0 indicating an empty string.
 
     In standard mode, the number will be formatted conventionally unless it
-    would require more than 17 digit, which would be due to excessive
+    would require more than 17 digits, which would be due to excessive
     trailing zeros or zeros immediately after the decimal point. In that
     case scientific notation will be used instead.
 */
