@@ -27,6 +27,8 @@ dec64_test.c is a test program.
 dec64_string.c is an implementation of functions for converting between DEC64
 and strings.
 
+dec64_string.html is a description of the functions in dec64_string.c.
+
 dec64_string.h is a companion header file.
 
 dec64_string_test.c is a test program.
