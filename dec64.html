@@ -104,6 +104,7 @@ th:after {
 <p>The fast path for addition in hardware should take only 1 cycle when the two exponents are equal to each other and there is no overflow. The fast path for multiplication in hardware takes the time it takes to do a 56*56 signed multiply when there is no overflow. </p>
 <p>A reference implementation is available at <a href="https://github.com/douglascrockford/DEC64">https://github.com/douglascrockford/DEC64</a>. <a href="http://DEC64.com/dec64.asm.html">It provides the DEC64 elementary operations.</a></p>
 <p>Conversion between <span class=dec64>DEC64</span> and strings is trivially easy. This is demonstrated by <a href="http://www.dec64.com/dec64_string.html">dec64_string</a>.</p>
+<p>The elementary functions (sine, log, sqrt, etc) are demonstrated by <a href="http://dec64.com/dec64_math.html">dec64_math</a>.</p>
 <h1>Motivation</h1>
 <p>The idea of using powers of <em>ten</em> instead of powers of <em>two</em> is not new. For example, </p>
 <blockquote>

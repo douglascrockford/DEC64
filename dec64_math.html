@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head><title>dec64_math</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style>
+@import url(http://fonts.googleapis.com/css?family=Cousine:700);
+@import url(http://fonts.googleapis.com/css?family=Inika:400,700);
+body {
+    background-color: cornsilk;
+    border-left: 1em solid indianred;
+    font-family: 'Inika', serif;
+    margin-left: 1em;
+    max-width: 50em;
+    padding: 10%;
+}
+
+code, pre, h3 {
+    font-family: "Courier New", Courier, mono;
+    font-size: 100%;
+	font-weight: bold;
+}
+
+code var, pre var, h3 var {
+    font-family: 'Inika', serif;
+	font-style: italic;
+	font-weight: normal;
+}
+
+pre {
+    padding-left: 2em;
+    padding-right: 1em;
+    padding-bottom: 0.25em;
+    padding-top: 0.25em;
+	text-align: left;
+}
+
+h3 {
+	border-top: 1pt solid black;
+	white-space: pre;
+}
+
+a {  /* link */
+    font-size: 100%;
+    font-variant: normal;
+    font-weight: normal;
+    text-decoration: none;
+}
+
+a:link {
+    color: midnightblue;
+}
+a:visited {
+    color: purple;
+}
+a:hover {
+	border-bottom: 1pt solid blue;
+    color: blue;
+}
+a:active {
+	border-bottom: 1pt dotted red;
+    color: red;
+}
+
+table {
+	margin-top: -1em;
+}
+
+td {
+    background-color: navajowhite;
+    border: 2pt solid black;
+    text-align: center;
+}
+
+th {
+    background-color: inherit;
+    border: 0;
+	font-weight: lighter;
+	padding-left: 3pt;
+	padding-right: 3pt;
+	position: relative;
+	text-align: justify;
+	top: 1em;
+}
+
+/* This terrible hack instead of text_align: force */
+
+th:after {
+	content: "";
+	display: inline-block;
+	height: 0;
+	width: 100%;
+}
+
+.dec64, h1, h2 {
+    font-family: 'Cousine', sans-serif;
+};
+
+</style>
+</head>
+
+<body>
+<img src="dec64.png" width="398" height="103" alt="DEC64">
+<h1>dec64_math.c</h1>
+<p><a href="https://github.com/douglascrockford/DEC64/blob/master/dec64_text.c">dec64_math.c</a> contains elementary functions for   <span class=dec64><a href="http://www.DEC64.com/">DEC64</a></span> numbers. <a href="https://github.com/douglascrockford/DEC64/blob/master/dec64_text.h">dec64_math.h</a> includes C function prototypes for these functions:</p>
+<pre>dec64 dec64_acos(dec64 x)</pre>
+<pre>dec64 dec64_asin(dec64 x)</pre>
+<pre>dec64 dec64_atan(dec64 x)</pre>
+<pre>dec64 dec64_atan2(dec64 y, dec64 x)</pre>
+<pre>dec64 dec64_cos(dec64 x)</pre>
+<pre>dec64 dec64_exp(dec64 x)</pre>
+<pre>dec64 dec64_exponentiate(dec64 coefficient, dec64 exponent)</pre>
+<pre>dec64 dec64_log(dec64 x)</pre>
+<pre>dec64 dec64_sin(dec64 x)</pre>
+<pre>dec64 dec64_root(dec64 degree, dec64 radicand)</pre>
+<pre>dec64 dec64_sqrt(dec64 x)</pre>
+<pre>dec64 dec64_tan(dec64 x)</pre>
+
+</body>
+</html>
