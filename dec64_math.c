@@ -217,13 +217,13 @@ dec64 dec64_random() {
 */
 
     do {
-        slush = (slush << 8) ^ (slush >> 55) ^ rand();
-        slush = (slush << 8) ^ (slush >> 55) ^ rand();
-        slush = (slush << 8) ^ (slush >> 55) ^ rand();
-        slush = (slush << 8) ^ (slush >> 55) ^ rand();
-        slush = (slush << 8) ^ (slush >> 55) ^ rand();
-        slush = (slush << 8) ^ (slush >> 55) ^ rand();
-        slush = (slush << 8) ^ (slush >> 55) ^ rand();
+        slush = (slush << 8) ^ (slush >> 47) ^ rand();
+        slush = (slush << 8) ^ (slush >> 47) ^ rand();
+        slush = (slush << 8) ^ (slush >> 47) ^ rand();
+        slush = (slush << 8) ^ (slush >> 47) ^ rand();
+        slush = (slush << 8) ^ (slush >> 47) ^ rand();
+        slush = (slush << 8) ^ (slush >> 47) ^ rand();
+        slush = (slush << 8) ^ (slush >> 47) ^ rand();
         mantissa = slush & 0x3FFFFFFFFFFFFFLL;
 /*
     mantissa contains an integer between 0 and 18014398509481983.
