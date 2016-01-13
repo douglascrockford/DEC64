@@ -3,7 +3,7 @@ dec64_math.c
 Elementary functions for DEC64.
 
 dec64.com
-2016-01-07
+2016-01-12
 Public Domain
 
 No warranty.
@@ -12,6 +12,7 @@ This file is a placeholder. It should be replaced with functions that are
 faster and more accurate.
 */
 
+#include <stdlib.h>
 #include "dec64.h"
 #include "dec64_math.h"
 
@@ -201,6 +202,34 @@ dec64 dec64_log(dec64 x)
         divisor = dec64_inc(divisor);
     }
     return result;
+}
+
+
+dec64 dec64_random() {
+
+/* Return a randomish number between 0 and 1 containing 16 randomy digits. */
+
+/* 
+    rand() produces low quality 15 bit numbers. We'll use 7 of them to make up
+    ours.
+*/
+
+    int64 rantissa = 0;
+    do {
+        rantissa = (rantissa << 8) | rand();
+        rantissa = (rantissa << 8) | rand();
+        rantissa = (rantissa << 8) | rand();
+        rantissa = (rantissa << 8) | rand();
+        rantissa = (rantissa << 8) | rand();
+        rantissa = (rantissa << 8) | rand();
+        rantissa = (rantissa << 8) | rand();
+        rantissa = rantissa & 0x3FFFFFFFFFFFFFLL;
+/*
+    rantissa contains an integer between 0 and 18014398509481983.
+    If it is less than or equal to 9999999999999999 then we are done.
+*/
+    } while (rantissa > 9999999999999999LL);
+    return dec64_new(rantissa, -16);
 }
 
 dec64 dec64_root(dec64 degree, dec64 radicand) {
