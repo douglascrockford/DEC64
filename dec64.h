@@ -3,7 +3,7 @@
 The DEC64 header file. This is the companion to dec64.asm.
 
 dec64.com
-2015-12-25
+2016-01-13
 Public Domain
 
 No warranty.
@@ -17,6 +17,7 @@ No warranty.
 #define DEC64_NEGATIVE_ONE  (0xFFFFFFFFFFFFFF00LL)
 
 typedef long long int64;
+typedef unsigned long long uint64;
 typedef int64 dec64;
 
 extern int64 dec64_coefficient(dec64 number)                  /* coefficient */;
