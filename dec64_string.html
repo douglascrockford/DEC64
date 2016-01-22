@@ -101,7 +101,7 @@ th:after {
 <body>
 <img src="dec64.png" width="398" height="103" alt="DEC64">
 <h1>dec64_string.c</h1>
-<p><a href="https://github.com/douglascrockford/DEC64/blob/master/dec64_string.c">dec64_string.c</a> contains functions for converting  <span class=dec64><a href="http://www.DEC64.com/">DEC64</a></span> numbers to strings and back again. <a href="https://github.com/douglascrockford/DEC64/blob/master/dec64_text.h">dec64_string.h</a> includes C function prototypes for these functions:</p>
+<p><a href="https://github.com/douglascrockford/DEC64/blob/master/dec64_text.c">dec64_string.c</a> contains functions for converting  <span class=dec64><a href="http://www.DEC64.com/">DEC64</a></span> numbers to strings and back again. <a href="https://github.com/douglascrockford/DEC64/blob/master/dec64_text.h">dec64_string.h</a> includes C function prototypes for these functions:</p>
 <pre>dec64 <a href="#dec64_from_string">dec64_from_string</a>(
     dec64_string_state state,
     dec64_string_char string[]
@@ -157,7 +157,7 @@ th:after {
   <li><code>  dec64_string_state</code></li>
 </ul>
 <h2 id="state">String State</h2>
-<p>There functions are reentrant and thread safe. This is accomplished by use of a state object that is created by <code>dec64_string_begin</code> and destroyed by <code>dec64_string_end</code>. All of these functions require a state object as the first argument. The state argument allows for customizing the conversions. Do not attempt to modify the string state object directly. Use the provided functions instead. State objects are reuseable.</p>
+<p>There functions are reentrant and thread safe. The is accomplished by use of a state object which is created by <code>dec64_string_begin</code> and destroyed by <code>dec64_string_end</code>. All of these functions require a state object as the first argument. The state argument allows for customizing the conversions. Do not attempt to modify the string state object directly. Use the provided functions instead. State objects are reuseable.</p>
 <p>The state object contains the output mode:      standard, scientific, or engineering.<br>
 </p>
 <h2 id="creation">Creation</h2>

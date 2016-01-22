@@ -349,7 +349,6 @@ static void test_all_sin() {
     test_sin(four, dec64_new(-7568024953079283, -16), "4");
     test_sin(five, dec64_new(-9589242746631385, -16), "5");
     test_sin(ten, dec64_new(-5440211108893698, -16), "10");
-    test_sin(dec64_new(-1, 0), dec64_new(-8414709848078965, -16), "-1");
 }
 
 static void test_all_sqrt() {
@@ -401,8 +400,6 @@ static int do_tests(int level_of_detail) {
     test_all_tan();
 
     printf("\n\n%i pass, %i fail.\n", nr_pass, nr_fail);
-    p(dec64_random(), "random");
-    p(dec64_random(), "random");
     dec64_string_end(state);
     return nr_fail;
 }
