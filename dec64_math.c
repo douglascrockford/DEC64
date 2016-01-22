@@ -205,7 +205,7 @@ dec64 dec64_log(dec64 x)
 }
 
 /* 
-    The seed variables contain the random number generators state. 
+    The seed variables contain the random number generator's state. 
     They can be set by dec64_seed.
 */
 
