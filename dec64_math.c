@@ -3,7 +3,7 @@ dec64_math.c
 Elementary functions for DEC64.
 
 dec64.com
-2016-01-13
+2016-01-19
 Public Domain
 
 No warranty.
@@ -204,37 +204,35 @@ dec64 dec64_log(dec64 x)
     return result;
 }
 
-static uint64 slush = 0;
-
-dec64 dec64_random() {
-
-/* Return a randomish number between 0 and 1 containing 16 randomy digits. */
-
-    uint64 mantissa = 0;
 /* 
-    rand() produces low quality 15 bit numbers. We'll use 7 of them to make up
-    ours.
+    The seed variables contain the random number generators state. 
+    They can be set by dec64_seed.
 */
 
-    slush = (slush << 8) ^ (slush >> 47) ^ rand();
-    slush = (slush << 8) ^ (slush >> 47) ^ rand();
-    slush = (slush << 8) ^ (slush >> 47) ^ rand();
-    slush = (slush << 8) ^ (slush >> 47) ^ rand();
-    slush = (slush << 8) ^ (slush >> 47) ^ rand();
-    slush = (slush << 8) ^ (slush >> 47) ^ rand();
-    slush = (slush << 8) ^ (slush >> 47) ^ rand();
+static uint64 seed_0 = D_E;
+static uint64 seed_1 = D_2PI;
+
+dec64 dec64_random() {
+/* 
+    Return a number between 0 and 1 containing 16 randomy digits. 
+    It uses xorshift128+.
+*/
     while (1) {
-        mantissa = slush & 0x3FFFFFFFFFFFFFLL;
+        uint64 s1 = seed_0;
+        uint64 s0 = seed_1;
+        s1 ^= s1 << 23;
+        s1 ^= s0 ^ (s0 >> 5) ^ (s1 >> 18);
+        seed_0 = s0;
+        seed_1 = s1;
+        uint64 mantissa = (s1 + s0) >> 10;
 /*
     mantissa contains an integer between 0 and 18014398509481983.
     If it is less than or equal to 9999999999999999 then we are done.
 */
         if (mantissa <= 9999999999999999LL) {
-            break;
+            return dec64_new(mantissa, -16);
         }
-        slush = slush >> 1;
     }
-    return dec64_new(mantissa, -16);
 }
 
 dec64 dec64_root(dec64 degree, dec64 radicand) {
@@ -283,6 +281,15 @@ dec64 dec64_root(dec64 degree, dec64 radicand) {
         repeat -= 1;
     }
     return result;
+}
+
+void dec64_seed(dec64 seed) {
+/*
+    Seed the dec64_random function. It takes any 64 bits as the seed value.
+    It initializes the seed variables.
+*/
+    seed_0 = seed;
+    seed_1 = (seed | 1) * D_2PI;
 }
 
 dec64 dec64_sin(dec64 x) {
