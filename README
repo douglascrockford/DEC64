@@ -4,7 +4,7 @@ Douglas Crockford
 douglas@crockford.com
 
 dec64.com
-2016-01-07
+2016-01-23
 Public Domain
 
     NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
@@ -36,6 +36,8 @@ dec64_string_test.c is a test program.
 dec64_math.c is an implementation of elementary functions, including
     acos    asin    atan    atan2    cos    exp    exponentiate
     log     root    sin     sqrt     tan
+and
+    random  seed
 
 dec64_math.html is a description of the functions in dec64_math.h.
 
