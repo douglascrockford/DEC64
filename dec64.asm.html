@@ -272,7 +272,7 @@ There is no negative zero.</p>
 <h3 id="dec64_less"><code>dec64_less(</code><var>comparahend</var><code>:</code> <var>dec64</var><code>,</code> <var>comparator</var><code>:</code> <var>dec64</var><code>) returns </code><var>comparison</var><code>:</code> <var>dec64</var></h3>
 <p>Compare two  numbers. If either argument is any <var>nan</var>, then the result is <code>DEC64_NAN</code>. If the <var>comparahend</var> is less than the <var>comparator</var>, return <code>DEC64_TRUE</code>, otherwise return <code>DEC64_FALSE</code>.</p>
 <p>The other 3 comparison functions are easily implemented with <code>dec64_less</code>:</p>
-<pre>dec64_greater(<var>a</var>, <var>b</var>)</code>          =&gt; <code>dec64_less(<var>b</var>, <var>a</var>)</code>
+<pre><code>dec64_greater(<var>a</var>, <var>b</var>)</code>          =&gt; <code>dec64_less(<var>b</var>, <var>a</var>)</code>
 <code>dec64_greater_or_equal(<var>a</var>, <var>b</var>)</code> <code>=&gt; dec64_not(dec64_less(<var>a</var>, <var>b</var>))</code>
 <code>dec64_less_or_equal(<var>a</var>, <var>b</var>)</code>    =&gt; dec64_not(dec64_less(<var>b</var>, <var>a</var>))</pre>
 <h3 id="dec64_modulo"><code>dec64_modulo(</code><var>dividend</var><code>:</code> <var>dec64</var><code>,</code> <var>divisor</var><code>:</code> <var>dec64</var><code>) returns </code><var>modulus</var><code>:</code> <var>dec64</var></h3>
