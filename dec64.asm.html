@@ -103,6 +103,8 @@ th:after {
     is a software implementation of elementary operators of
     <span class=dec64><a href="http://www.DEC64.com/">DEC64</a></span> for
     <a href="https://en.wikipedia.org/wiki/X86-64">x64</a> processors.
+    (<a href="http://dec64.com/dec64.obj">obj</a>
+    <a href="http://dec64.com/dec64.listing">listing</a>)
     <a href="https://github.com/douglascrockford/DEC64/blob/master/dec64.h">dec64.h</a>
     includes C function prototypes for these functions:</p>
 <ul><li><a href="#dec64_abs"><code>dec64_abs(<var>number</var>: dec64) returns
@@ -471,9 +473,8 @@ dec64_less_or_equal(<var>a</var>, <var>b</var>)    =&gt; dec64_not(dec64_less(<v
 <h2>MASM</h2>
 <p>This file can be processed with Microsoft's
     <a href="https://msdn.microsoft.com/en-us/library/hb5z4sxd.aspx">ML64.exe</a>.
-    (<a href="http://dec64.com/dec64.listing">listing</a>) Visual Studio does
-    not have good defaults for building with MASM, and apparently provides no
-    documentation. These hints may be useful:</p>
+    Visual Studio does not have good defaults for building with MASM, and
+    apparently provides no documentation. These hints may be useful:</p>
 <pre>Platform &gt; x64
 Solution Explorer &gt; dec64 &gt; Build Dependencies &gt; Build Customizations... &gt; masm</pre>
 <p>There might be other assemblers that can process this file, but that has not
