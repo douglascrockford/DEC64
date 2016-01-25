@@ -287,6 +287,7 @@ static void test_to_place() {
     test_to(dec64_new(12345, -5), "0.12345");
     test_to(dec64_new(12345, -6), "0.012345");
     test_to(dec64_new(12345, -7), "0.0012345");
+    test_to(dec64_new(10, -128), "1e-127");
 }
 
 static void test_to_scientific() {
@@ -407,6 +408,7 @@ static void test_to_engineering() {
     test_to(dec64_new(12345, -5), "123.45e-3");
     test_to(dec64_new(12345, -6), "12.345e-3");
     test_to(dec64_new(12345, -7), "1.2345e-3");
+    test_to(dec64_new(1024, 0), "1.024e-3");
 }
 
 static void test_all_from() {
