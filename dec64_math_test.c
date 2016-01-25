@@ -3,7 +3,7 @@
 This is a test of dec64_math.c.
 
 dec64.com
-2016-01-07
+2016-01-24
 Public Domain
 
 No warranty.
@@ -401,8 +401,6 @@ static int do_tests(int level_of_detail) {
     test_all_tan();
 
     printf("\n\n%i pass, %i fail.\n", nr_pass, nr_fail);
-    p(dec64_random(), "random");
-    p(dec64_random(), "random");
     dec64_string_end(state);
     return nr_fail;
 }
