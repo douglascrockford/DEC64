@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2015-12-25
+; 2016-01-24
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -850,6 +850,7 @@ dec64_subtract: function_with_two_parameters
     xchg    r8,r9           ; swap the exponents
     xchg    r10,r11         ; swap the coefficients
     jmp     subtract_slower_decrease_compare
+    pad
 
 subtract_slower_decrease:
 
@@ -863,6 +864,7 @@ subtract_slower_decrease:
     jo      subtract_slower_increase
     sub     r8,1            ; decrease the first exponent
     mov     r10,r0          ; r10 is the enlarged first coefficient
+    pad
 
 subtract_slower_decrease_compare:
 
@@ -874,6 +876,7 @@ subtract_slower_decrease_compare:
 
     add     r0,r10          ; add the two coefficients
     jmp     pack            ; pack it up
+    pad
 
 subtract_slower_increase:
 
@@ -898,6 +901,7 @@ subtract_slower_increase:
 
     add     r0,r10          ; add the two coefficients
     jmp     pack
+    pad
 
 subtract_underflow:
 
@@ -1175,7 +1179,7 @@ dec64_half: function_with_one_parameter
     movsx   r8,r1_b         ; r8 is the exponent
     sar     r1,8            ; r1 is the coefficient
     sub     r8,1            ; bump down the exponent
-    imul    r0,r1,5         ; r0 is the coefficient * 5
+    lea     r0,[r1+r1*4]    ; r0 is the coefficient * 5
     jmp     pack
     pad
 
@@ -1545,7 +1549,7 @@ return:
 
 return_nan:
 
-; Return nan. All of the dec64_ functions return only this form of nan.
+; All of the dec64_ functions return only this form of nan.
 
     mov     r0,128          ; nan
     ret
@@ -1554,8 +1558,6 @@ return_nan:
 
 return_one:
 
-; Return one.
-
     mov     r0,256          ; one
     ret
 
@@ -1563,16 +1565,12 @@ return_one:
 
 return_zero:
 
-; Return zero.
-
     xor     r0,r0           ; zero
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 return_false:
-
-; Return zero.
 
     mov     r0,false
     ret
