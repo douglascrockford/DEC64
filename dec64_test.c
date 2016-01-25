@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2015-12-26
+2016-01-24
 Public Domain
 
 No warranty.
@@ -704,6 +704,8 @@ static void test_all_half() {
     test_half(two, one, "two");
     test_half(ten, five, "ten");
     test_half(minnum, minnum, "minnum");
+    test_half(dec64_new(-2, 0), dec64_new(-1, 0), "-2");
+    test_half(dec64_new(-1, 0), dec64_new(-5, -1), "-1");
 }
 
 static void test_all_inc() {
