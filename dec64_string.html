@@ -226,7 +226,7 @@ prefixed with '<code>e</code>' is appended if necessary.</p>
     dec64_string_char string[]
 )</h3>
 <p>    <code>dec64_to_string</code> converts a <code>dec64</code> number into a string. The caller provides
-    the memory in which to deposit the string. The provided string must have sufficient
+    the memory into which to deposit the string. The provided string must have sufficient
     capacity to hold 32 characters. It returns the number of characters actually deposited in the
   string (not including the trailing '<code>\0</code>'). If the number is <var>nan</var>, then it
   returns <code>0</code> indicating an empty string. If <code>NULL</code> is passed in as the string, then
