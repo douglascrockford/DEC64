@@ -247,6 +247,11 @@ dec64_to_string(state, dec64_new(10, -128), string);</pre></td>
     <td><pre>&quot;1024&quot;</pre></td>
   </tr>
   <tr>
+    <td><pre>dec64_separator(state, ',');
+dec64_to_string(state, dec64_new(1024, 0), string);</pre></td>
+    <td><pre>&quot;1,024&quot;</pre></td>
+  </tr>
+  <tr>
     <td><pre>dec64_separator(state, ' ');
 dec64_to_string(state, dec64_new(1024, 0), string);</pre></td>
     <td><pre>&quot;1 024&quot;</pre></td>
@@ -268,6 +273,11 @@ dec64_to_string(state, dec64_new(1024, 0), string);</pre></td>
   <tr>
     <td><pre>dec64_from_string(state, &quot;1,024.0000&quot;)</pre></td>
     <td><pre>DEC64_NAN</pre></td>
+  </tr>
+  <tr>
+    <td><pre>dec64_separator(state, ',');
+dec64_from_string(state, &quot;1,024.0000&quot;)</pre></td>
+    <td><pre>1024</pre></td>
   </tr>
   <tr>
     <td><pre>dec64_string_end();</pre></td>
