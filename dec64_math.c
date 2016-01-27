@@ -3,7 +3,7 @@ dec64_math.c
 Elementary functions for DEC64.
 
 dec64.com
-2016-01-19
+2016-01-26
 Public Domain
 
 No warranty.
@@ -24,30 +24,30 @@ faster and more accurate.
 #define D_PI             0x6F9C9E6576434CF0LL
 #define D_2PI            0x165286144ADA42F1LL
 
-dec64 dec64_acos(dec64 x) {
+dec64 dec64_acos(dec64 ratio) {
     dec64 result = dec64_subtract(
         D_HALF_PI,
-        dec64_asin(x)
+        dec64_asin(ratio)
     );
     return result;
 }
 
-dec64 dec64_asin(dec64 x) {
-    if (dec64_equal(x, DEC64_ONE) == DEC64_TRUE) {
+dec64 dec64_asin(dec64 ratio) {
+    if (dec64_equal(ratio, DEC64_ONE) == DEC64_TRUE) {
         return D_HALF_PI;
     }
-    if (dec64_equal(x, DEC64_NEGATIVE_ONE) == DEC64_TRUE) {
+    if (dec64_equal(ratio, DEC64_NEGATIVE_ONE) == DEC64_TRUE) {
         return dec64_neg(D_HALF_PI);
     }
     if (
-        dec64_is_any_nan(x) == DEC64_TRUE ||
-        dec64_less(DEC64_ONE, dec64_abs(x)) == DEC64_TRUE
+        dec64_is_any_nan(ratio) == DEC64_TRUE ||
+        dec64_less(DEC64_ONE, dec64_abs(ratio)) == DEC64_TRUE
     ) {
         return DEC64_NAN;
     }
     dec64 bottom = D_2;
-    dec64 factor = x;
-    dec64 x2 = dec64_multiply(x, x);
+    dec64 factor = ratio;
+    dec64 x2 = dec64_multiply(ratio, ratio);
     dec64 result = factor;
     while (1) {
         factor = dec64_divide(
@@ -70,11 +70,11 @@ dec64 dec64_asin(dec64 x) {
     return result;
 }
 
-dec64 dec64_atan(dec64 x) {
+dec64 dec64_atan(dec64 ratio) {
     return dec64_asin(
         dec64_divide(
-            x, 
-            dec64_sqrt(dec64_inc(dec64_multiply(x, x)))
+            ratio, 
+            dec64_sqrt(dec64_inc(dec64_multiply(ratio, ratio)))
         )
     );
 }
@@ -102,17 +102,17 @@ dec64 dec64_atan2(dec64 y, dec64 x) {
     }
 }
 
-dec64 dec64_cos(dec64 x) {
-    return dec64_sin(dec64_add(x, D_HALF_PI));
+dec64 dec64_cos(dec64 radians) {
+    return dec64_sin(dec64_add(radians, D_HALF_PI));
 }
 
-dec64 dec64_exp(dec64 x) {
-        dec64 result = dec64_inc(x);
+dec64 dec64_exp(dec64 exponent) {
+        dec64 result = dec64_inc(exponent);
         dec64 divisor = D_2;
-        dec64 term = x;
+        dec64 term = exponent;
         while (1) {
             term = dec64_divide(
-                dec64_multiply(term, x), 
+                dec64_multiply(term, exponent), 
                 divisor
             );
             dec64 progress = dec64_add(result, term);
@@ -171,8 +171,7 @@ dec64 dec64_exponentiate(dec64 coefficient, dec64 exponent) {
     ));
 }
 
-dec64 dec64_log(dec64 x)
-{
+dec64 dec64_log(dec64 x) {
     if (x <= 0 || dec64_is_any_nan(x) == DEC64_TRUE) {
         return DEC64_NAN;
     }
@@ -292,30 +291,30 @@ void dec64_seed(dec64 seed) {
     seed_1 = (seed | 1) * D_2PI;
 }
 
-dec64 dec64_sin(dec64 x) {
-    while (dec64_less(D_PI, x) == DEC64_TRUE) {
-        x = dec64_subtract(x, D_PI);
-        x = dec64_subtract(x, D_PI);
+dec64 dec64_sin(dec64 radians) {
+    while (dec64_less(D_PI, radians) == DEC64_TRUE) {
+        radians = dec64_subtract(radians, D_PI);
+        radians = dec64_subtract(radians, D_PI);
     }
-    while (dec64_less(x, D_NPI) == DEC64_TRUE) {
-        x = dec64_add(x, D_PI);
-        x = dec64_add(x, D_PI);
+    while (dec64_less(radians, D_NPI) == DEC64_TRUE) {
+        radians = dec64_add(radians, D_PI);
+        radians = dec64_add(radians, D_PI);
     }
     int neg = 0;
-    if (x < 0) {
-        x = dec64_neg(x);
+    if (radians < 0) {
+        radians = dec64_neg(radians);
         neg = -1;
     }
-    if (dec64_less(D_HALF_PI, x) == DEC64_TRUE) {
-        x = dec64_subtract(D_PI, x);
+    if (dec64_less(D_HALF_PI, radians) == DEC64_TRUE) {
+        radians = dec64_subtract(D_PI, radians);
     }
     dec64 result;
-    if (x == D_HALF_PI) {
+    if (radians == D_HALF_PI) {
         result = DEC64_ONE;
     } else {
-        dec64 x2 = dec64_multiply(x, x);
+        dec64 x2 = dec64_multiply(radians, radians);
         dec64 order = DEC64_ONE;
-        dec64 term = x;
+        dec64 term = radians;
         result = term;
         while (1) {
             term = dec64_multiply(term, x2);
@@ -364,9 +363,9 @@ dec64 dec64_sqrt(dec64 radicand) {
     }
 }
 
-dec64 dec64_tan(dec64 x) {
+dec64 dec64_tan(dec64 radians) {
     return dec64_divide(
-        dec64_sin(x), 
-        dec64_cos(x)
+        dec64_sin(radians), 
+        dec64_cos(radians)
     );
 }
