@@ -77,18 +77,7 @@ th {
 	font-weight: lighter;
 	padding-left: 3pt;
 	padding-right: 3pt;
-	position: relative;
-	text-align: justify;
-	top: 1em;
-}
-
-/* This terrible hack instead of text_align: force */
-
-th:after {
-	content: "";
-	display: inline-block;
-	height: 0;
-	width: 100%;
+	text-align: center;
 }
 
 .dec64, h1, h2 {
@@ -99,9 +88,39 @@ th:after {
 </head>
 
 <body>
-<img src="dec64.png" width="398" height="103" alt="DEC64">
+<a href="http://www.DEC64.com/"><img src="dec64.png" alt="DEC64" width="398" height="103" border="0"></a>
 <h1>dec64_string.c</h1>
-<p><a href="https://github.com/douglascrockford/DEC64/blob/master/dec64_string.c">dec64_string.c</a> contains functions for converting  <span class=dec64><a href="http://www.DEC64.com/">DEC64</a></span> numbers to strings and back again. <a href="https://github.com/douglascrockford/DEC64/blob/master/dec64_text.h">dec64_string.h</a> includes C function prototypes for these functions:</p>
+<p>One of the most difficult problems in floating-point systems is the
+    conversion of numbers to text. This conversion is important because humans
+    generally cannot use binary representations, and there are not simple, exact
+    transformations between familiar decimal representations and binary
+    floating-point. It can be difficult and expensive to find representations
+    that are accurate, minimal, and unsurprising. </p>
+<table>
+  <tr>
+    <th scope="col">&nbsp;</th>
+    <th align="center" scope="col">0.1 + 0.2</th>
+    <th align="center" scope="col">10 / 3</th>
+  </tr>
+  <tr>
+    <th>IEEE754</th>
+    <td><pre>0.30000000000000004</pre></td>
+    <td><pre>3.3333333333333335</pre></td>
+  </tr>
+  <tr>
+    <th><span class=dec64>DEC64</span></th>
+    <td align="left"><pre>0.3</pre></td>
+    <td><pre>3.3333333333333333</pre></td>
+  </tr>
+</table>
+<p>One of <span class=dec64>DEC64</span>'s advantages is that it easily and
+    accurately converts  to decimal representations, requiring only slightly
+    more effort than the conversion of integers.</p>
+<p><a href="https://github.com/douglascrockford/DEC64/blob/master/dec64_string.c">
+    dec64_string.c</a> contains functions for converting
+    <span class=dec64>DEC64</span> numbers to strings and back again.
+    <a href="https://github.com/douglascrockford/DEC64/blob/master/dec64_text.h">
+    dec64_string.h</a> includes C function prototypes for these functions:</p>
 <pre>dec64 <a href="#dec64_from_string">dec64_from_string</a>(
     dec64_string_state state,
     dec64_string_char string[]
@@ -146,7 +165,7 @@ th:after {
 )</pre>
 
 <pre>int <a href="#dec64_to_string">dec64_to_string</a>(
-    dec64_string_state state, 
+    dec64_string_state state,
     dec64 number,
     dec64_string_char string[]
 )</pre>
@@ -157,12 +176,20 @@ th:after {
   <li><code>  dec64_string_state</code></li>
 </ul>
 <h2 id="state">String State</h2>
-<p>There functions are reentrant and thread safe. This is accomplished by use of a state object that is created by <code>dec64_string_begin</code> and destroyed by <code>dec64_string_end</code>. All of these functions require a state object as the first argument. The state argument allows for customizing the conversions. Do not attempt to modify the string state object directly. Use the provided functions instead. State objects are reuseable.</p>
-<p>The state object contains the output mode:      standard, scientific, or engineering.<br>
-</p>
+<p>There functions are reentrant and thread safe. This is accomplished by use of
+    a state object that is created by
+    <code><a href="#dec64_string_begin">dec64_string_begin</a></code> and
+    destroyed by <code><a href="#dec64_string_end">dec64_string_end</a></code>.
+    All of these functions require a state object as the first argument. The
+    state argument allows for customizing the conversions. Do not attempt to
+    modify the string state object directly. Use the provided functions instead.
+    State objects are reusable.</p>
+<p>The state object contains the output mode: standard, scientific, or engineering.</p>
 <h2 id="creation">Creation</h2>
-<h3><span id="dec64_string_state">dec64_string_state</span> <span id="dec64_string_begin">dec64_string_begin</span>()</h3>
-<p><code>dec64_string_begin</code> creates a state object. The object should be passed to all of the other functions.</p>
+<h3><span id="dec64_string_state">dec64_string_state</span>
+    <span id="dec64_string_begin">dec64_string_begin</span>()</h3>
+<p><code>dec64_string_begin</code> creates a state object. The object should be
+    passed to all of the other functions.</p>
 <h2 id="destruction">Destruction</h2>
 <h3 id="dec64_string_end">void dec64_string_end(
     dec64_string_state state
@@ -174,42 +201,62 @@ th:after {
     dec64_string_state state,
     dec64_string_char decimal_point
 )</h3>
-<p>Specify the decimal point character. This is used by both dec64_to_string and dec64_from_string. The default is '<code>.</code>'. If it is '<code>\0</code>', then the decimal point will be suppressed. </p>
+<p>Specify the decimal point character. This is used by both
+    <code><a href="#dec64_to_string">dec64_to_string</a></code> and
+    <code><a href="#dec64_from_string">dec64_from_string</a></code>.
+    The default is '<code>.</code>'. If it is '<code>\0</code>', then the
+    decimal point will be suppressed.</p>
 <p> It returns the previous value.</p>
 <h3>void <span id="dec64_string_engineering">dec64_string_engineering</span>(
     dec64_string_state state
 )</h3>
-<p>Put dec64_to_string into engineering mode, which is like scientific mode  except that the exponent is constrained to be a multiple of 3. There can be up to three digits before the decimal point.</p>
-
+<p>Put <a href="#dec64_to_string"><code>dec64_to_string</code></a> into
+    engineering mode, which is like scientific mode  except that the exponent is
+    constrained to be a multiple of 3. There can be up to three digits before
+    the decimal point.</p>
 <h3>int <span id="dec64_string_places">dec64_string_places</span>(
     dec64_string_state state,
     dec64_string_char places
 )</h3>
-<p>Specify the minimum number of decimal places output by dec64_to_string in standard mode. This is commonly used to format money values. The default is <code>0</code>.</p>
+<p>Specify the minimum number of decimal places output by
+    <a href="http://www.DEC64.com/"><code>dec64_to_string</code></a> in standard
+    mode. This is commonly used to format money values. The default is
+    <code>0</code>.</p>
 <p> It returns the previous value.</p>
 <h3>void <span id="dec64_string_scientific">dec64_string_scientific</span>(
     dec64_string_state state
 )</h3>
-<p>Put dec64_to_string into scientific mode, in which the coefficient is displayed with one digit before the decimal point, and an exponent 
-prefixed with '<code>e</code>' is appended if necessary.</p>
-
+<p>Put dec64_to_string into scientific mode, in which the coefficient is
+    displayed with one digit before the decimal point, and an exponent prefixed
+    with '<code>e</code>' is appended if necessary.</p>
 <h3>int <span id="dec64_string_separation">dec64_string_separation</span>(
     dec64_string_state state,
     int separation
 )</h3>
-<p>Specify the number of digits output between separators by <code>dec64_to_string</code>  in standard mode. If separation is <code>1</code> or less, then separation is suppressed. The default is <code>3</code>. </p>
+<p>Specify the number of digits output between separators by
+    <code><a href="#dec64_to_string">dec64_to_string</a></code> in standard
+    mode. If separation is <code>1</code> or less, then separation is
+    suppressed. The default is <code>3</code>.</p>
 <p> It returns the previous value.</p>
 <h3>dec64_string_char <span id="dec64_string_separator">dec64_string_separator</span>(
     dec64_string_state state,
     dec64_string_char separator
 )</h3>
-<p>Specify the separation character, which is used by <code>dec64_to_string</code> in  standard mode to improve the readability of digits before the decimal point. Typical values include '<code>,</code>', '<code> </code>', '<code>_</code>', and '<code>.</code>'. If it is '<code>\0</code>', then separation will be supressed. The default is '<code>\0</code>'.</p>
-<p> <code>dec64_from_string</code> will ignore this character.</p>
-<p> It returns the previous value.</p>
+<p>Specify the separation character, which is used by
+    <code><a href="http://www.DEC64.com/">dec64_to_string</a></code> in standard
+    mode to improve the readability of digits before the decimal point. Typical
+    values include '<code>,</code>', '<code> </code>', '<code>_</code>', and
+    '<code>.</code>'. If it is '<code>\0</code>', then separation will be
+    suppressed. The default is '<code>\0</code>'.</p>
+<p><code><a href="#dec64_from_string">dec64_from_string</a></code> will ignore
+    this character.</p>
+<p>It returns the previous value.</p>
 <h3>void <span id="dec64_string_standard">dec64_string_standard</span>(
     dec64_string_state state
 )</h3>
-<p>Put <code>dec64_to_string</code> into standard mode. Separators can be inserted between some digits if requested. If the number might be too long, then scientific mode might be used instead.</p>
+<p>Put <code><a href="#dec64_to_string">dec64_to_string</a></code> into standard
+    mode. Separators can be inserted between some digits if requested. If the
+    number might be too long, then scientific mode might be used instead.</p>
 <p>Standard mode is the default.</p>
 
 <h2 id="action">Action</h2>
@@ -218,23 +265,26 @@ prefixed with '<code>e</code>' is appended if necessary.</p>
     dec64_string_state state,
     dec64_string_char string[]
 )</h3>
-<p>Convert a zero-delimited string into a <code>dec64</code>. If conversion is not possible for any reason, the result will be <code>DEC64_NAN</code>.</p>
-
+<p>Convert a zero-delimited string into a <code>dec64</code>. Separator
+    characters will be ignored. If conversion is not possible for any reason,
+    the result will be <code>DEC64_NAN</code>.</p>
 <h3>int <span id="dec64_to_string">dec64_to_string</span>(
-    dec64_string_state state, 
+    dec64_string_state state,
     dec64 number,
     dec64_string_char string[]
 )</h3>
-<p>    <code>dec64_to_string</code> converts a <code>dec64</code> number into a string. The caller provides
-    the memory into which to deposit the string. The provided string must have sufficient
-    capacity to hold 32 characters. It returns the number of characters actually deposited in the
-  string (not including the trailing '<code>\0</code>'). If the number is <var>nan</var>, then it
-  returns <code>0</code> indicating an empty string. If <code>NULL</code> is passed in as the string, then
-no characters will be deposited, but a character count will be returned.</p>
-<p> In standard mode, the number will be formatted conventionally unless it
+<p><code>dec64_to_string</code> converts a <code>dec64</code> number into a
+    string. The caller provides the memory into which to deposit the string. The
+    provided string must have sufficient capacity to hold 32 characters. It
+    returns the number of characters actually deposited in the string (not
+    including the trailing '<code>\0</code>'). If the number is <var>nan</var>,
+    then it returns <code>0</code> indicating an empty string. If
+    <code>NULL</code> is passed in as the string, then no characters will be
+    deposited, but a character count will be returned.</p>
+<p>In standard mode, the number will be formatted conventionally unless it
   would require more than 17 digits, which would be due to excessive
   trailing zeros or zeros immediately after the decimal point. In that
-case scientific notation will be used instead. </p>
+  case scientific notation will be used instead.</p>
 <h2 id="examples">Examples</h2>
 <table>
   <tr>
