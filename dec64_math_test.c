@@ -3,7 +3,7 @@
 This is a test of dec64_math.c.
 
 dec64.com
-2016-01-24
+2016-01-28
 Public Domain
 
 No warranty.
@@ -332,9 +332,13 @@ static void test_all_root() {
     test_root(two, zero, zero, "2|zero");
     test_root(three, zero, zero, "3|zero");
     test_root(three, dec64_new(27, 0), three, "3|27");
-    test_root(three, dec64_new(-27, 0), dec64_new(-3, 0), "3|-27");
+    test_root(three, dec64_new(-27, 0), dec64_new(-3, 0), "3|-27");    
+    test_root(three, pi, dec64_new(14645918875615233, -16), "3|pi");
     test_root(four, dec64_new(-27, 0), nan, "4|-27");
     test_root(four, dec64_new(256, 0), four, "4|256");
+    test_root(four, dec64_new(1, 4), ten, "4|1e4");
+    test_root(four, dec64_new(1, 16), dec64_new(1, 4), "4|1e16");
+    test_root(four, pi, dec64_new(13313353638003897, -16), "4|pi");
 }
 
 static void test_all_sin() {

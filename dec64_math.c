@@ -3,7 +3,7 @@ dec64_math.c
 Elementary functions for DEC64.
 
 dec64.com
-2016-01-26
+2016-01-28
 Public Domain
 
 No warranty.
@@ -20,6 +20,7 @@ faster and more accurate.
 #define D_E              0x6092A113D8D574F0LL
 #define D_HALF                        0x5FFLL
 #define D_HALF_PI        0x37CE4F32BB21A6F0LL
+#define D_NHALF_PI       0xC831B0CD44DE59F0LL
 #define D_NPI            0x9063619A89BCB4F0LL
 #define D_PI             0x6F9C9E6576434CF0LL
 #define D_2PI            0x165286144ADA42F1LL
@@ -37,7 +38,7 @@ dec64 dec64_asin(dec64 ratio) {
         return D_HALF_PI;
     }
     if (dec64_equal(ratio, DEC64_NEGATIVE_ONE) == DEC64_TRUE) {
-        return dec64_neg(D_HALF_PI);
+        return D_NHALF_PI;
     }
     if (
         dec64_is_any_nan(ratio) == DEC64_TRUE ||
@@ -84,7 +85,7 @@ dec64 dec64_atan2(dec64 y, dec64 x) {
         if (dec64_is_zero(y) == DEC64_TRUE) {
             return DEC64_NAN;
         } else if (y < 0) {
-            return dec64_neg(D_HALF_PI);
+            return D_NHALF_PI;
         } else {
             return D_HALF_PI;
         }
@@ -235,7 +236,6 @@ dec64 dec64_random() {
 }
 
 dec64 dec64_root(dec64 degree, dec64 radicand) {
-    int repeat;
     dec64 result;
     degree = dec64_normal(degree);
     if (
@@ -260,9 +260,9 @@ dec64 dec64_root(dec64 degree, dec64 radicand) {
         return dec64_sqrt(radicand);
     }
     dec64 degree_minus_one = dec64_dec(degree);
-    repeat = 64;
     result = DEC64_ONE;
-    while (repeat > 0) {
+    dec64 prosult = DEC64_NAN;
+    while (1) {
         dec64 progress = dec64_divide(
             dec64_add(
                 dec64_multiply(result, degree_minus_one),
@@ -274,12 +274,14 @@ dec64 dec64_root(dec64 degree, dec64 radicand) {
             degree
         );
         if (progress == result) {
-            break;
+            return result;
         }
+        if (progress == prosult) {
+            return dec64_half(dec64_add(progress, result));
+        }
+        prosult = result;
         result = progress;
-        repeat -= 1;
     }
-    return result;
 }
 
 void dec64_seed(dec64 seed) {
@@ -348,15 +350,17 @@ dec64 dec64_sqrt(dec64 radicand) {
         if (dec64_coefficient(radicand) == 0) {
             return DEC64_ZERO;
         }
-        int repeat = 8;
         dec64 result = radicand;
-        do {
-            result = dec64_half(dec64_add(
+        while (1) {
+            dec64 progress = dec64_half(dec64_add(
                 result,
                 dec64_divide(radicand, result)
             ));
-            repeat -= 1;
-        } while (repeat > 0);
+            if (progress == result) {
+                return result;
+            }
+            result = progress;
+        } 
         return result;
     } else {
         return DEC64_NAN;
