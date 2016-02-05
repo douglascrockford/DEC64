@@ -3,7 +3,7 @@ dec64_string.c
 Conversion between DEC64 and strings.
 
 dec64.com
-2016-01-10
+2016-02-04
 Public Domain
 
 No warranty.
@@ -512,16 +512,14 @@ dec64 dec64_from_string(
     The exponent itself.
 */
                         while (c != 0) {
-                            if (c != state->separator) {
-                                if (c >= '0' && c <= '9') {
-                                    ok = 1;
-                                    exp = exp * 10 + (c - '0');
-                                    if (exp >= 1000) {
-                                        return DEC64_NAN;
-                                    }
-                                } else {
+                            if (c >= '0' && c <= '9') {
+                                ok = 1;
+                                exp = exp * 10 + (c - '0');
+                                if (exp < 0) {
                                     return DEC64_NAN;
                                 }
+                            } else {
+                                return DEC64_NAN;
                             }
                             at += 1;
                             c = string[at];
