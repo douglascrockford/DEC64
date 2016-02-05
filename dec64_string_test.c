@@ -3,7 +3,7 @@
 This is a test of dec64_string.c.
 
 dec64.com
-2015-12-25
+2016-02-04
 Public Domain
 
 No warranty.
@@ -111,7 +111,7 @@ static void print_dec64(dec64 number) {
 
 static void test_from(dec64_string_char * string, dec64 expected) {
     dec64 actual = dec64_from_string(state, string);
-    if (dec64_equal(expected, actual)) {
+    if (dec64_equal(expected, actual) == DEC64_TRUE) {
         nr_pass += 1;
         if (level >= 3) {
             printf("\n\npass from: %s", string);
@@ -408,7 +408,7 @@ static void test_to_engineering() {
     test_to(dec64_new(12345, -5), "123.45e-3");
     test_to(dec64_new(12345, -6), "12.345e-3");
     test_to(dec64_new(12345, -7), "1.2345e-3");
-    test_to(dec64_new(1024, 0), "1.024e-3");
+    test_to(dec64_new(1024, 0), "1.024e3");
 }
 
 static void test_all_from() {
@@ -424,7 +424,6 @@ static void test_all_from() {
     test_from(".", nan);
     test_from("1e,1", nan);
     test_from(",-0", nan);
-    test_from("1e1,", nan);
 
     test_from("0", zero);
     test_from("-0", zero);
@@ -432,7 +431,7 @@ static void test_all_from() {
     test_from("00", zero);
     test_from("0000000000000000000000000000000000000000000000000", zero);
     test_from("000000.0000000000000000000000000000000000000000000", zero);
-    test_from("000000.0000000000000000000,000000000000000000000000e-128", zero);
+    test_from("00,0000.00000000000000000000000000000000000000000000000000000000e-128", zero);
     test_from(".00", zero);
     test_from("0.00", zero);
     test_from("0.00e-999", zero);
