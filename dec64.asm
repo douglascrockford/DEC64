@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2016-01-24
+; 2016-02-12
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -88,6 +88,10 @@ title   dec64.asm for x64.
 true    equ 380h
 false   equ 280h
 
+; Sometimes multiplication by a magic number can be faster than and as
+; accurate as division.
+
+eight_over_ten equ -3689348814741910323
 
 public dec64_abs;(number: dec64)
 ;   returns absolution: dec64
@@ -381,10 +385,19 @@ pack:
 
 pack_large:
 
-    mov     r10,10          ; r10 is 10
-    cqo                     ; sign extend r0 into r2
-    idiv    r10             ; divide r0 by ten
+    mov     r1,r0           ; r1 is the coefficient
+    sar     r1,63           ; r1 is -1 if negative, or 0 if positive
+    mov     r11,eight_over_ten ; magic number
+    mov     r9,r1           ; r9 is -1 or 0
+    xor     r0,r1           ; complement the coefficient if negative
+    and     r9,1            ; r9 is 1 or 0
+    add     r0,r9           ; r0 is absolute value of coefficient
     add     r8,1            ; add 1 to the exponent
+    mul     r11             ; multiply abs(coefficient) by magic number
+    mov     r0,r2           ; r0 is the product shift 64 bits
+    shr     r0,3            ; r0 is divided by 8: the abs(coefficient) / 10
+    xor     r0,r1           ; complement the coefficient if it was negative
+    add     r0,r9           ; coefficient's sign is restored
     jmp     pack            ; start over
     pad
 
@@ -453,13 +466,16 @@ dec64_round: function_with_two_parameters
     movsx   r8,r11_b        ; r8 is the current exponent
     mov     r0,r11          ; r0 is the number
     test    r1_b,r1_h       ; is either nan?
-    jz      return_nan       ; if so, the result is nan
+    jz      return_nan      ; if so, the result is nan
 
     sar     r0,8            ; r0 is the coefficient
     jz      return          ; if the coefficient is zero, the result is zero
     cmp     r8,r9           ; compare the exponents
     jge     pack            ; no rounding required
-    mov     r10,10          ; r10 is the divisor
+    mov     r2,r0           ; r2 is the coefficient
+    neg     r2              ; rs is the coefficient negated
+    cmovns  r0,r2           ; r0 is absolute value of the coefficient
+    mov     r10,eight_over_ten ; magic
     pad
 
 round_loop:
@@ -467,22 +483,23 @@ round_loop:
 ; Increment the exponent and divide the coefficient by 10 until the target
 ; exponent is reached.
 
-    cqo                     ; sign extend r0 into r2
-    idiv    r10             ; divide r2:r0 by 10
+    mul     r10             ; r2 is the coefficient * 8 / 10
+    mov     r0,r2           ; r0 is the coefficient * 8 / 10
+    shr     r0,3            ; r0 is the coefficient / 10
+
     add     r8,1            ; increment the exponent
     cmp     r8,r9           ; compare the exponents
     jne     round_loop      ; loop if the exponent has not reached the target
 
 ; Round if necessary and return the result.
 
-    xor     r1,r1           ; r1 is zero
-    cmp     r2_b,-5         ; compare the remainder to -5
-    setle   r1_b            ; r1 is 1 if remainder <= -5 else 0
-    cmp     r2_b,5          ; compare the remainder to 5
-    setge   r2_h            ; if the remainder is greater than or equal to 5
-    neg     r1              ; r1 is -1 or 0
-    or      r1_b,r2_h       ; r1 is the rounding flag: -1, 0, or 1
-    add     r0,r1           ; r0 is the rounded coefficient
+    shr     r2,2            ; Isolate the carry bit
+    and     r2,1            ; r2 is 1 if rounding is needed
+    add     r0,r2           ; r0 is rounded
+    mov     r2,r0           ; r2 is the result
+    neg     r2              ; r2 is the result negated
+    test    r11,r11         ; was the original number negative
+    cmovs   r0,r2           ; if so, use the negated result
     jmp     pack            ; pack it up
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
