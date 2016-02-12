@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2016-01-24
+; 2016-02-10
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -87,6 +87,11 @@ title   dec64.asm for x64.
 
 true    equ 380h
 false   equ 280h
+
+; Multication by a power of 2 divided by 10 followed by a right shift
+; can be faster than division by 10.
+
+four_over_ten equ 6666666666666667h
 
 
 public dec64_abs;(number: dec64)
@@ -381,9 +386,10 @@ pack:
 
 pack_large:
 
-    mov     r10,10          ; r10 is 10
-    cqo                     ; sign extend r0 into r2
-    idiv    r10             ; divide r0 by ten
+    mov     r10,four_over_ten
+    imul    r10
+    mov     r0,r2
+    sar     r0,2
     add     r8,1            ; add 1 to the exponent
     jmp     pack            ; start over
     pad
@@ -420,7 +426,7 @@ pack_decrease:
     xor     r1,r1           ; the rounding flag is zero
     sar     r9,56           ; r9 is top 8 bits of the coefficient
     adc     r9,0            ; add the ninth bit
-    jnz     return_nan       ; the number is still too large
+    jnz     return_nan      ; the number is still too large
     shl     r0,8            ; shift the exponent into position
     cmovz   r8,r0           ; if the coefficient is zero, also zero the exponent
     movzx   r8,r8_b         ; zero out all but the bottom 8 bits of the exponent
