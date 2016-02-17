@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2016-02-12
+; 2016-02-16
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -427,10 +427,9 @@ pack_decrease:
     imul    r0,10           ; try multiplying the coefficient by 10
     jo      return_nan      ; if it overflows, we failed to salvage
     sub     r8,1            ; decrement the exponent
-    cmp     r8,127          ; test the exponent
-    jg      pack_decrease   ; until the exponent is less than 127
+    test    r8,-128         ; is the exponent still over 127?
+    jnz     pack_decrease   ; until the exponent is less than 127
     mov     r9,r0           ; r9 is the coefficient
-    xor     r1,r1           ; the rounding flag is zero
     sar     r9,56           ; r9 is top 8 bits of the coefficient
     adc     r9,0            ; add the ninth bit
     jnz     return_nan      ; the number is still too large
@@ -527,9 +526,9 @@ dec64_add: function_with_two_parameters
 add_begin:
 
     mov     r0,r1           ; r0 is the first number
-    or      r0_b,r2_b       ; r0_b is the two exponents or'd together
+    or      r1_b,r2_b       ; r1_b is the two exponents or'd together
     jnz     add_slow        ; if either exponent is not zero, take the slow path
-    add     r0,r2           ; add the coefficients together
+    add     r0,r2           ; add the shifted coefficients together
     jo      add_overflow    ; if there was no overflow, we are done
     ret                     ; no need to pack
     pad
@@ -549,8 +548,9 @@ add_slow:
 
 ; The slow path is taken if the two operands do not both have zero exponents.
 
-    cmp     r1_b,128        ; Is the first operand nan?
-    je      return_nan
+    mov     r1,r0           ; restore r1
+    cmp     r0_b,128        ; is the first operand nan?
+    je      return_nan      ; if nan, get out
 
 ; Are the two exponents the same? This will happen often, especially with
 ; money values.
@@ -562,12 +562,13 @@ add_slow:
 ; will be no carry into the coefficients when the coefficients are added.
 ; If the result is zero, then return the normal zero.
 
-    xor     r0_b,r0_b       ; remove the first exponent
-    xor     r2_b,r2_b       ; remove the second exponent
-    add     r0,r2           ; add the coefficients
+    and     r0,-256         ; remove the exponent
+    and     r2,-256         ; remove the other exponent
+    add     r0,r2           ; add the shifted coefficients
     jo      add_overflow    ; if it overflows, it must be repaired
     cmovz   r1,r0           ; if the coefficient is zero, the exponent is zero
-    mov     r0_b,r1_b       ; mix in the exponent
+    and     r1,255          ; mask the exponent
+    or      r0,r1           ; mix in the exponent
     ret                     ; no need to pack
     pad
 
