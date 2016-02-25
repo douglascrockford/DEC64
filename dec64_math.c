@@ -3,7 +3,7 @@ dec64_math.c
 Elementary functions for DEC64.
 
 dec64.com
-2016-01-28
+2016-02-24
 Public Domain
 
 No warranty.
@@ -25,30 +25,30 @@ faster and more accurate.
 #define D_PI             0x6F9C9E6576434CF0LL
 #define D_2PI            0x165286144ADA42F1LL
 
-dec64 dec64_acos(dec64 ratio) {
+dec64 dec64_acos(dec64 slope) {
     dec64 result = dec64_subtract(
         D_HALF_PI,
-        dec64_asin(ratio)
+        dec64_asin(slope)
     );
     return result;
 }
 
-dec64 dec64_asin(dec64 ratio) {
-    if (dec64_equal(ratio, DEC64_ONE) == DEC64_TRUE) {
+dec64 dec64_asin(dec64 slope) {
+    if (dec64_equal(slope, DEC64_ONE) == DEC64_TRUE) {
         return D_HALF_PI;
     }
-    if (dec64_equal(ratio, DEC64_NEGATIVE_ONE) == DEC64_TRUE) {
+    if (dec64_equal(slope, DEC64_NEGATIVE_ONE) == DEC64_TRUE) {
         return D_NHALF_PI;
     }
     if (
-        dec64_is_any_nan(ratio) == DEC64_TRUE ||
-        dec64_less(DEC64_ONE, dec64_abs(ratio)) == DEC64_TRUE
+        dec64_is_any_nan(slope) == DEC64_TRUE ||
+        dec64_less(DEC64_ONE, dec64_abs(slope)) == DEC64_TRUE
     ) {
         return DEC64_NAN;
     }
     dec64 bottom = D_2;
-    dec64 factor = ratio;
-    dec64 x2 = dec64_multiply(ratio, ratio);
+    dec64 factor = slope;
+    dec64 x2 = dec64_multiply(slope, slope);
     dec64 result = factor;
     while (1) {
         factor = dec64_divide(
@@ -71,11 +71,11 @@ dec64 dec64_asin(dec64 ratio) {
     return result;
 }
 
-dec64 dec64_atan(dec64 ratio) {
+dec64 dec64_atan(dec64 slope) {
     return dec64_asin(
         dec64_divide(
-            ratio, 
-            dec64_sqrt(dec64_inc(dec64_multiply(ratio, ratio)))
+            slope, 
+            dec64_sqrt(dec64_inc(dec64_multiply(slope, slope)))
         )
     );
 }
@@ -189,13 +189,14 @@ dec64 dec64_log(dec64 x) {
     dec64 factor = y;
     dec64 result = factor;
     dec64 divisor = D_2;
+
     while (1) {
         factor = dec64_multiply(factor, y);
         dec64 progress = dec64_add(
             result, 
             dec64_divide(factor, divisor)
         );
-        if (result == progress) {
+        if (result == progress || progress == DEC64_NAN) {
             break;
         }
         result = progress;
