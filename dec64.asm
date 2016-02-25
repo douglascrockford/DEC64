@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2016-02-16
+; 2016-02-25
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -567,7 +567,7 @@ add_slow:
     add     r0,r2           ; add the shifted coefficients
     jo      add_overflow    ; if it overflows, it must be repaired
     cmovz   r1,r0           ; if the coefficient is zero, the exponent is zero
-    and     r1,255          ; mask the exponent
+    movzx   r1,r1_b         ; mask the exponent
     or      r0,r1           ; mix in the exponent
     ret                     ; no need to pack
     pad
@@ -1225,17 +1225,17 @@ dec64_signum: function_with_one_parameter
 ; If the number is zero, the result is 0.
 ; If the number is greater than zero, the result is 1.
 
-    xor     r0,r0           ; r0 is zero
-    mov     r10,r1          ; r10 is the number
-    xor     r2,r2           ; r2 is zero
-    sar     r10,8           ; r10 is the coefficient
-    sets    r2_h            ; r2 is one if r1 is negative
-    setnz   r1_h            ; r1_h is 1 if the number was not zero
-    sub     r0,r2           ; r0 is -one if the number was negative, otherwise 0
+    mov     r0,r1           ; r0 is the number
+    sar     r0,8            ; r0 is the coefficient
+    mov     r8,r0           ; r8 is the coefficient too
+    neg     r0              ; r0 is -coefficient
+    sar     r8,63           ; r8 is the extended sign (-1 if negative else 0)
+    shr     r0,63           ; r0 is 1 if the number was greater than 0
     mov     r2,128          ; r2 is nan
-    or      r0_h,r1_h       ; r0 is (-)one if the number was not zero
-    cmp     r1_b,r2_b       ; but if the original number was nan
-    cmove   r0,r2           ; then the result is nan
+    or      r0,r8           ; r0 is -1, 0, or 1
+    shl     r0,8            ; package the number with a zero exponent
+    cmp     r1_b,r2_b       ; is the number nan?
+    cmove   r0,r2           ; if so, replace the answer
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
