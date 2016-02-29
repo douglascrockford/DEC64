@@ -104,9 +104,9 @@ th:after {
     <span class=dec64><a href="http://www.DEC64.com/">DEC64</a></span> for
     <a href="https://en.wikipedia.org/wiki/X86-64">x64</a> processors.
     (<a href="http://dec64.com/dec64.obj">obj</a>
-    <a href="http://dec64.com/dec64.listing">listing</a>)
-    <a href="https://github.com/douglascrockford/DEC64/blob/master/dec64.h">dec64.h</a>
-    includes C function prototypes for these functions:</p>
+    <a href="http://dec64.com/dec64.listing">listing</a>)    </p>
+<p><a href="https://github.com/douglascrockford/DEC64/blob/master/dec64.h">dec64.h</a>
+  includes C function prototypes for these functions:</p>
 <ul><li><a href="#dec64_abs"><code>dec64_abs(<var>number</var>: dec64) returns
     <var>absolution</var>: dec64</code></a></li>
 <li><a href="#dec64_add"><code>dec64_add(<var>augend</var>: dec64,
@@ -186,15 +186,15 @@ th:after {
 <p><var>nan (not-a-number)</var> is a popular but poorly named concept in
     floating-point systems. It is a number value that represents numbers that
     are undefined or not representable. <span class=dec64>DEC64</span> has
-    72057594037927936 <var>nan</var> values. When these functions return a
+    72 057 594 037 927 936 possible <var>nan</var> values. When these functions return a
     <var>nan</var> value, they will always return <code>DEC64_NAN</code>, the
-    normal <var>nan</var>.</p>
+    normal <var>nan</var>, regardless of the input.</p>
 <p>Two <var>nan</var> values are reserved to represent <code>DEC64_TRUE</code>
     and <code>DEC64_FALSE</code>. The comparison functions will return either
     <code>DEC64_TRUE</code> or <code>DEC64_FALSE</code>. Be careful when using
     these comparisons with C because C thinks that <code>DEC64_FALSE</code> is
     truthy.</p>
-<p>The remaining <var>nan</var> values can be used to hold object pointers or
+<p>The remaining <var>nan</var> values may be used to hold object pointers or
     other useful values.</p>
 <p>These operations will produce a result of <code>DEC64_NAN</code>:</p>
 <pre>dec64_abs(<var>nan</var>)
@@ -431,7 +431,8 @@ dec64_less_or_equal(<var>a</var>, <var>b</var>)    =&gt; dec64_not(dec64_less(<v
 <h3 id="dec64_round">dec64_round(<var>number</var>: dec64,
     <var>place</var>: dec64) returns <var>quantization</var>:
     dec64</h3>
-<p>Round the number. The exponent determines which decimal place to round to.</p>
+<p>Round the number. Ties are rounded away from zero. </p>
+<p>The <var>place</var> determines which decimal place to round to. The <var>place</var> should be between -16 and 16.</p>
 <table>
   <tr>
     <th><var>place</var></th>
@@ -458,7 +459,6 @@ dec64_less_or_equal(<var>a</var>, <var>b</var>)    =&gt; dec64_not(dec64_less(<v
     <td> billion</td>
   </tr>
 </table>
-<p>The <var>place</var> should be between -16 and 16.</p>
 <h3 id="dec64_signum">dec64_signum(<var>number</var>: dec64) returns
     <var>signature</var>: dec64</h3>
 <p>If the number is <var>nan</var>, the result is <code>DEC64_NAN</code>.
@@ -469,7 +469,7 @@ dec64_less_or_equal(<var>a</var>, <var>b</var>)    =&gt; dec64_not(dec64_less(<v
 <h3 id="dec64_subtract">dec64_subtract(<var>minuend</var>: dec64,
     <var>subtrahend</var>: dec64) returns <var>difference</var>:
     dec64</h3>
-<p>Subtract one number from another.</p>
+<p>Subtract a <var>subtrahend</var> from from a <var>minuend</var>.</p>
 <h2>MASM</h2>
 <p>This file can be processed with Microsoft's
     <a href="https://msdn.microsoft.com/en-us/library/hb5z4sxd.aspx">ML64.exe</a>.
