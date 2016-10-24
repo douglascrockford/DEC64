@@ -3,7 +3,7 @@
 This is a test of dec64_math.c.
 
 dec64.com
-2016-01-28
+2016-10-22
 Public Domain
 
 No warranty.
@@ -233,6 +233,11 @@ static void test_exponentiate(dec64 first, dec64 second, dec64 expected, char * 
     judge_binary(first, second, expected, actual, "exponentiate", "^", comment);
 }
 
+static void test_factorial(dec64 first, dec64 expected, char * comment) {
+    dec64 actual = dec64_factorial(first);
+    judge_unary(first, expected, actual, "fac", "!", comment);
+}
+
 static void test_log(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_log(first);
     judge_unary(first, expected, actual, "log", "ln", comment);
@@ -292,6 +297,7 @@ static void test_all_atan() {
 
 static void test_all_cos() {
     test_cos(zero, one, "0");
+    test_cos(cent, dec64_new(99995000041666528, -17), "0.01");
     test_cos(pi, negative_one, "pi");
     test_cos(half_pi, zero, "pi");
     test_cos(ten, dec64_new(-8390715290764525, -16), "10");
@@ -317,8 +323,24 @@ static void test_all_exponentiate() {
     test_exponentiate(two, ten,  dec64_new(1024, 0), "2^10");
 }
 
+static void test_all_factorial() {
+    test_factorial(zero, one, "0!");
+    test_factorial(one, one, "1!");
+    test_factorial(dec64_new(18, 0), dec64_new(6402373705728000, 0), "18!");
+    test_factorial(dec64_new(19, 0), dec64_new(121645100408832000, 0), "19!");
+    test_factorial(dec64_new(20, 0), dec64_new(2432902008176640000, 0), "20!");
+    test_factorial(dec64_new(21, 0), dec64_new(5109094217170944000, 1), "21!");
+    test_factorial(dec64_new(22, 0), dec64_new(11240007277776077, 5), "22!");
+    test_factorial(dec64_new(92, 0), dec64_new(12438414054641307, 126), "92!");
+    test_factorial(dec64_new(93, 0), nan, "93!");
+    test_factorial(nan, nan, "nan!");
+    test_factorial(pi, nan, "pi!");
+    test_factorial(negative_one, nan, "-1!");
+}
+
 static void test_all_log() {
     test_log(zero, nan, "0");
+    test_log(cent, dec64_new(-4605170185988091, -16), "0.01");
     test_log(half, dec64_new(-6931471805599453, -16), "1/2");
     test_log(one, zero, "1");
     test_log(half_pi, dec64_new(4515827052894549, -16), "pi/2");
@@ -331,6 +353,7 @@ static void test_all_log() {
 static void test_all_root() {
     test_root(two, zero, zero, "2|zero");
     test_root(three, zero, zero, "3|zero");
+    test_root(three, half, dec64_new(7937005259840997, -16), "3|1/2");
     test_root(three, dec64_new(27, 0), three, "3|27");
     test_root(three, dec64_new(-27, 0), dec64_new(-3, 0), "3|-27");    
     test_root(three, pi, dec64_new(14645918875615233, -16), "3|pi");
@@ -344,6 +367,7 @@ static void test_all_root() {
 static void test_all_sin() {
     test_sin(zero, zero, "0");
     test_sin(epsilon, epsilon, "epsilon");
+    test_sin(cent, dec64_new(9999833334166665, -18), "0.01");
     test_sin(one, dec64_new(8414709848078965, -16), "1");
     test_sin(half_pi, one, "pi/2");
     test_sin(two, dec64_new(9092974268256817, -16), "2");
@@ -371,13 +395,13 @@ static void test_all_sqrt() {
 
 static void test_all_tan() {
     test_tan(zero, zero, "0");
+    test_tan(cent, dec64_new(10000333346667206, -18), "0.01");
     test_tan(half, dec64_new(5463024898437905, -16), "1/2");
     test_tan(one, dec64_new(15574077246549022, -16), "1");
     test_tan(half_pi, nan, "pi/2");
     test_tan(pi, zero, "pi");
     test_tan(ten, dec64_new(6483608274590867, -16), "10");
 }
-
 
 static int do_tests(int level_of_detail) {
 /*
@@ -397,8 +421,9 @@ static int do_tests(int level_of_detail) {
     test_all_atan();
     test_all_cos();
     test_all_exp();
-    test_all_log();
     test_all_exponentiate();
+    test_all_factorial();
+    test_all_log();
     test_all_root();
     test_all_sin();
     test_all_sqrt();

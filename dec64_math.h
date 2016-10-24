@@ -3,7 +3,7 @@
 The dec64_math header file. This is the companion to dec64_math.c.
 
 dec64.com                                                       
-2016-02-24
+2016-10-22
 Public Domain
 
 No warranty.
@@ -16,6 +16,7 @@ extern dec64 dec64_atan2(dec64 y, dec64 x);
 extern dec64 dec64_cos(dec64 radians);
 extern dec64 dec64_exp(dec64 exponent);
 extern dec64 dec64_exponentiate(dec64 coefficient, dec64 exponent);
+extern dec64 dec64_factorial(dec64 x);
 extern dec64 dec64_log(dec64 x);
 extern dec64 dec64_random();
 extern void  dec64_seed(dec64 seed);
