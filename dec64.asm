@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2016-02-25
+; 2016-02-26
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -339,7 +339,7 @@ dec64_new: function_with_two_parameters
 pack:
 
 ; The pack function will combine the coefficient and exponent into a dec64.
-; Numbers that are too huge to be contained in this format become nan or -nan.
+; Numbers that are too huge to be contained in this format become nan.
 ; Numbers that are too tiny to be contained in this format become zero.
 
 ; The coefficient is in r0.
