@@ -105,7 +105,7 @@ public dec64_ceiling;(number: dec64)
 public dec64_coefficient;(number: dec64)
 ;   returns coefficient: int64
 
-public dec64_dec;(augend: dec64)
+public dec64_dec;(minuend: dec64)
 ;   returns decrementation: dec64
 
 public dec64_divide;(dividend: dec64, divisor: dec64)
@@ -348,8 +348,8 @@ pack:
 ; If the exponent is greater than 127, then the number is too big.
 ; But it might still be possible to salvage a value.
 
-    cmp     r8,127              ; compare exponent with 127
-    jg      pack_decrease       ; it might be possible to decrease it
+    cmp     r8,127          ; compare exponent with 127
+    jg      pack_decrease   ; it might be possible to decrease it
 
 ; If the exponent is too small, or if the coefficient is too large, then some
 ; division is necessary. The absolute value of the coefficient is off by one
@@ -704,7 +704,7 @@ inc_negative_exponent:
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 dec64_dec: function_with_one_parameter
-;(augend: dec64) returns decrementation: dec64
+;(minuend: dec64) returns decrementation: dec64
 
 ; Increment a number. In most cases, this will be a faster way to subtract one
 ; than dec64_subtract.
@@ -1097,7 +1097,7 @@ dec64_integer_divide: function_with_two_parameters
     setnz   r2_h            ; r2_h is 1 if the dividend coefficient is not zero
     cmp     r0_b,128        ; are the operands nan?
     sete    r2_b            ; r2_b is 1 if the operands are nan
-    xor     r0_b,r0_b       ; zero the dividend's exponent
+    and     r0,-256         ; zero the dividend's exponent
     or      r2_h,r2_b       ; r2_h is zero if the dividend is zero and not nan
     jz      return_zero     ; the quotient is zero if the dividend is zero
     sar     r11,8           ; r11 is the divisor coefficient
@@ -1106,7 +1106,7 @@ dec64_integer_divide: function_with_two_parameters
     jnz     return_nan
     cqo                     ; sign extend r0 into r2
     idiv    r11             ; r0 is the quotient
-    xor     r0_b,r0_b       ; zero the exponent again
+    and     r0,-256         ; zero the exponent again
     ret                     ; no need to pack
     pad
 
