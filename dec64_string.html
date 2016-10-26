@@ -95,12 +95,12 @@ th {
     generally cannot use binary representations, and there are not simple, exact
     transformations between familiar decimal representations and binary
     floating-point. It can be difficult and expensive to find representations
-    that are accurate, minimal, and unsurprising. </p>
+    that are accurate, minimal, and unsurprising. </p><br>
 <table>
   <tr>
     <th scope="col">&nbsp;</th>
-    <th align="center" scope="col">0.1 + 0.2</th>
-    <th align="center" scope="col">10 / 3</th>
+    <th align="center" scope="col"><code>0.1 + 0.2</code></th>
+    <th align="center" scope="col"><code>10 / 3</code></th>
   </tr>
   <tr>
     <th>IEEE754</th>
@@ -245,9 +245,12 @@ th {
 <p>Specify the separation character, which is used by
     <code><a href="http://www.DEC64.com/">dec64_to_string</a></code> in standard
     mode to improve the readability of digits before the decimal point. Typical
-    values include '<code>,</code>', '<code> </code>', '<code>_</code>', and
-    '<code>.</code>'. If it is '<code>\0</code>', then separation will be
-    suppressed. The default is '<code>\0</code>'.</p>
+    values include</p>
+<blockquote>
+'<code>,</code>'&nbsp;&nbsp;&nbsp;&nbsp;'<code> </code>'&nbsp;&nbsp;&nbsp;&nbsp;'<code>_</code>'&nbsp;&nbsp;&nbsp;&nbsp;'<code>.</code>'&nbsp;&nbsp;&nbsp;&nbsp;'<code>\0</code>' </p>
+</blockquote>
+<p>If it is '<code>\0</code>', then separation will be
+  suppressed. The default is '<code>\0</code>'.</p>
 <p><code><a href="#dec64_from_string">dec64_from_string</a></code> will ignore
     this character.</p>
 <p>It returns the previous value.</p>
