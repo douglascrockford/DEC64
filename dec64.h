@@ -35,7 +35,7 @@ extern dec64 dec64_ceiling(dec64 number)                          /* integer */;
 extern dec64 dec64_dec(dec64 minuend)                      /* decrementation */;
 extern dec64 dec64_divide(dec64 dividend, dec64 divisor)         /* quotient */;
 extern dec64 dec64_floor(dec64 dividend)                          /* integer */;
-extern dec64 dec64_half(dec64 number)                            /* quotient */;
+extern dec64 dec64_half(dec64 dividend)                          /* quotient */;
 extern dec64 dec64_inc(dec64 augend)                       /* incrementation */;
 extern dec64 dec64_int(dec64 number)                              /* integer */;
 extern dec64 dec64_integer_divide(dec64 dividend, dec64 divisor) /* quotient */;
