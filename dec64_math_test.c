@@ -3,7 +3,7 @@
 This is a test of dec64_math.c.
 
 dec64.com
-2016-10-22
+2017-01-22
 Public Domain
 
 No warranty.
@@ -130,11 +130,11 @@ void p(dec64 number, dec64_string_char name[]) {
 }
 
 static void judge_unary(
-    dec64 first, 
-    dec64 expected, 
-    dec64 actual, 
-    char * name, 
-    char * op, 
+    dec64 first,
+    dec64 expected,
+    dec64 actual,
+    char * name,
+    char * op,
     char * comment
 ) {
     if (dec64_equal(expected, actual) == DEC64_TRUE) {
@@ -165,12 +165,12 @@ static void judge_unary(
 }
 
 static void judge_binary(
-    dec64 first, 
-    dec64 second, 
-    dec64 expected, 
-    dec64 actual, 
-    char * name, 
-    char * op, 
+    dec64 first,
+    dec64 second,
+    dec64 expected,
+    dec64 actual,
+    char * name,
+    char * op,
     char * comment
 ) {
     if (dec64_equal(expected, actual) == DEC64_TRUE) {
@@ -228,9 +228,9 @@ static void test_exp(dec64 first, dec64 expected, char * comment) {
     judge_unary(first, expected, actual, "exp", "e", comment);
 }
 
-static void test_exponentiate(dec64 first, dec64 second, dec64 expected, char * comment) {
-    dec64 actual = dec64_exponentiate(first, second);
-    judge_binary(first, second, expected, actual, "exponentiate", "^", comment);
+static void test_raise(dec64 first, dec64 second, dec64 expected, char * comment) {
+    dec64 actual = dec64_raise(first, second);
+    judge_binary(first, second, expected, actual, "raise", "^", comment);
 }
 
 static void test_factorial(dec64 first, dec64 expected, char * comment) {
@@ -312,17 +312,6 @@ static void test_all_exp() {
     test_exp(ten,  dec64_new(22026465794806717, -12), "10");
 }
 
-static void test_all_exponentiate() {
-    test_exponentiate(e, zero, one, "e^0");
-    test_exponentiate(e, cent, dec64_new(10100501670841681, -16), "e^0.01");
-    test_exponentiate(e, half, dec64_new(16487212707001281, -16), "e^0.5");
-    test_exponentiate(e, one, e, "e^1");
-    test_exponentiate(e, two,  dec64_new(7389056098930650, -15), "e^2");
-    test_exponentiate(e, ten,  dec64_new(22026465794806717, -12), "e^10");
-    test_exponentiate(four, half,  two, "4^0.5");
-    test_exponentiate(two, ten,  dec64_new(1024, 0), "2^10");
-}
-
 static void test_all_factorial() {
     test_factorial(zero, one, "0!");
     test_factorial(one, one, "1!");
@@ -350,12 +339,23 @@ static void test_all_log() {
     test_log(ten, dec64_new(23025850929940457, -16), "10");
 }
 
+static void test_all_raise() {
+    test_raise(e, zero, one, "e^0");
+    test_raise(e, cent, dec64_new(10100501670841681, -16), "e^0.01");
+    test_raise(e, half, dec64_new(16487212707001281, -16), "e^0.5");
+    test_raise(e, one, e, "e^1");
+    test_raise(e, two,  dec64_new(7389056098930650, -15), "e^2");
+    test_raise(e, ten,  dec64_new(22026465794806717, -12), "e^10");
+    test_raise(four, half,  two, "4^0.5");
+    test_raise(two, ten,  dec64_new(1024, 0), "2^10");
+}
+
 static void test_all_root() {
     test_root(two, zero, zero, "2|zero");
     test_root(three, zero, zero, "3|zero");
     test_root(three, half, dec64_new(7937005259840997, -16), "3|1/2");
     test_root(three, dec64_new(27, 0), three, "3|27");
-    test_root(three, dec64_new(-27, 0), dec64_new(-3, 0), "3|-27");    
+    test_root(three, dec64_new(-27, 0), dec64_new(-3, 0), "3|-27");
     test_root(three, pi, dec64_new(14645918875615233, -16), "3|pi");
     test_root(four, dec64_new(-27, 0), nan, "4|-27");
     test_root(four, dec64_new(256, 0), four, "4|256");
@@ -421,9 +421,9 @@ static int do_tests(int level_of_detail) {
     test_all_atan();
     test_all_cos();
     test_all_exp();
-    test_all_exponentiate();
     test_all_factorial();
     test_all_log();
+    test_all_raise();
     test_all_root();
     test_all_sin();
     test_all_sqrt();
