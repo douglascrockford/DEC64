@@ -228,11 +228,6 @@ static void test_exp(dec64 first, dec64 expected, char * comment) {
     judge_unary(first, expected, actual, "exp", "e", comment);
 }
 
-static void test_raise(dec64 first, dec64 second, dec64 expected, char * comment) {
-    dec64 actual = dec64_raise(first, second);
-    judge_binary(first, second, expected, actual, "raise", "^", comment);
-}
-
 static void test_factorial(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_factorial(first);
     judge_unary(first, expected, actual, "fac", "!", comment);
@@ -241,6 +236,11 @@ static void test_factorial(dec64 first, dec64 expected, char * comment) {
 static void test_log(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_log(first);
     judge_unary(first, expected, actual, "log", "ln", comment);
+}
+
+static void test_raise(dec64 first, dec64 second, dec64 expected, char * comment) {
+    dec64 actual = dec64_raise(first, second);
+    judge_binary(first, second, expected, actual, "raise", "^", comment);
 }
 
 static void test_root(dec64 first, dec64 second, dec64 expected, char * comment) {
