@@ -3,7 +3,7 @@ dec64_math.c
 Elementary functions for DEC64.
 
 dec64.com
-2016-10-22
+2017-01-22
 Public Domain
 
 No warranty.
@@ -151,13 +151,13 @@ dec64 dec64_asin(dec64 slope) {
     while (1) {
         factor = dec64_divide(
             dec64_multiply(
-                dec64_multiply(dec64_dec(bottom), x2), 
+                dec64_multiply(dec64_dec(bottom), x2),
                 factor
-            ), 
+            ),
             bottom
         );
         dec64 progress = dec64_add(
-            result, 
+            result,
             dec64_divide(factor, dec64_inc(bottom))
         );
         if (result == progress) {
@@ -172,7 +172,7 @@ dec64 dec64_asin(dec64 slope) {
 dec64 dec64_atan(dec64 slope) {
     return dec64_asin(
         dec64_divide(
-            slope, 
+            slope,
             dec64_sqrt(dec64_inc(dec64_multiply(slope, slope)))
         )
     );
@@ -211,7 +211,7 @@ dec64 dec64_exp(dec64 exponent) {
         dec64 term = exponent;
         while (1) {
             term = dec64_divide(
-                dec64_multiply(term, exponent), 
+                dec64_multiply(term, exponent),
                 divisor
             );
             dec64 progress = dec64_add(result, term);
@@ -222,52 +222,6 @@ dec64 dec64_exp(dec64 exponent) {
             divisor = dec64_inc(divisor);
         }
         return result;
-}
-
-dec64 dec64_exponentiate(dec64 coefficient, dec64 exponent) {
-    if (dec64_is_zero(exponent) == DEC64_TRUE) {
-        return DEC64_ONE;
-    }
-
-// Adjust for a negative exponent.
-
-    if (exponent < 0) {
-        coefficient = dec64_divide(DEC64_ONE, coefficient);
-        exponent = dec64_neg(exponent);
-    }
-    if (dec64_is_any_nan(coefficient) == DEC64_TRUE) {
-        return DEC64_NAN;
-    }
-    if (dec64_is_zero(coefficient) == DEC64_TRUE) {
-        return 0;
-    }
-
-// If the exponent is an integer, then use the squaring method.
-
-    if (exponent > 0 && dec64_exponent(exponent) == 0) {
-        dec64 aux = DEC64_ONE;
-        int64 n = dec64_coefficient(exponent);
-        if (n <= 1) {
-            return coefficient;
-        }
-        while (n > 1) {
-            if ((n & 1) != 0) {
-                aux = dec64_multiply(aux, coefficient);
-            }
-            coefficient = dec64_multiply(coefficient, coefficient);
-            n /= 2;
-        }
-        return (n == 1)
-            ? dec64_multiply(aux, coefficient)
-            : aux;
-    }
-
-// Otherwise do it the hard way.
-
-    return dec64_exp(dec64_multiply(
-        dec64_log(coefficient), 
-        exponent
-    ));
 }
 
 dec64 dec64_factorial(dec64 x) {
@@ -300,7 +254,7 @@ dec64 dec64_log(dec64 x) {
     while (1) {
         factor = dec64_multiply(factor, y);
         dec64 progress = dec64_add(
-            result, 
+            result,
             dec64_divide(factor, divisor)
         );
         if (result == progress || progress == DEC64_NAN) {
@@ -312,8 +266,54 @@ dec64 dec64_log(dec64 x) {
     return result;
 }
 
-/* 
-    The seed variables contain the random number generator's state. 
+dec64 dec64_raise(dec64 coefficient, dec64 exponent) {
+    if (dec64_is_zero(exponent) == DEC64_TRUE) {
+        return DEC64_ONE;
+    }
+
+// Adjust for a negative exponent.
+
+    if (exponent < 0) {
+        coefficient = dec64_divide(DEC64_ONE, coefficient);
+        exponent = dec64_neg(exponent);
+    }
+    if (dec64_is_zero(coefficient) == DEC64_TRUE) {
+        return 0;
+    }
+    if (dec64_is_any_nan(coefficient) == DEC64_TRUE) {
+        return DEC64_NAN;
+    }
+
+// If the exponent is an integer, then use the squaring method.
+
+    if (exponent > 0 && dec64_exponent(exponent) == 0) {
+        dec64 aux = DEC64_ONE;
+        int64 n = dec64_coefficient(exponent);
+        if (n <= 1) {
+            return coefficient;
+        }
+        while (n > 1) {
+            if ((n & 1) != 0) {
+                aux = dec64_multiply(aux, coefficient);
+            }
+            coefficient = dec64_multiply(coefficient, coefficient);
+            n /= 2;
+        }
+        return (n == 1)
+            ? dec64_multiply(aux, coefficient)
+            : aux;
+    }
+
+// Otherwise do it the hard way.
+
+    return dec64_exp(dec64_multiply(
+        dec64_log(coefficient),
+        exponent
+    ));
+}
+
+/*
+    The seed variables contain the random number generator's state.
     They can be set by dec64_seed.
 */
 
@@ -321,8 +321,8 @@ static uint64 seed_0 = D_E;
 static uint64 seed_1 = D_2PI;
 
 dec64 dec64_random() {
-/* 
-    Return a number between 0 and 1 containing 16 randomy digits. 
+/*
+    Return a number between 0 and 1 containing 16 randomy digits.
     It uses xorshift128+.
 */
     while (1) {
@@ -376,7 +376,7 @@ dec64 dec64_root(dec64 degree, dec64 radicand) {
                 dec64_multiply(result, degree_minus_one),
                 dec64_divide(
                     radicand,
-                    dec64_exponentiate(result, degree_minus_one)
+                    dec64_raise(result, degree_minus_one)
                 )
             ),
             degree
@@ -468,7 +468,7 @@ dec64 dec64_sqrt(dec64 radicand) {
                 return result;
             }
             result = progress;
-        } 
+        }
         return result;
     } else {
         return DEC64_NAN;
@@ -477,7 +477,7 @@ dec64 dec64_sqrt(dec64 radicand) {
 
 dec64 dec64_tan(dec64 radians) {
     return dec64_divide(
-        dec64_sin(radians), 
+        dec64_sin(radians),
         dec64_cos(radians)
     );
 }
