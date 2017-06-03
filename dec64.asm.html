@@ -179,9 +179,8 @@ th:after {
   <li><code>DEC64_ZERO</code></li>
   <li><code>DEC64_ONE</code></li>
   <li><code>DEC64_NEGATIVE_ONE</code></li>
-  <li><code>DEC64_ONE</code></li>
-  <li><code>DEC64_ZERO</code></li>
 </ul>
+<p>The comparison functions will return either <code>DEC64_ONE</code> or <code>DEC64_ZERO</code>.</p>
 <h2 id="nan"><var>nan</var></h2>
 <p><var>nan (not-a-number)</var> is a popular but poorly named concept in
     floating-point systems. It is a number value that represents numbers that
@@ -189,11 +188,6 @@ th:after {
     72 057 594 037 927 936 possible <var>nan</var> values. When these functions return a
     <var>nan</var> value, they will always return <code>DEC64_NAN</code>, the
     normal <var>nan</var>, regardless of the input.</p>
-<p>Two <var>nan</var> values are reserved to represent <code>DEC64_ONE</code>
-    and <code>DEC64_ZERO</code>. The comparison functions will return either
-    <code>DEC64_ONE</code> or <code>DEC64_ZERO</code>. Be careful when using
-    these comparisons with C because C thinks that <code>DEC64_ZERO</code> is
-    truthy.</p>
 <p>The remaining <var>nan</var> values may be used to hold object pointers or
     other useful values.</p>
 <p>These operations will produce a result of <code>DEC64_NAN</code>:</p>
