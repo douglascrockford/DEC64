@@ -116,7 +116,7 @@ th:after {
 <li><a href="#dec64_coefficient"><code>dec64_coefficient(<var>number</var>:
     dec64) returns <var>coefficient</var>: int64</code></a></li>
 <li><a href="#dec64_dec"><code>dec64_dec(<var>minuend</var>: dec64) returns
-    <var>decrementation</var>: dec64</code></a></li>
+    <var>difference</var>: dec64</code></a></li>
 <li><a href="#dec64_divide"><code>dec64_divide(<var>dividend</var>: dec64,
     <var>divisor</var>: dec64)
     returns <var>quotient</var>: dec64</code></a></li>
@@ -130,7 +130,7 @@ th:after {
 <li><a href="#dec64_half"><code>dec64_half(<var>dividend</var>: dec64) returns
     <var>quotient</var>: dec64</code></a></li>
 <li><a href="#dec64_inc"><code>dec64_inc(<var>augend</var>: dec64) returns
-    <var>incrementation</var>: dec64</code></a></li>
+    <var>difference</var>: dec64</code></a></li>
 <li><a href="#dec64_int"><code>dec64_int(<var>number</var>: dec64)
     returns <var>integer</var>: dec64</code></a></li>
 <li><a href="#dec64_integer_divide"><code>dec64_integer_divide(<var>dividend</var>:
@@ -179,8 +179,8 @@ th:after {
   <li><code>DEC64_ZERO</code></li>
   <li><code>DEC64_ONE</code></li>
   <li><code>DEC64_NEGATIVE_ONE</code></li>
-  <li><code>DEC64_TRUE</code></li>
-  <li><code>DEC64_FALSE</code></li>
+  <li><code>DEC64_ONE</code></li>
+  <li><code>DEC64_ZERO</code></li>
 </ul>
 <h2 id="nan"><var>nan</var></h2>
 <p><var>nan (not-a-number)</var> is a popular but poorly named concept in
@@ -189,10 +189,10 @@ th:after {
     72 057 594 037 927 936 possible <var>nan</var> values. When these functions return a
     <var>nan</var> value, they will always return <code>DEC64_NAN</code>, the
     normal <var>nan</var>, regardless of the input.</p>
-<p>Two <var>nan</var> values are reserved to represent <code>DEC64_TRUE</code>
-    and <code>DEC64_FALSE</code>. The comparison functions will return either
-    <code>DEC64_TRUE</code> or <code>DEC64_FALSE</code>. Be careful when using
-    these comparisons with C because C thinks that <code>DEC64_FALSE</code> is
+<p>Two <var>nan</var> values are reserved to represent <code>DEC64_ONE</code>
+    and <code>DEC64_ZERO</code>. The comparison functions will return either
+    <code>DEC64_ONE</code> or <code>DEC64_ZERO</code>. Be careful when using
+    these comparisons with C because C thinks that <code>DEC64_ZERO</code> is
     truthy.</p>
 <p>The remaining <var>nan</var> values may be used to hold object pointers or
     other useful values.</p>
@@ -301,7 +301,7 @@ dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
 <pre>dec64_coefficient(DEC64_NAN)</pre>
 <p>returns <code>0</code>.</p>
 <h3 id="dec64_dec">dec64_dec(<var>augend</var>: dec64) returns
-    <var>decrementation</var>: dec64</h3>
+    <var>difference</var>: dec64</h3>
 <p>The decrement function subtracts <code>1</code> from a number. That can be
     faster than </p>
 <pre>dec64_subtract(<var>augend</var>, DEC64_ONE)</pre>
@@ -313,7 +313,7 @@ dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
     dec64</h3>
 <p>Compare two  numbers. If either is <var>nan</var>, return
     <code>DEC64_NAN</code>. If they are exactly equal, return
-    <code>DEC64_TRUE</code>, otherwise return <code>DEC64_FALSE</code>. Denormal
+    <code>DEC64_ONE</code>, otherwise return <code>DEC64_ZERO</code>. Denormal
     zeros are equal but denormal nans are not.</p>
 <h3 id="dec64_exponent">dec64_exponent(<var>number</var>: dec64)
     returns <var>exponent</var>: int64</h3>
@@ -341,7 +341,7 @@ dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
 <p>Divide a dec64 number by two. This will always be faster than </p>
 <pre>dec64_divide(<var>dividend</var>, dec64_new(2, 0))</pre>
 <h3 id="dec64_inc">dec64_inc(<var>augend</var>: dec64) returns
-    <var>incrementation</var>: dec64</h3>
+    <var>sum</var>: dec64</h3>
 <p>The increment function adds <code>1</code> to a number. That can be faster
     than </p>
 <pre>dec64_add(<var>augend</var>, DEC64_ONE)</pre>
@@ -362,25 +362,25 @@ dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
 <h3 id="dec64_is_any_nan">dec64_is_any_nan(<var>number</var>: dec64)
     returns <var>comparison</var>: dec64</h3>
 <p>If the <var>number</var> is any <var>nan</var>, return
-    <code>DEC64_TRUE</code>, otherwise return <code>DEC64_FALSE</code>. To test
-    if a <var>number</var> is <code>DEC64_NAN</code>, use <code>==</code>.</p>
+    <code>DEC64_ONE</code>, otherwise return <code>DEC64_ZERO</code>. To test
+    if a <var>number</var> is the normal <code>DEC64_NAN</code>, just use <code>==</code>.</p>
 <h3 id="dec64_is_integer">dec64_is_integer(<var>number</var>: dec64)
     returns <var>comparison</var>: dec64</h3>
 <p>If the <var>number</var> contains a non-zero fractional part or if it is
-    <var>nan</var>, return <code>DEC64_FALSE</code>. Otherwise, return
-    <code>DEC64_TRUE</code>.</p>
+    <var>nan</var>, return <code>DEC64_ZERO</code>. Otherwise, return
+    <code>DEC64_ONE</code>.</p>
 <h3 id="dec64_is_zero">dec64_is_zero(<var>number</var>: dec64)
     returns <var>comparison</var>: dec64</h3>
-<p>If the <var>number</var> is any zero, return <code>DEC64_TRUE</code>,
-    otherwise return <code>DEC64_FALSE</code>. To test if a <var>number</var>
+<p>If the <var>number</var> is any zero, return <code>DEC64_ONE</code>,
+    otherwise return <code>DEC64_ZERO</code>. To test if a <var>number</var>
     is <code>DEC64_ZERO</code>, use <code>==</code>.</p>
 <h3 id="dec64_less">dec64_less(<var>comparahend</var>: dec64,
     <var>comparator</var>: dec64) returns <var>comparison</var>:
     dec64</h3>
 <p>Compare two  numbers. If either argument is any <var>nan</var>, then the
     result is <code>DEC64_NAN</code>. If the <var>comparahend</var> is less
-    than the <var>comparator</var>, return <code>DEC64_TRUE</code>, otherwise
-    return <code>DEC64_FALSE</code>.</p>
+    than the <var>comparator</var>, return <code>DEC64_ONE</code>, otherwise
+    return <code>DEC64_ZERO</code>.</p>
 <p>The other 3 comparison functions are easily implemented with
     <code>dec64_less</code>:</p>
 <pre>dec64_greater(<var>a</var>, <var>b</var>)          =&gt; dec64_less(<var>b</var>, <var>a</var>)
@@ -424,9 +424,9 @@ dec64_less_or_equal(<var>a</var>, <var>b</var>)    =&gt; dec64_not(dec64_less(<v
     it does not materially change the value of a number.</p>
 <h3 id="dec64_not">dec64_not(<var>boolean</var>: dec64) returns
     <var>notation</var>: dec64</h3>
-<p>If the <var>boolean</var> is <code>DEC64_TRUE</code>, the result is
-    <code>DEC64_FALSE</code>. If the <var>boolean</var> is
-    <code>DEC64_FALSE</code>, the result is <code>DEC64_TRUE</code>. Otherwise,
+<p>If the <var>boolean</var> is <code>DEC64_ONE</code>, the result is
+    <code>DEC64_ZERO</code>. If the <var>boolean</var> is
+    <code>DEC64_ZERO</code>, the result is <code>DEC64_ONE</code>. Otherwise,
     the result is <code>DEC64_NAN</code>.</p>
 <h3 id="dec64_round">dec64_round(<var>number</var>: dec64,
     <var>place</var>: dec64) returns <var>quantization</var>:

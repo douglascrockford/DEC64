@@ -3,7 +3,7 @@ dec64_string.c
 Conversion between DEC64 and strings.
 
 dec64.com
-2016-02-04
+2017-06-03
 Public Domain
 
 No warranty.
@@ -509,7 +509,7 @@ dec64 dec64_from_string(
                             c = string[at];
                         }
 /*
-    The exponent itself.
+    The exponent digits.
 */
                         while (c != 0) {
                             if (c >= '0' && c <= '9') {
@@ -581,8 +581,8 @@ int dec64_to_string(
 
     state->length = 0;
     state->string = string;
-    if (dec64_is_any_nan(number) != DEC64_TRUE) {
-        if (dec64_is_zero(number) == DEC64_TRUE) {
+    if (dec64_is_any_nan(number) != DEC64_ONE) {
+        if (dec64_is_zero(number) == DEC64_ONE) {
             emit(state, '0');
         } else {
             if (number != state->number) {

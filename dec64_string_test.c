@@ -3,7 +3,7 @@
 This is a test of dec64_string.c.
 
 dec64.com
-2016-02-04
+2017-06-03
 Public Domain
 
 No warranty.
@@ -111,7 +111,7 @@ static void print_dec64(dec64 number) {
 
 static void test_from(dec64_string_char * string, dec64 expected) {
     dec64 actual = dec64_from_string(state, string);
-    if (dec64_equal(expected, actual) == DEC64_TRUE) {
+    if (dec64_equal(expected, actual) == DEC64_ONE) {
         nr_pass += 1;
         if (level >= 3) {
             printf("\n\npass from: %s", string);

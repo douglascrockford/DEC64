@@ -3,7 +3,7 @@
 This is a test of dec64_math.c.
 
 dec64.com
-2017-01-22
+2017-06-03
 Public Domain
 
 No warranty.
@@ -37,6 +37,7 @@ static dec64 seven;
 static dec64 eight;
 static dec64 nine;
 static dec64 ten;
+static dec64 eleven;
 static dec64 maxint;
 static dec64 maxint_plus;
 static dec64 maxnum;
@@ -71,6 +72,7 @@ static void define_constants() {
     eight = dec64_new(8, 0);        /* 8 */
     nine = dec64_new(9, 0);         /* 9 */
     ten = dec64_new(10, 0);         /* 10 */
+    eleven = dec64_new(11, 0);      /* 11 */
     minnum = dec64_new(1, -127);    /* the smallest possible number */
     e = dec64_new(27182818284590452, -16);                  /* e */
     epsilon = dec64_new(1, -16);    /* the smallest number addable to 1 */
@@ -105,14 +107,8 @@ static void define_constants() {
 
 static void print_dec64(dec64 number) {
     dec64_string_char actual[32];
-    if (dec64_is_any_nan(number) == DEC64_TRUE) {
-        if (number == DEC64_TRUE) {
-            printf("true");
-        } else if (number == DEC64_FALSE) {
-            printf("false");
-        } else {
-            printf("nan");
-        }
+    if (dec64_is_any_nan(number) == DEC64_ONE) {
+        printf("nan");
     } else {
         dec64_to_string(state, number, actual);
         printf("%s", actual);
@@ -130,14 +126,14 @@ void p(dec64 number, dec64_string_char name[]) {
 }
 
 static void judge_unary(
-    dec64 first,
-    dec64 expected,
-    dec64 actual,
-    char * name,
-    char * op,
+    dec64 first, 
+    dec64 expected, 
+    dec64 actual, 
+    char * name, 
+    char * op, 
     char * comment
 ) {
-    if (dec64_equal(expected, actual) == DEC64_TRUE) {
+    if (dec64_equal(expected, actual) == DEC64_ONE) {
         nr_pass += 1;
         if (level >= 3) {
             printf("\n\npass %s: %s", name, comment);
@@ -165,15 +161,15 @@ static void judge_unary(
 }
 
 static void judge_binary(
-    dec64 first,
-    dec64 second,
-    dec64 expected,
-    dec64 actual,
-    char * name,
-    char * op,
+    dec64 first, 
+    dec64 second, 
+    dec64 expected, 
+    dec64 actual, 
+    char * name, 
+    char * op, 
     char * comment
 ) {
-    if (dec64_equal(expected, actual) == DEC64_TRUE) {
+    if (dec64_equal(expected, actual) == DEC64_ONE) {
         nr_pass += 1;
         if (level >= 3) {
             printf("\n\npass %s: %s\n    ", name, comment);
@@ -228,6 +224,11 @@ static void test_exp(dec64 first, dec64 expected, char * comment) {
     judge_unary(first, expected, actual, "exp", "e", comment);
 }
 
+static void test_exponentiate(dec64 first, dec64 second, dec64 expected, char * comment) {
+    dec64 actual = dec64_exponentiate(first, second);
+    judge_binary(first, second, expected, actual, "exponentiate", "^", comment);
+}
+
 static void test_factorial(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_factorial(first);
     judge_unary(first, expected, actual, "fac", "!", comment);
@@ -236,11 +237,6 @@ static void test_factorial(dec64 first, dec64 expected, char * comment) {
 static void test_log(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_log(first);
     judge_unary(first, expected, actual, "log", "ln", comment);
-}
-
-static void test_raise(dec64 first, dec64 second, dec64 expected, char * comment) {
-    dec64 actual = dec64_raise(first, second);
-    judge_binary(first, second, expected, actual, "raise", "^", comment);
 }
 
 static void test_root(dec64 first, dec64 second, dec64 expected, char * comment) {
@@ -312,6 +308,20 @@ static void test_all_exp() {
     test_exp(ten,  dec64_new(22026465794806717, -12), "10");
 }
 
+static void test_all_exponentiate() {
+    test_exponentiate(e, zero, one, "e^0");
+    test_exponentiate(e, cent, dec64_new(10100501670841681, -16), "e^0.01");
+    test_exponentiate(e, half, dec64_new(16487212707001281, -16), "e^0.5");
+    test_exponentiate(e, one, e, "e^1");
+    test_exponentiate(e, two,  dec64_new(7389056098930650, -15), "e^2");
+    test_exponentiate(e, ten,  dec64_new(22026465794806717, -12), "e^10");
+    test_exponentiate(four, half,  two, "4^0.5");
+    test_exponentiate(two, eleven,  dec64_new(2048, 0), "2^11");
+    test_exponentiate(two, ten,  dec64_new(1024, 0), "2^10");
+    test_exponentiate(two, five,  dec64_new(32, 0), "2^5");
+    test_exponentiate(two, four,  dec64_new(16, 0), "2^4");
+}
+
 static void test_all_factorial() {
     test_factorial(zero, one, "0!");
     test_factorial(one, one, "1!");
@@ -339,23 +349,12 @@ static void test_all_log() {
     test_log(ten, dec64_new(23025850929940457, -16), "10");
 }
 
-static void test_all_raise() {
-    test_raise(e, zero, one, "e^0");
-    test_raise(e, cent, dec64_new(10100501670841681, -16), "e^0.01");
-    test_raise(e, half, dec64_new(16487212707001281, -16), "e^0.5");
-    test_raise(e, one, e, "e^1");
-    test_raise(e, two,  dec64_new(7389056098930650, -15), "e^2");
-    test_raise(e, ten,  dec64_new(22026465794806717, -12), "e^10");
-    test_raise(four, half,  two, "4^0.5");
-    test_raise(two, ten,  dec64_new(1024, 0), "2^10");
-}
-
 static void test_all_root() {
     test_root(two, zero, zero, "2|zero");
     test_root(three, zero, zero, "3|zero");
     test_root(three, half, dec64_new(7937005259840997, -16), "3|1/2");
     test_root(three, dec64_new(27, 0), three, "3|27");
-    test_root(three, dec64_new(-27, 0), dec64_new(-3, 0), "3|-27");
+    test_root(three, dec64_new(-27, 0), dec64_new(-3, 0), "3|-27");    
     test_root(three, pi, dec64_new(14645918875615233, -16), "3|pi");
     test_root(four, dec64_new(-27, 0), nan, "4|-27");
     test_root(four, dec64_new(256, 0), four, "4|256");
@@ -421,9 +420,9 @@ static int do_tests(int level_of_detail) {
     test_all_atan();
     test_all_cos();
     test_all_exp();
+    test_all_exponentiate();
     test_all_factorial();
     test_all_log();
-    test_all_raise();
     test_all_root();
     test_all_sin();
     test_all_sqrt();

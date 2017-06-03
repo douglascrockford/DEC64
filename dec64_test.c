@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2016-02-12
+2017-06-03
 Public Domain
 
 No warranty.
@@ -12,8 +12,8 @@ No warranty.
 #include <stdio.h>
 #include "dec64.h"
 
-#define false DEC64_FALSE
-#define true DEC64_TRUE
+#define false DEC64_ZERO
+#define true DEC64_ONE
 
 static int level;
 static int nr_fail;
@@ -99,11 +99,7 @@ static void define_constants() {
 static void print_dec64(dec64 number) {
     int64 exponent = dec64_exponent(number);
     int64 coefficient = dec64_coefficient(number);
-    if (number == DEC64_TRUE) {
-        printf("                   true");
-    } else if (number == DEC64_FALSE) {
-        printf("                   false");
-    } else if (number == DEC64_NAN) {
+    if (number == DEC64_NAN) {
         printf("                   nan");
     } else {
         printf("%20lli", coefficient);
@@ -521,6 +517,8 @@ static void test_all_dec() {
     test_dec(maxnum, maxnum, "maxnum");
     test_dec(googol, googol, "googol");
     test_dec(almost_one, negative_epsilon, "almost_one");
+    test_dec(negative_maxint, dec64_new(-3602879701896397, 1), "negative_maxint"); 
+
 }
 
 static void test_all_divide() {
@@ -1206,8 +1204,10 @@ static void test_all_not() {
     test_not(true, false, "true");
     test_not(nan, nan, "nan");
     test_not(nannan, nan, "nannan");
-    test_not(zip, nan, "zip");
-    test_not(100, nan, "false alias");
+    test_not(zip, one, "zip");
+    test_not(dec64_new(10, -1), zero, "true alias");
+    test_not(almost_one, nan, "almost 1");
+    test_not(two, nan, "2");
     test_not(negative_one, nan, "-1");
     test_not(negative_maxint, nan, "-maxint");
     test_not(negative_maxnum, nan, "-maxnum");
