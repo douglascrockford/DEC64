@@ -151,13 +151,13 @@ dec64 dec64_asin(dec64 slope) {
     while (1) {
         factor = dec64_divide(
             dec64_multiply(
-                dec64_multiply(dec64_dec(bottom), x2), 
+                dec64_multiply(dec64_dec(bottom), x2),
                 factor
-            ), 
+            ),
             bottom
         );
         dec64 progress = dec64_add(
-            result, 
+            result,
             dec64_divide(factor, dec64_inc(bottom))
         );
         if (result == progress) {
@@ -172,7 +172,7 @@ dec64 dec64_asin(dec64 slope) {
 dec64 dec64_atan(dec64 slope) {
     return dec64_asin(
         dec64_divide(
-            slope, 
+            slope,
             dec64_sqrt(dec64_inc(dec64_multiply(slope, slope)))
         )
     );
@@ -211,7 +211,7 @@ dec64 dec64_exp(dec64 exponent) {
         dec64 term = exponent;
         while (1) {
             term = dec64_divide(
-                dec64_multiply(term, exponent), 
+                dec64_multiply(term, exponent),
                 divisor
             );
             dec64 progress = dec64_add(result, term);
@@ -265,7 +265,7 @@ dec64 dec64_exponentiate(dec64 coefficient, dec64 exponent) {
 // Otherwise do it the hard way.
 
     return dec64_exp(dec64_multiply(
-        dec64_log(coefficient), 
+        dec64_log(coefficient),
         exponent
     ));
 }
@@ -300,7 +300,7 @@ dec64 dec64_log(dec64 x) {
     while (1) {
         factor = dec64_multiply(factor, y);
         dec64 progress = dec64_add(
-            result, 
+            result,
             dec64_divide(factor, divisor)
         );
         if (result == progress || progress == DEC64_NAN) {
@@ -312,8 +312,8 @@ dec64 dec64_log(dec64 x) {
     return result;
 }
 
-/* 
-    The seed variables contain the random number generator's state. 
+/*
+    The seed variables contain the random number generator's state.
     They can be set by dec64_seed.
 */
 
@@ -321,8 +321,8 @@ static uint64 seed_0 = D_E;
 static uint64 seed_1 = D_2PI;
 
 dec64 dec64_random() {
-/* 
-    Return a number between 0 and 1 containing 16 randomy digits. 
+/*
+    Return a number between 0 and 1 containing 16 randomy digits.
     It uses xorshift128+.
 */
     while (1) {
@@ -347,13 +347,13 @@ dec64 dec64_root(dec64 degree, dec64 radicand) {
     dec64 result;
     degree = dec64_normal(degree);
     if (
-        dec64_is_any_nan(radicand) == DEC64_ONE ||
-        dec64_is_zero(degree) == DEC64_ONE ||
-        degree < 0 ||
-        dec64_exponent(degree) != 0 ||
-        (
-            radicand < 0 &&
-            (dec64_coefficient(degree) & 1) == 0
+        dec64_is_any_nan(radicand) == DEC64_ONE
+        || dec64_is_zero(degree) == DEC64_ONE
+        || degree < 0
+        || dec64_exponent(degree) != 0
+        || (
+            radicand < 0
+            && (dec64_coefficient(degree) & 1) == 0
         )
     ) {
         return DEC64_NAN;
@@ -468,7 +468,7 @@ dec64 dec64_sqrt(dec64 radicand) {
                 return result;
             }
             result = progress;
-        } 
+        }
         return result;
     } else {
         return DEC64_NAN;
@@ -477,7 +477,7 @@ dec64 dec64_sqrt(dec64 radicand) {
 
 dec64 dec64_tan(dec64 radians) {
     return dec64_divide(
-        dec64_sin(radians), 
+        dec64_sin(radians),
         dec64_cos(radians)
     );
 }
