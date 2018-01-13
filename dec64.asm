@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2017-06-03
+; 2018-01-13
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -77,7 +77,7 @@ title   dec64.asm for x64.
 
 ; All public symbols have a dec64_ prefix. All other symbols are private.
 
-; There are 72057594037927936 possible nan values. 
+; There are 72057594037927936 possible nan values.
 
 ; When these functions return nan, they will always return 0x80, the normal
 ; nan.
@@ -1118,7 +1118,7 @@ integer_divide_slow:
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-dec64_modulo: function_with_one_parameter
+dec64_modulo: function_with_two_parameters
 ;(dividend: dec64, divisor: dec64) returns modulus: dec64
 
 ; Modulo. It produces the same result as
