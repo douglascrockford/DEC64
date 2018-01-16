@@ -1118,7 +1118,7 @@ integer_divide_slow:
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-dec64_modulo: function_with_one_parameter
+dec64_modulo: function_with_two_parameters
 ;(dividend: dec64, divisor: dec64) returns modulus: dec64
 
 ; Modulo. It produces the same result as
