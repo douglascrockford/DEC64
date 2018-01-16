@@ -1,0 +1,4 @@
+dec64_test
+dec64_math_test
+dec64_string_test
+*.o

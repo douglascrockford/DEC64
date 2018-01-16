@@ -9,6 +9,8 @@ Public Domain
 No warranty.
 */
 
+#pragma clang diagnostic ignored "-Wimplicit-function-declaration"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -126,11 +128,11 @@ void p(dec64 number, dec64_string_char name[]) {
 }
 
 static void judge_unary(
-    dec64 first, 
-    dec64 expected, 
-    dec64 actual, 
-    char * name, 
-    char * op, 
+    dec64 first,
+    dec64 expected,
+    dec64 actual,
+    char * name,
+    char * op,
     char * comment
 ) {
     if (dec64_equal(expected, actual) == DEC64_ONE) {
@@ -161,12 +163,12 @@ static void judge_unary(
 }
 
 static void judge_binary(
-    dec64 first, 
-    dec64 second, 
-    dec64 expected, 
-    dec64 actual, 
-    char * name, 
-    char * op, 
+    dec64 first,
+    dec64 second,
+    dec64 expected,
+    dec64 actual,
+    char * name,
+    char * op,
     char * comment
 ) {
     if (dec64_equal(expected, actual) == DEC64_ONE) {
@@ -354,7 +356,7 @@ static void test_all_root() {
     test_root(three, zero, zero, "3|zero");
     test_root(three, half, dec64_new(7937005259840997, -16), "3|1/2");
     test_root(three, dec64_new(27, 0), three, "3|27");
-    test_root(three, dec64_new(-27, 0), dec64_new(-3, 0), "3|-27");    
+    test_root(three, dec64_new(-27, 0), dec64_new(-3, 0), "3|-27");
     test_root(three, pi, dec64_new(14645918875615233, -16), "3|pi");
     test_root(four, dec64_new(-27, 0), nan, "4|-27");
     test_root(four, dec64_new(256, 0), four, "4|256");
