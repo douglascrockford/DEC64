@@ -11,6 +11,8 @@ No warranty.
 This file contains dec64_to_string and dec64_from_string, and dec64_string-*
 configuration functions.
 */
+#pragma clang diagnostic ignored "-Wimplicit-int"
+#pragma clang diagnostic ignored "-Wreturn-type"
 
 #include <stdlib.h>
 #include "dec64.h"
@@ -79,9 +81,9 @@ static emit(dec64_string_state state, int c) {
 
 static void emit_at(dec64_string_state state, int64 at) {
     emit(
-        state, 
+        state,
         (at >= state->nr_digits || at < 0)
-            ? '0' 
+            ? '0'
             : state->digits[at]
     );
 }
@@ -231,7 +233,7 @@ static void standard(dec64_string_state state) {
 
 dec64_string_state dec64_string_begin() {
 /*
-    Create a state object. State objects are passed as the first argument to 
+    Create a state object. State objects are passed as the first argument to
     the other public functions. It holds state so that this module is reentrant
     and thread safe. Do not manipulate this object directly. Use the functions.
     It can return NULL if memory allocation fails.
@@ -282,7 +284,7 @@ void dec64_string_engineering(dec64_string_state state) {
 void dec64_string_scientific(dec64_string_state state) {
 /*
     Put dec64_to_string into scientific mode, in which the coefficient is
-    displayed with one digit before the decimal point, and an exponent 
+    displayed with one digit before the decimal point, and an exponent
     prefixed with 'e' is appended if necessary.
 */
     state->mode = scientific_mode;
@@ -371,7 +373,7 @@ dec64_string_char dec64_string_separator(
 /* Action. */
 
 dec64 dec64_from_string(
-    dec64_string_state state, 
+    dec64_string_state state,
     dec64_string_char string[]
 ) {
 /*

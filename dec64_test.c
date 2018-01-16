@@ -9,6 +9,8 @@ Public Domain
 No warranty.
 */
 
+#pragma clang diagnostic ignored "-Wshift-negative-value"
+
 #include <stdio.h>
 #include "dec64.h"
 
@@ -517,7 +519,7 @@ static void test_all_dec() {
     test_dec(maxnum, maxnum, "maxnum");
     test_dec(googol, googol, "googol");
     test_dec(almost_one, negative_epsilon, "almost_one");
-    test_dec(negative_maxint, dec64_new(-3602879701896397, 1), "negative_maxint"); 
+    test_dec(negative_maxint, dec64_new(-3602879701896397, 1), "negative_maxint");
 
 }
 
