@@ -3,7 +3,7 @@ dec64_math.c
 Elementary functions for DEC64.
 
 dec64.com
-2017-06-03
+2018-01-20
 Public Domain
 
 No warranty.
@@ -343,17 +343,17 @@ dec64 dec64_random() {
     }
 }
 
-dec64 dec64_root(dec64 degree, dec64 radicand) {
+dec64 dec64_root(dec64 index, dec64 radicand) {
     dec64 result;
-    degree = dec64_normal(degree);
+    index = dec64_normal(index);
     if (
         dec64_is_any_nan(radicand) == DEC64_ONE
-        || dec64_is_zero(degree) == DEC64_ONE
-        || degree < 0
-        || dec64_exponent(degree) != 0
+        || dec64_is_zero(index) == DEC64_ONE
+        || index < 0
+        || dec64_exponent(index) != 0
         || (
             radicand < 0
-            && (dec64_coefficient(degree) & 1) == 0
+            && (dec64_coefficient(index) & 1) == 0
         )
     ) {
         return DEC64_NAN;
@@ -361,25 +361,25 @@ dec64 dec64_root(dec64 degree, dec64 radicand) {
     if (dec64_is_zero(radicand) == DEC64_ONE) {
         return DEC64_ZERO;
     }
-    if (degree == DEC64_ONE) {
+    if (index == DEC64_ONE) {
         return radicand;
     }
-    if (degree == D_2) {
+    if (index == D_2) {
         return dec64_sqrt(radicand);
     }
-    dec64 degree_minus_one = dec64_dec(degree);
+    dec64 index_minus_one = dec64_dec(index);
     result = DEC64_ONE;
     dec64 prosult = DEC64_NAN;
     while (1) {
         dec64 progress = dec64_divide(
             dec64_add(
-                dec64_multiply(result, degree_minus_one),
+                dec64_multiply(result, index_minus_one),
                 dec64_divide(
                     radicand,
-                    dec64_exponentiate(result, degree_minus_one)
+                    dec64_exponentiate(result, index_minus_one)
                 )
             ),
-            degree
+            index
         );
         if (progress == result) {
             return result;
