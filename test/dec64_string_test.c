@@ -12,8 +12,8 @@ No warranty.
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "dec64.h"
-#include "dec64_string.h"
+#include <dec64.h>
+#include <dec64_string.h>
 
 static int level;
 static int nr_fail;
