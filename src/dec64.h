@@ -9,12 +9,21 @@ Public Domain
 No warranty.
 */
 
+#ifndef DEC64
+#define DEC64
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+
 #define DEC64_NAN           (0x80LL)
 #define DEC64_ZERO          (0x00LL)
 #define DEC64_ONE           (0x100LL)
 #define DEC64_NEGATIVE_ONE  (0xFFFFFFFFFFFFFF00LL)
 
-typedef long long int64;
+typedef long long int int64;
 typedef unsigned long long uint64;
 typedef int64 dec64;
 
@@ -46,3 +55,10 @@ extern dec64 dec64_not(dec64 boolean)                            /* notation */;
 extern dec64 dec64_round(dec64 number, dec64 place)          /* quantization */;
 extern dec64 dec64_signum(dec64 number)                         /* signature */;
 extern dec64 dec64_subtract(dec64 minuend, dec64 subtrahend)   /* difference */;
+
+
+#endif //DEC64
+
+#ifdef __cplusplus
+}
+#endif

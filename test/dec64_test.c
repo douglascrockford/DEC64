@@ -10,7 +10,7 @@ No warranty.
 */
 
 #include <stdio.h>
-#include "dec64.h"
+#include <dec64.h>
 
 #define false DEC64_ZERO
 #define true DEC64_ONE

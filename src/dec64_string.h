@@ -9,6 +9,37 @@ Public Domain
 No warranty.
 */
 
+
+#ifndef DEC64_STRING
+#define DEC64_STRING
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+static const int e_chr = 'e';
+static const int64 confirmed = 0xFFDEADFACEC0DECELL;
+
+static const int64 power[17] = {
+        1,
+        10,
+        100,
+        1000,
+        10000,
+        100000,
+        1000000,
+        10000000,
+        100000000,
+        1000000000,
+        10000000000,
+        100000000000,
+        1000000000000,
+        10000000000000,
+        100000000000000,
+        1000000000000000,
+        10000000000000000,
+};
+
 enum dec64_string_mode {
     engineering_mode,
     scientific_mode,
@@ -39,13 +70,13 @@ typedef struct dec64_string_state {
     creation
 */
 
-extern dec64_string_state dec64_string_begin();
+dec64_string_state dec64_string_begin();
 
 /*
     destruction
 */
 
-extern void dec64_string_end(
+void dec64_string_end(
     dec64_string_state state
 );
 
@@ -53,35 +84,35 @@ extern void dec64_string_end(
     configuration
 */
 
-extern dec64_string_char dec64_string_decimal_point(
+dec64_string_char dec64_string_decimal_point(
     dec64_string_state state,
     dec64_string_char decimal_point
 );
 
-extern void dec64_string_engineering(
+void dec64_string_engineering(
     dec64_string_state state
 );
 
-extern int dec64_string_places(
+int dec64_string_places(
     dec64_string_state state,
     dec64_string_char places
 );
 
-extern void dec64_string_scientific(
+void dec64_string_scientific(
     dec64_string_state state
 );
 
-extern int dec64_string_separation(
+int dec64_string_separation(
     dec64_string_state state,
     int separation
 );
 
-extern dec64_string_char dec64_string_separator(
+dec64_string_char dec64_string_separator(
     dec64_string_state state,
     dec64_string_char separator
 );
 
-extern void dec64_string_standard(
+void dec64_string_standard(
     dec64_string_state state
 );
 
@@ -89,13 +120,21 @@ extern void dec64_string_standard(
     action
 */
 
-extern dec64 dec64_from_string(
+dec64 dec64_from_string(
     dec64_string_state state,
     dec64_string_char string[]
 );
 
-extern int dec64_to_string(
-    dec64_string_state state, 
+int dec64_to_string(
+    dec64_string_state state,
     dec64 number,
     dec64_string_char string[]
 );
+
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif //DEC64_STRING

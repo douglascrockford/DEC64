@@ -1,8 +1,8 @@
-title   dec64.asm for x64.
+;title   dec64.asm for x64.
 
 ; dec64.com
 ; 2018-01-13
-; Public Domain
+; global Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
 
@@ -35,7 +35,7 @@ title   dec64.asm for x64.
 ;   dec64_signum(nan)
 ;
 ; These operations will produce a result of zero for all values of n,
-; even if n is nan:
+; even %if n is nan:
 ;
 ;   dec64_divide(0, n)
 ;   dec64_integer_divide(0, n)
@@ -75,7 +75,7 @@ title   dec64.asm for x64.
 ;   You know what goes great with those defective pentium chips?
 ;   Defective pentium salsa! (David Letterman)
 
-; All public symbols have a dec64_ prefix. All other symbols are private.
+; All global symbols have a dec64_ prefix. All other symbols are private.
 
 ; There are 72057594037927936 possible nan values.
 
@@ -91,115 +91,115 @@ title   dec64.asm for x64.
 
 eight_over_ten equ -3689348814741910323
 
-public dec64_abs;(number: dec64)
+global dec64_abs;(number: dec64)
 ;   returns absolution: dec64
 
-public dec64_add;(augend: dec64, addend: dec64)
+global dec64_add;(augend: dec64, addend: dec64)
 ;   returns sum: dec64
 
-public dec64_ceiling;(number: dec64)
+global dec64_ceiling;(number: dec64)
 ;   returns integer: dec64
 
-public dec64_coefficient;(number: dec64)
+global dec64_coefficient;(number: dec64)
 ;   returns coefficient: int64
 
-public dec64_dec;(minuend: dec64)
-;   returns difference: dec64
+global dec64_dec;(minuend: dec64)
+;   returns d%ifference: dec64
 
-public dec64_divide;(dividend: dec64, divisor: dec64)
+global dec64_divide;(dividend: dec64, divisor: dec64)
 ;   returns quotient: dec64
 
-public dec64_equal;(comparahend: dec64, comparator: dec64)
+global dec64_equal;(comparahend: dec64, comparator: dec64)
 ;   returns comparison: dec64
 
-public dec64_exponent;(number: dec64)
+global dec64_exponent;(number: dec64)
 ;   returns exponent: int64
 
-public dec64_floor;(number: dec64)
+global dec64_floor;(number: dec64)
 ;   returns integer: dec64
 
-public dec64_half;(dividend: dec64)
+global dec64_half;(dividend: dec64)
 ;   returns quotient: dec64
 
-public dec64_inc;(augend: dec64)
+global dec64_inc;(augend: dec64)
 ;   returns sum: dec64
 
-public dec64_int;(number: dec64)
+global dec64_int;(number: dec64)
 ;   returns integer: dec64
 
-public dec64_integer_divide;(dividend: dec64, divisor: dec64)
+global dec64_integer_divide;(dividend: dec64, divisor: dec64)
 ;   returns quotient: dec64
 
-public dec64_is_any_nan;(number: dec64)
+global dec64_is_any_nan;(number: dec64)
 ;   returns comparison: dec64
 
-public dec64_is_integer;(number: dec64)
+global dec64_is_integer;(number: dec64)
 ;   returns comparison: dec64
 
-public dec64_is_zero;(number: dec64)
+global dec64_is_zero;(number: dec64)
 ;   returns comparison: dec64
 
-public dec64_less;(comparahend: dec64, comparator: dec64)
+global dec64_less;(comparahend: dec64, comparator: dec64)
 ;   returns comparison: dec64
 
-public dec64_modulo;(dividend: dec64, divisor: dec64)
+global dec64_modulo;(dividend: dec64, divisor: dec64)
 ;   returns modulus: dec64
 
-public dec64_multiply;(multiplicand: dec64, multiplier: dec64)
+global dec64_multiply;(multiplicand: dec64, multiplier: dec64)
 ;   returns product: dec64
 
-public dec64_neg;(number: dec64)
+global dec64_neg;(number: dec64)
 ;   returns negation: dec64
 
-public dec64_new;(coefficient: int64, exponent: int64)
+global dec64_new;(coefficient: int64, exponent: int64)
 ;   returns number: dec64
 
-public dec64_normal;(number: dec64)
+global dec64_normal;(number: dec64)
 ;   returns normalization: dec64
 
-public dec64_not;(boolean: dec64)
+global dec64_not;(boolean: dec64)
 ;   returns notation: dec64
 
-public dec64_round;(number: dec64, place: dec64)
+global dec64_round;(number: dec64, place: dec64)
 ;   returns quantization: dec64
 
-public dec64_signum;(number: dec64)
+global dec64_signum;(number: dec64)
 ;   returns signature: dec64
 
-public dec64_subtract;(minuend: dec64, subtrahend: dec64)
-;   returns difference: dec64
+global dec64_subtract;(minuend: dec64, subtrahend: dec64)
+;   returns d%ifference: dec64
 
 ;  -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 ; Repair the register names. Over the long and twisted evolution of x86, the
 ; register names have picked up some weird, inconsistent conventions. We can
-; simplify, naming them r0 thru r15, with a _b suffix to indicate the low
+; simpl%ify, naming them r0 thru r15, with a _b suffix to indicate the low
 ; order byte, an _h suffix to indicate the so-called high byte and a _w suffix
 ; to indicate the lower 16 bits. We would use _d to indicate the lower 32 bits,
 ; but that was not needed here.
 
-r0      equ rax
-r1      equ rcx
-r2      equ rdx
-r6      equ rsi
-r7      equ rdi
+%define r0    rax
+%define r1    rcx
+%define r2    rdx
+%define r6    rsi
+%define r7    rdi
 
-r0_b    equ al
-r1_b    equ cl
-r2_b    equ dl
-r8_b    equ r8b
-r9_b    equ r9b
-r10_b   equ r10b
-r11_b   equ r11b
+%define r0_b  al
+%define r1_b  cl
+%define r2_b  dl
+%define r8_b  r8b
+%define r9_b  r9b
+%define r10_b r10b
+%define r11_b r11b
 
-r0_h    equ ah
-r1_h    equ ch
-r2_h    equ dh
+%define r0_h  ah
+%define r1_h  ch
+%define r2_h  dh
 
-r0_w    equ ax
-r1_w    equ cx
+%define r0_w  ax
+%define r1_w   cx
 
-; All of the public functions in this file accept up to two arguments, which
+; All of the global functions in this file accept up to two arguments, which
 ; are passed in registers (either r1, r2 or r7, r6), returning a result in r0.
 
 ; Registers r1, r2, r8, r9, r10, and r11 are clobbered. Register r0 is the
@@ -207,96 +207,95 @@ r1_w    equ cx
 
 ; There is painfully inadequate standardization around x64 calling conventions.
 ; On Win64, the first two arguments are passed in r1 and r2. On Unix, the first
-; two arguments are passed in r7 and r6. We try to hide this behind macros. The
-; two systems also have different conventions about which registers may be
+; two arguments are passed in r7 and r6. We try to hide this behind 0s. The
+; two systems also have d%ifferent conventions about which registers may be
 ; clobbered and which must be preserved. This code lives in the intersection.
 
 ; This has not yet been tested on Unix.
 
-UNIX    equ 0                   ; calling convention: 0 for Windows, 1 for Unix
+; we can define this value with the cmake instead of editing the file
+;UNIX    equ 1                   ; calling convention: 0 for Windows, 1 for Unix
 
-function_with_one_parameter macro
-    if UNIX
+%macro function_with_one_parameter 0
+    %if UNIX
     mov     r1,r7               ;; UNIX
-    endif
-    endm
+    %endif
+%endmacro
 
-function_with_two_parameters macro
-    if UNIX
+%macro function_with_two_parameters 0
+    %if UNIX
     mov     r1,r7               ;; UNIX
     mov     r2,r6               ;; UNIX
-    endif
-    endm
+    %endif
+%endmacro
 
-call_with_one_parameter macro function
-    if UNIX
+%macro call_with_one_parameter 1
+    %if UNIX
     mov     r7,r1               ;; UNIX
-    endif
-    call    function
-    endm
+    %endif
+    call    %1
+%endmacro
 
-call_with_two_parameters macro function
-    if UNIX
-    mov     r7,r1               ;; UNIX
-    mov     r6,r2               ;; UNIX
-    endif
-    call    function
-    endm
-
-tail_with_one_parameter macro function
-    if UNIX
-    mov     r7,r1               ;; UNIX
-    endif
-    jmp     function
-    endm
-
-tail_with_two_parameters macro function
-    if UNIX
+%macro call_with_two_parameters 1
+    %if UNIX
     mov     r7,r1               ;; UNIX
     mov     r6,r2               ;; UNIX
-    endif
-    jmp     function
-    endm
+    %endif
+    call    %1
+%endmacro
+
+%macro tail_with_one_parameter 1
+    %if UNIX
+    mov     r7,r1               ;; UNIX
+    %endif
+    jmp     %1
+%endmacro
+
+%macro tail_with_two_parameters 1
+    %if UNIX
+    mov     r7,r1               ;; UNIX
+    mov     r6,r2               ;; UNIX
+    %endif
+    jmp     %1
+%endmacro
 
 ; There may be a performance benefit in padding programs so that most jump
 ; destinations are aligned on 16 byte boundaries.
 
-pad macro
+%macro pad 0
     align   16
-    endm
+%endmacro
 
 ;  -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-dec64_data segment para read
+section .data
 
-power:                              ; the powers of 10
+; the powers of 10
+power dq 1                       , ; 0
+      dq 10                      , ; 1
+      dq 100                     , ; 2
+      dq 1000                    , ; 3
+      dq 10000                   , ; 4
+      dq 100000                  , ; 5
+      dq 1000000                 , ; 6
+      dq 10000000                , ; 7
+      dq 100000000               , ; 8
+      dq 1000000000              , ; 9
+      dq 10000000000             , ; 10
+      dq 100000000000            , ; 11
+      dq 1000000000000           , ; 12
+      dq 10000000000000          , ; 13
+      dq 100000000000000         , ; 14
+      dq 1000000000000000        , ; 15
+      dq 10000000000000000       , ; 16
+      dq 100000000000000000      , ; 17
+      dq 1000000000000000000     , ; 18
+      dq 10000000000000000000      ; 19
 
-    qword   1                       ; 0
-    qword   10                      ; 1
-    qword   100                     ; 2
-    qword   1000                    ; 3
-    qword   10000                   ; 4
-    qword   100000                  ; 5
-    qword   1000000                 ; 6
-    qword   10000000                ; 7
-    qword   100000000               ; 8
-    qword   1000000000              ; 9
-    qword   10000000000             ; 10
-    qword   100000000000            ; 11
-    qword   1000000000000           ; 12
-    qword   10000000000000          ; 13
-    qword   100000000000000         ; 14
-    qword   1000000000000000        ; 15
-    qword   10000000000000000       ; 16
-    qword   100000000000000000      ; 17
-    qword   1000000000000000000     ; 18
-    qword   10000000000000000000    ; 19
-
-dec64_data ends
 
 ;  -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-dec64_code segment para execute
+section .text
 
 dec64_coefficient: function_with_one_parameter
 ;(number: dec64) returns coefficient: int64
@@ -331,7 +330,10 @@ dec64_new: function_with_two_parameters
     mov     r8,r2               ; r8 is the exponent
 
 ; Fall into pack.
-
+    cmp r8, 0
+    jl pack
+    mov r9, 0
+    sub r9, r8
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 pack:
@@ -343,13 +345,19 @@ pack:
 ; The coefficient is in r0.
 ; The exponent is in r8.
 
-; If the exponent is greater than 127, then the number is too big.
+; %if the exponent is greater than 127, then the number is too big.
 ; But it might still be possible to salvage a value.
 
     cmp     r8,127          ; compare exponent with 127
     jg      pack_decrease   ; it might be possible to decrease it
 
-; If the exponent is too small, or if the coefficient is too large, then some
+; %if the exponent is smaller than -127, then the number is too small.
+; But it might still be possible to salvage a value.
+
+    cmp     r9,-127
+    jl      pack_decrease_small
+
+; %if the exponent is too small, or %if the coefficient is too large, then some
 ; division is necessary. The absolute value of the coefficient is off by one
 ; for the negative because
 ;    negative_extreme_coefficent = -(extreme_coefficent + 1)
@@ -365,17 +373,17 @@ pack:
     mov     r1,36028797018963967 ; the ultimate coefficient - 1
     mov     r9,-127         ; r9 is the ultimate exponent
     cmp     r1,r10          ; compare with the actual coefficient
-    adc     r11,0           ; add 1 to r11 if 1 digit too big
+    adc     r11,0           ; add 1 to r11 %if 1 digit too big
     mov     r1,360287970189639679 ; the ultimate coefficient * 10 - 1
-    sub     r9,r8           ; r9 is the difference from the actual exponent
+    sub     r9,r8           ; r9 is the d%ifference from the actual exponent
     cmp     r1,r10          ; compare with the actual coefficient
-    adc     r11,0           ; add 1 to r11 if 2 digits too big
+    adc     r11,0           ; add 1 to r11 %if 2 digits too big
     cmp     r9,r11          ; which excess is larger?
     cmovl   r9,r11          ; take the max
-    test    r9,r9           ; if neither was zero
+    test    r9,r9           ; %if neither was zero
     jnz     pack_increase   ; then increase the exponent by the excess
-    shl     r0,8            ; shift the exponent into position
-    cmovz   r8,r0           ; if the coefficient is zero, also zero the exp
+    shl     r0,8            ; sh%ift the exponent into position
+    cmovz   r8,r0           ; %if the coefficient is zero, also zero the exp
     movzx   r8,r8_b         ; zero out all but the bottom 8 bits of the exp
     or      r0,r8           ; mix in the exponent
     ret                     ; whew
@@ -384,17 +392,17 @@ pack:
 pack_large:
 
     mov     r1,r0           ; r1 is the coefficient
-    sar     r1,63           ; r1 is -1 if negative, or 0 if positive
+    sar     r1,63           ; r1 is -1 %if negative, or 0 %if positive
     mov     r11,eight_over_ten ; magic number
     mov     r9,r1           ; r9 is -1 or 0
-    xor     r0,r1           ; complement the coefficient if negative
+    xor     r0,r1           ; complement the coefficient %if negative
     and     r9,1            ; r9 is 1 or 0
     add     r0,r9           ; r0 is absolute value of coefficient
     add     r8,1            ; add 1 to the exponent
     mul     r11             ; multiply abs(coefficient) by magic number
-    mov     r0,r2           ; r0 is the product shift 64 bits
+    mov     r0,r2           ; r0 is the product sh%ift 64 bits
     shr     r0,3            ; r0 is divided by 8: the abs(coefficient) / 10
-    xor     r0,r1           ; complement the coefficient if it was negative
+    xor     r0,r1           ; complement the coefficient %if it was negative
     add     r0,r9           ; coefficient's sign is restored
     jmp     pack            ; start over
     pad
@@ -402,9 +410,9 @@ pack_large:
 pack_increase:
 
     mov     r10,power
-    mov     r10,[r10][r9*8] ; r10 is 10^r9
-    cmp     r9,20           ; is the difference more than 20?
-    jae     return_zero     ; if so, the result is zero (rare)
+    mov     r10,[r10+r9*8] ; r10 is 10^r9
+    cmp     r9,20           ; is the d%ifference more than 20?
+    jae     return_zero     ; %if so, the result is zero (rare)
     mov     r11,r10         ; r11 is the power of ten
     neg     r11             ; r11 is the negation of the power of ten
     test    r0,r0           ; examine the sign of the coefficient
@@ -423,7 +431,7 @@ pack_decrease:
 ; This can salvage values in a small set of cases.
 
     imul    r0,10           ; try multiplying the coefficient by 10
-    jo      return_nan      ; if it overflows, we failed to salvage
+    jo      return_nan      ; %if it overflows, we failed to salvage
     sub     r8,1            ; decrement the exponent
     test    r8,-128         ; is the exponent still over 127?
     jnz     pack_decrease   ; until the exponent is less than 127
@@ -431,8 +439,34 @@ pack_decrease:
     sar     r9,56           ; r9 is top 8 bits of the coefficient
     adc     r9,0            ; add the ninth bit
     jnz     return_nan      ; the number is still too large
-    shl     r0,8            ; shift the exponent into position
-    cmovz   r8,r0           ; if the coefficient is zero, also zero the exponent
+    shl     r0,8            ; sh%ift the exponent into position
+    cmovz   r8,r0           ; %if the coefficient is zero, also zero the exponent
+    movzx   r8,r8_b         ; zero out all but the bottom 8 bits of the exponent
+    or      r0,r8           ; mix in the exponent
+    ret
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+pack_decrease_small:
+
+; The exponent is too small. We can attempt to reduce it by scaling up.
+; This can salvage values in a small set of cases.
+
+    mov     r10, 10
+    sub     r10, r0
+    jb      return_zero     ; %if less than 10, will underflow (nan?)
+    mov     r10, 10         ; if not, try to salvage
+    cqo
+    idiv    r10             ; try dividing the coefficient by 10
+    add     r8,1            ; decrement the exponent
+    test    r8,-128         ; is the exponent still under -127?
+    jnz     pack_decrease_small   ; until the exponent is less than -127
+    mov     r9,r0           ; r9 is the coefficient
+    sar     r9,56           ; r9 is top 8 bits of the coefficient
+    adc     r9,0            ; add the ninth bit
+    jnz     return_zero     ; the number is still too small
+    shl     r0,8            ; sh%ift the exponent into position
+    cmovz   r8,r0           ; %if the coefficient is zero, also zero the exponent
     movzx   r8,r8_b         ; zero out all but the bottom 8 bits of the exponent
     or      r0,r8           ; mix in the exponent
     ret
@@ -463,10 +497,10 @@ dec64_round: function_with_two_parameters
     movsx   r8,r11_b        ; r8 is the current exponent
     mov     r0,r11          ; r0 is the number
     test    r1_b,r1_h       ; is either nan?
-    jz      return_nan      ; if so, the result is nan
+    jz      return_nan      ; %if so, the result is nan
 
     sar     r0,8            ; r0 is the coefficient
-    jz      return          ; if the coefficient is zero, the result is zero
+    jz      return          ; %if the coefficient is zero, the result is zero
     cmp     r8,r9           ; compare the exponents
     jge     pack            ; no rounding required
     mov     r2,r0           ; r2 is the coefficient
@@ -486,17 +520,17 @@ round_loop:
 
     add     r8,1            ; increment the exponent
     cmp     r8,r9           ; compare the exponents
-    jne     round_loop      ; loop if the exponent has not reached the target
+    jne     round_loop      ; loop %if the exponent has not reached the target
 
-; Round if necessary and return the result.
+; Round %if necessary and return the result.
 
     shr     r2,2            ; Isolate the carry bit
-    and     r2,1            ; r2 is 1 if rounding is needed
+    and     r2,1            ; r2 is 1 %if rounding is needed
     add     r0,r2           ; r0 is rounded
     mov     r2,r0           ; r2 is the result
     neg     r2              ; r2 is the result negated
     test    r11,r11         ; was the original number negative
-    cmovs   r0,r2           ; if so, use the negated result
+    cmovs   r0,r2           ; %if so, use the negated result
     jmp     pack            ; pack it up
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -515,7 +549,7 @@ dec64_add: function_with_two_parameters
 ; r10       coefficient of first argument
 ; r11       coefficient of second argument
 
-; If the two exponents are both zero (which is usually the case for integers)
+; %if the two exponents are both zero (which is usually the case for integers)
 ; we can take the fast path. Since the exponents are both zero, we can simply
 ; add the numbers together and check for overflow.
 
@@ -525,15 +559,15 @@ add_begin:
 
     mov     r0,r1           ; r0 is the first number
     or      r1_b,r2_b       ; r1_b is the two exponents or'd together
-    jnz     add_slow        ; if either exponent is not zero, take the slow path
-    add     r0,r2           ; add the shifted coefficients together
-    jo      add_overflow    ; if there was no overflow, we are done
+    jnz     add_slow        ; %if either exponent is not zero, take the slow path
+    add     r0,r2           ; add the sh%ifted coefficients together
+    jo      add_overflow    ; %if there was no overflow, we are done
     ret                     ; no need to pack
     pad
 
 add_overflow:
 
-; If there was an overflow (extremely unlikely) then we must make it fit.
+; %if there was an overflow (extremely unlikely) then we must make it fit.
 ; pack knows how to do that.
 
     rcr     r0,1            ; divide the sum by 2 and repair its sign
@@ -544,27 +578,27 @@ add_overflow:
 
 add_slow:
 
-; The slow path is taken if the two operands do not both have zero exponents.
+; The slow path is taken %if the two operands do not both have zero exponents.
 
     mov     r1,r0           ; restore r1
     cmp     r0_b,128        ; is the first operand nan?
-    je      return_nan      ; if nan, get out
+    je      return_nan      ; %if nan, get out
 
 ; Are the two exponents the same? This will happen often, especially with
 ; money values.
 
     cmp     r1_b,r2_b       ; compare the two exponents
-    jne     add_slower      ; if not equal, take the slower path
+    jne     add_slower      ; %if not equal, take the slower path
 
 ; The exponents match so we may add now. Zero out the exponents so there
 ; will be no carry into the coefficients when the coefficients are added.
-; If the result is zero, then return the normal zero.
+; %if the result is zero, then return the normal zero.
 
     and     r0,-256         ; remove the exponent
     and     r2,-256         ; remove the other exponent
-    add     r0,r2           ; add the shifted coefficients
-    jo      add_overflow    ; if it overflows, it must be repaired
-    cmovz   r1,r0           ; if the coefficient is zero, the exponent is zero
+    add     r0,r2           ; add the sh%ifted coefficients
+    jo      add_overflow    ; %if it overflows, it must be repaired
+    cmovz   r1,r0           ; %if the coefficient is zero, the exponent is zero
     movzx   r1,r1_b         ; mask the exponent
     or      r0,r1           ; mix in the exponent
     ret                     ; no need to pack
@@ -573,8 +607,8 @@ add_slow:
 add_slower:
 
 ; The slower path is taken when neither operand is nan, and their
-; exponents are different. Before addition can take place, the exponents
-; must be made to match. Swap the numbers if the second exponent is greater
+; exponents are d%ifferent. Before addition can take place, the exponents
+; must be made to match. Swap the numbers %if the second exponent is greater
 ; than the first.
 
     cmp     r2_b,128        ; Is the second operand nan?
@@ -584,7 +618,7 @@ add_slower:
     cmovl   r1,r2           ; r1 is the number with the larger exponent
     cmovl   r2,r0           ; r2 is the number with the smaller exponent
 
-; Shift the coefficients of r1 and r2 into r10 and r11 and unpack the exponents.
+; Sh%ift the coefficients of r1 and r2 into r10 and r11 and unpack the exponents.
 
     mov     r10,r1          ; r10 is the first number
     mov     r11,r2          ; r11 is the second number
@@ -620,23 +654,23 @@ add_slower_decrease:
 add_slower_increase:
 
 ; We cannot decrease the first exponent any more, so we must instead try to
-; increase the second exponent, which will result in a loss of significance.
+; increase the second exponent, which will result in a loss of sign%ificance.
 ; That is the heartbreak of floating point.
 
-; Determine how many places need to be shifted. If it is more than 17, there is
+; Determine how many places need to be sh%ifted. %if it is more than 17, there is
 ; nothing more to add.
 
     mov     r2,r8           ; r2 is the first exponent
-    sub     r2,r9           ; r2 is the remaining exponent difference
+    sub     r2,r9           ; r2 is the remaining exponent d%ifference
     mov     r0,r11          ; r0 is the second coefficient
     cmp     r2,17           ; 17 is the max digits in a packed coefficient
     ja      return_r1       ; too small to matter
     mov     r9,power
-    mov     r9,[r9][r2*8]   ; r9 is the power of ten
+    mov     r9,[r9+r2*8]   ; r9 is the power of ten
     cqo                     ; sign extend r0 into r2
     idiv    r9              ; divide the second coefficient by the power of 10
     test    r0,r0           ; examine the scaled coefficient
-    jz      return_r1       ; too insignificant to add?
+    jz      return_r1       ; too insign%ificant to add?
 
 ; The exponents are now equal, so the coefficients may be added.
 
@@ -673,7 +707,7 @@ inc_not_integer:
     js      inc_negative_exponent
 
     test    r1,-256         ; is the coefficient zero?
-    jz      return_one      ; if so, the result is one
+    jz      return_one      ; %if so, the result is one
     cmp     r1_b,17         ; is the number too enormous to increment?
     jge     return_r1       ; then return the number
 
@@ -693,16 +727,16 @@ inc_negative_exponent:
     movsx   r8,r1_b         ; r8 is the negative exponent
     neg     r8              ; flip the sign
     mov     r9,power
-    mov     r0,[r9][r8*8]   ; r0 is 10^(-exponent)
+    mov     r0,[r9+r8*8]   ; r0 is 10^(-exponent)
     shl     r0,8            ; convert to dec64
     add     r0,r1           ; now we add
-    jo      inc_hardway     ; if it overflows, do it the hard way
+    jo      inc_hardway     ; %if it overflows, do it the hard way
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 dec64_dec: function_with_one_parameter
-;(minuend: dec64) returns difference: dec64
+;(minuend: dec64) returns d%ifference: dec64
 
 ; Increment a number. In most cases, this will be a faster way to subtract one
 ; than dec64_subtract.
@@ -714,7 +748,7 @@ dec64_dec: function_with_one_parameter
 ; The number is an integer. This might be easy.
 
     mov     r0,-256         ; r0 is negative one
-    add     r0,r1           ; r0 is the difference
+    add     r0,r1           ; r0 is the d%ifference
     jo      dec_hardway     ; overflow (very rare)
     ret
     pad
@@ -724,7 +758,7 @@ dec_not_integer:
     js      dec_negative_exponent
 
     test    r1,-256         ; is the coefficient zero?
-    jz      dec_neg_one     ; if so, the result is negative one
+    jz      dec_neg_one     ; %if so, the result is negative one
     cmp     r1_b,17         ; is the number too enormous to decrement?
     jge     return_r1       ; then return the number
 
@@ -744,11 +778,11 @@ dec_negative_exponent:
     movsx   r8,r1_b         ; r8 is the negative exponent
     neg     r8              ; flip the sign
     mov     r9,power
-    mov     r0,[r9][r8*8]   ; r0 is 10^(-exponent)
+    mov     r0,[r9+r8*8]   ; r0 is 10^(-exponent)
     neg     r0              ; go negative
     shl     r0,8            ; convert to dec64
     add     r0,r1           ; now we subtract
-    jo      dec_hardway     ; if it overflows, do it the hard way
+    jo      dec_hardway     ; %if it overflows, do it the hard way
     ret
     pad
 
@@ -764,7 +798,7 @@ dec64_ceiling: function_with_one_parameter
 
 ; Produce the smallest integer that is greater than or equal to the number. In
 ; the result, the exponent will be greater than or equal to zero unless it is
-; nan. Numbers with positive exponents will not be modified, even if the
+; nan. Numbers with positive exponents will not be mod%ified, even %if the
 ; numbers are outside of the safe integer range.
 
 ; Preserved: r11.
@@ -780,7 +814,7 @@ dec64_floor: function_with_one_parameter
 ; Produce the largest integer that is less than or equal to the number. This
 ; is sometimes called the entier function. In the result, the exponent will be
 ; greater than or equal to zero unless it is nan. Numbers with positive
-; exponents will not be modified, even if the numbers are outside of the safe
+; exponents will not be mod%ified, even %if the numbers are outside of the safe
 ; integer range.
 
 ; Preserved: r11.
@@ -791,18 +825,18 @@ dec64_floor: function_with_one_parameter
 floor_begin:
 
     cmp     r1_b,128        ; compare the exponent to nan
-    je      return_nan       ; if the exponent is nan, the result is nan
+    je      return_nan       ; %if the exponent is nan, the result is nan
     mov     r0,r1           ; r0 is the number
     movsx   r8,r1_b         ; r8 is the exponent
     sar     r0,8            ; r0 is the coefficient
-    cmovz   r1,r0           ; if the coefficient is zero, the number is zero
+    cmovz   r1,r0           ; %if the coefficient is zero, the number is zero
     neg     r8              ; r8 is the negated exponent
     test    r1_b,r1_b       ; examine the exponent
     jns     return_r1       ; nothing to do unless the exponent was negative
     cmp     r8,17           ; is the exponent is too extreme?
     jae     floor_micro     ; deal with a micro number
     mov     r10,power
-    mov     r10,[r10][r8*8] ; r10 is the power of ten
+    mov     r10,[r10+r8*8] ; r10 is the power of ten
     cqo                     ; sign extend r0 into r2
     idiv    r10             ; divide r2:r0 by 10
     test    r2,r2           ; examine the remainder
@@ -819,13 +853,13 @@ floor_micro:
 
 floor_remains:
 
-; If the remainder is negative and the rounding flag is negative, then we need
-; to decrement r0. But if the remainder and the rounding flag are both
+; %if the remainder is negative and the rounding flag is negative, then we need
+; to decrement r0. But %if the remainder and the rounding flag are both
 ; positive, then we need to increment r0.
 
     xor     r10,r10         ; r10 is zero
     xor     r2,r9           ; xor the remainder and the rounding
-    cmovs   r9,r10          ; if they had different signs, clear the rounding
+    cmovs   r9,r10          ; %if they had d%ifferent signs, clear the rounding
     add     r0,r9           ; add the rounding to the coefficient
     shl     r0,8            ; pack the coefficient
     ret
@@ -833,7 +867,7 @@ floor_remains:
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 dec64_subtract: function_with_two_parameters
-;(minuend: dec64, subtrahend: dec64) returns difference: dec64
+;(minuend: dec64, subtrahend: dec64) returns d%ifference: dec64
 
 ; Subtract the dec64 number in r2 from the dec64 number in r1.
 ; The result is in r0.
@@ -843,7 +877,7 @@ dec64_subtract: function_with_two_parameters
 
     xor     r2,-256         ; not the coefficient only
     add     r2,256          ; the two's complement increment of the coefficient
-    jno     add_begin       ; if there is no overflow, begin the beguine
+    jno     add_begin       ; %if there is no overflow, begin the beguine
 
 ; The subtrahend coefficient is -36028797018963968. This value cannot easily be
 ; complemented, so take the slower path. This should be extremely rare.
@@ -860,7 +894,7 @@ dec64_subtract: function_with_two_parameters
     movsx   r9,r2_b         ; r9 is the second exponent
     mov     r11,80000000000000H ; r11 is 36028797018963968
     mov     r0,r10          ; r0 is the first coefficient
-    cmp     r8,r9           ; if the second exponent is larger, swap
+    cmp     r8,r9           ; %if the second exponent is larger, swap
     jge     subtract_slower_decrease_compare
     mov     r0,r11          ; r0 is the second coefficient
     xchg    r8,r9           ; swap the exponents
@@ -897,19 +931,19 @@ subtract_slower_decrease_compare:
 subtract_slower_increase:
 
 ; We cannot decrease the first exponent any more, so we must instead try to
-; increase the second exponent, which will result in a loss of significance.
+; increase the second exponent, which will result in a loss of sign%ificance.
 ; That is the heartbreak of floating point.
 
-; Determine how many places need to be shifted. If it is more than 17, there is
+; Determine how many places need to be sh%ifted. %if it is more than 17, there is
 ; nothing more to add.
 
     mov     r2,r8           ; r2 is the first exponent
-    sub     r2,r9           ; r2 is the remaining exponent difference
+    sub     r2,r9           ; r2 is the remaining exponent d%ifference
     mov     r0,r11          ; r0 is the second coefficient
     cmp     r2,17           ; 17 is the max digits in a packed coefficient
     ja      subtract_underflow ; too small to matter
     mov     r9,power
-    mov     r9,[r9][r2*8]   ; r9 is the power of ten
+    mov     r9,[r9+r2*8]   ; r9 is the power of ten
     cqo                     ; sign extend r0 into r2
     idiv    r9              ; divide the second coefficient by the power of 10
 
@@ -936,22 +970,22 @@ dec64_multiply: function_with_two_parameters
     movsx   r8,r1_b         ; r8 is the first exponent
     movsx   r9,r2_b         ; r9 is the second exponent
 
-; Set flags in r0 if either operand is nan.
+; Set flags in r0 %if either operand is nan.
 
     cmp     r1_b,128        ; is the first operand nan?
-    sete    r0_b            ; r0_b is 1 if the first operand is nan
+    sete    r0_b            ; r0_b is 1 %if the first operand is nan
     cmp     r2_b,128        ; is the second operand nan?
-    sete    r0_h            ; r0_h is 1 if the second operand is nan
+    sete    r0_h            ; r0_h is 1 %if the second operand is nan
 
-; Unpack the coefficients. Set flags in r1 if either is not zero.
+; Unpack the coefficients. Set flags in r1 %if either is not zero.
 
     sar     r1,8            ; r1 is the first coefficient
     mov     r10,r1          ; r10 is the first coefficient
-    setnz   r1_b            ; r1_b is 1 if the first coefficient is not zero
+    setnz   r1_b            ; r1_b is 1 %if the first coefficient is not zero
     sar     r2,8            ; r2 is the second coefficient
-    setnz   r1_h            ; r1_h is 1 if the second coefficient is not zero
+    setnz   r1_h            ; r1_h is 1 %if the second coefficient is not zero
 
-; The result is nan if one or both of the operands is nan and neither of the
+; The result is nan %if one or both of the operands is nan and neither of the
 ; operands is zero.
 
     or      r1_w,r0_w       ; is either coefficient zero and not nan?
@@ -962,7 +996,7 @@ dec64_multiply: function_with_two_parameters
     mov     r0,r10          ; r0 is the first coefficient
     add     r8,r9           ; r8 is the product exponent
     imul    r2              ; r2:r0 is r1 * r2
-    jno     pack            ; if the product fits in 64 bits, start packing
+    jno     pack            ; %if the product fits in 64 bits, start packing
 
 ; There was overflow.
 
@@ -970,18 +1004,18 @@ dec64_multiply: function_with_two_parameters
 ; digits of excess, and increase the exponent by that many digits.
 ; We use 77/256 to convert log2 to log10.
 
-    mov     r9,r2           ; r9 is the excess significance
+    mov     r9,r2           ; r9 is the excess sign%ificance
     xor     r1,r1           ; r1 is zero anticipating bsr
     neg     r9
-    cmovs   r9,r2           ; r9 is absolute value of the excess significance
+    cmovs   r9,r2           ; r9 is absolute value of the excess sign%ificance
 
-    bsr     r1,r9           ; find the position of the most significant bit
+    bsr     r1,r9           ; find the position of the most sign%ificant bit
     imul    r1,77           ; multiply the bit number by 77/256 to
     shr     r1,8            ;     convert a bit number to a digit number
     add     r1,2            ; add two extra digits to the scale
     add     r8,r1           ; increase the exponent
     mov     r9,power
-    idiv    qword ptr [r9][r1*8] ; divide by the power of ten
+    idiv    qword [r9+r1*8] ; divide by the power of ten
     jmp     pack
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -1001,26 +1035,26 @@ dec64_divide: function_with_two_parameters
 ; Set nan flags in r0.
 
     cmp     r1_b,128        ; is the first operand nan?
-    sete    r0_b            ; r0_b is 1 if the first operand is nan
+    sete    r0_b            ; r0_b is 1 %if the first operand is nan
     cmp     r2_b,128        ; is the second operand nan?
-    sete    r0_h            ; r0_h is 1 if the second operand is nan
+    sete    r0_h            ; r0_h is 1 %if the second operand is nan
 
     sar     r10,8           ; r10 is the dividend coefficient
-    setnz   r1_b            ; r1_b is 1 if the dividend coefficient is zero
+    setnz   r1_b            ; r1_b is 1 %if the dividend coefficient is zero
     sar     r11,8           ; r11 is the divisor coefficient
-    setz    r1_h            ; r1_h is 1 if dividing by zero
-    or      r0_h,r0_b       ; r0_h is 1 if either is nan
-    or      r1_b,r0_b       ; r1_b is zero if the dividend is zero and not nan
-    jz      return_zero     ; if the dividend is zero, the quotient is zero
+    setz    r1_h            ; r1_h is 1 %if dividing by zero
+    or      r0_h,r0_b       ; r0_h is 1 %if either is nan
+    or      r1_b,r0_b       ; r1_b is zero %if the dividend is zero and not nan
+    jz      return_zero     ; %if the dividend is zero, the quotient is zero
     sub     r8,r9           ; r8 is the quotient exponent
-    or      r0_b,r1_h       ; r0_b is 1 if either is nan or the divisor is zero
+    or      r0_b,r1_h       ; r0_b is 1 %if either is nan or the divisor is zero
     jnz     return_nan
     pad
 
 divide_measure:
 
 ; We want to get as many bits into the quotient as possible in order to capture
-; enough significance. But if the quotient has more than 64 bits, then there
+; enough sign%ificance. But %if the quotient has more than 64 bits, then there
 ; will be a hardware fault. To avoid that, we compare the magnitudes of the
 ; dividend coefficient and divisor coefficient, and use that to scale the
 ; dividend to give us a good quotient.
@@ -1031,8 +1065,8 @@ divide_measure:
     cmovs   r0,r10          ; r0 is abs of dividend coefficient
     neg     r1              ; r1 is negated
     cmovs   r1,r11          ; r1 is abs of divisor coefficient
-    bsr     r0,r0           ; r0 is the dividend most significant bit
-    bsr     r1,r1           ; r1 is the divisor most significant bit
+    bsr     r0,r0           ; r0 is the dividend most sign%ificant bit
+    bsr     r1,r1           ; r1 is the divisor most sign%ificant bit
 
 ; Scale up the dividend to be approximately 58 bits longer than the divisor.
 ; Scaling uses factors of 10, so we must convert from a bit count to a digit
@@ -1045,7 +1079,7 @@ divide_measure:
 
 ; The largest power of 10 that can be held in an int64 is 1e18.
 
-    cmp     r1,18           ; prescale the dividend if 10**r1 won't fit
+    cmp     r1,18           ; prescale the dividend %if 10**r1 won't fit
     jg      divide_prescale
 
 ; Multiply the dividend by the scale factor, and divide that 128 bit result by
@@ -1055,7 +1089,7 @@ divide_measure:
 
     mov     r0,r10          ; r0 is the dividend coefficient
     mov     r9,power
-    imul    qword ptr [r9][r1*8] ; r2:r0 is the dividend coefficient * 10**r1
+    imul    qword [r9+r1*8] ; r2:r0 is the dividend coefficient * 10**r1
     idiv    r11             ; r0 is the quotient
     sub     r8,r1           ; r8 is the exponent
     jmp     pack            ; pack it up
@@ -1063,7 +1097,7 @@ divide_measure:
 
 divide_prescale:
 
-; If the number of scaling digits is larger than 18, then we will have to
+; %if the number of scaling digits is larger than 18, then we will have to
 ; scale in two steps: first prescaling the dividend to fill a register, and
 ; then repeating to fill a second register. This happens when the divisor
 ; coefficient is much larger than the dividend coefficient.
@@ -1071,9 +1105,9 @@ divide_prescale:
     mov     r1,58           ; we want 58 bits or so in the dividend
     sub     r1,r0           ; r1 is the number of additional bits needed
     imul    r1,77           ; convert bits to digits
-    shr     r1,8            ; shift 8 is cheaper than div 256
+    shr     r1,8            ; sh%ift 8 is cheaper than div 256
     mov     r9,power
-    imul    r10,qword ptr [r9][r1*8] ; multiply the dividend by power of ten
+    imul    r10,qword [r9+r1*8] ; multiply the dividend by power of ten
     sub     r8,r1           ; reduce the exponent
     jmp     divide_measure  ; try again
 
@@ -1092,15 +1126,15 @@ dec64_integer_divide: function_with_two_parameters
     mov     r0,r1           ; r0 is the dividend
     mov     r11,r2          ; r11 is the divisor
     sar     r1,8            ; r1 is the dividend coefficient
-    setnz   r2_h            ; r2_h is 1 if the dividend coefficient is not zero
+    setnz   r2_h            ; r2_h is 1 %if the dividend coefficient is not zero
     cmp     r0_b,128        ; are the operands nan?
-    sete    r2_b            ; r2_b is 1 if the operands are nan
+    sete    r2_b            ; r2_b is 1 %if the operands are nan
     and     r0,-256         ; zero the dividend's exponent
-    or      r2_h,r2_b       ; r2_h is zero if the dividend is zero and not nan
-    jz      return_zero     ; the quotient is zero if the dividend is zero
+    or      r2_h,r2_b       ; r2_h is zero %if the dividend is zero and not nan
+    jz      return_zero     ; the quotient is zero %if the dividend is zero
     sar     r11,8           ; r11 is the divisor coefficient
-    setz    r2_h            ; r2_h is 1 if the divisor coefficient is zero
-    or      r2_b,r2_h       ; r2_b is 1 if the result is nan
+    setz    r2_h            ; r2_h is 1 %if the divisor coefficient is zero
+    or      r2_b,r2_h       ; r2_b is 1 %if the result is nan
     jnz     return_nan
     cqo                     ; sign extend r0 into r2
     idiv    r11             ; r0 is the quotient
@@ -1131,33 +1165,33 @@ dec64_modulo: function_with_two_parameters
 ;    )
 
     cmp     r1_b,r2_b       ; are the two exponents the same?
-    jnz     modulo_slow     ; if not take the slow path
+    jnz     modulo_slow     ; %if not take the slow path
     mov     r0,r1           ; r0 is the dividend
     mov     r11,r2          ; r11 is the divisor
     cmp     r1_b,128        ; is the first operand nan?
-    setne   r2_h            ; r2_h is 1 if the operands are not nan
+    setne   r2_h            ; r2_h is 1 %if the operands are not nan
     sar     r0,8            ; r0 is the dividend coefficient
-    setz    r2_b            ; r2_b is 1 if the dividend coefficient is zero
+    setz    r2_b            ; r2_b is 1 %if the dividend coefficient is zero
     test    r2_b,r2_h       ; is the dividend is zero and not nan?
-    jnz     return_zero     ; the quotient is zero if the dividend is zero
+    jnz     return_zero     ; the quotient is zero %if the dividend is zero
     sar     r11,8           ; r11 is the divisor coefficient
-    setnz   r2_b            ; r2_b is 1 if the divisor coefficient is not zero
+    setnz   r2_b            ; r2_b is 1 %if the divisor coefficient is not zero
     test    r2_h,r2_b       ; is either operand nan or is the divisor zero?
     jz      return_nan
     cqo                     ; sign extend r0 into r2
     idiv    r11             ; divide r2:r0 by the divisor
 
-; If the signs of the divisor and remainder are different and the remainder is
+; %if the signs of the divisor and remainder are d%ifferent and the remainder is
 ; not zero, add the divisor to the remainder.
 
     xor     r0,r0           ; r0 is zero
     mov     r10,r2          ; r10 is the remainder
     test    r2,r2           ; examine the remainder
-    cmovz   r11,r0          ; r11 is zero if the remainder is zero
+    cmovz   r11,r0          ; r11 is zero %if the remainder is zero
     xor     r10,r11         ; r10 is remainder xor divisor
-    cmovs   r0,r11          ; r0 is the divisor if the signs were different
+    cmovs   r0,r11          ; r0 is the divisor %if the signs were d%ifferent
     add     r0,r2           ; r0 is the corrected result
-    cmovz   r1,r0           ; if r0 is zero, so is the exponent
+    cmovz   r1,r0           ; %if r0 is zero, so is the exponent
     shl     r0,8            ; position the coefficient
     mov     r0_b,r1_b       ; mix in the exponent
     ret
@@ -1201,12 +1235,12 @@ dec64_half: function_with_one_parameter
 
 half_fast:
 
-; If the least significant bit of the coefficient is 0, then we can do this
-; the fast way. Shift the coefficient by 1 bit and restore the exponent. If
-; the shift produces zero, even easier.
+; %if the least sign%ificant bit of the coefficient is 0, then we can do this
+; the fast way. Sh%ift the coefficient by 1 bit and restore the exponent. %if
+; the sh%ift produces zero, even easier.
 
     mov     r0,-256         ; r0 is the coefficient mask
-    and     r0,r1           ; r0 is the coefficient shifted 8 bits
+    and     r0,r1           ; r0 is the coefficient sh%ifted 8 bits
     jz      return
     sar     r0,1            ; r0 is divided by 2
     movzx   r1,r1_b         ; zero out r1 except lowest 8 bits
@@ -1218,22 +1252,22 @@ half_fast:
 dec64_signum: function_with_one_parameter
 ;(number: dec64) returns signature: dec64
 
-; If the number is nan, the result is nan.
-; If the number is less than zero, the result is -1.
-; If the number is zero, the result is 0.
-; If the number is greater than zero, the result is 1.
+; %if the number is nan, the result is nan.
+; %if the number is less than zero, the result is -1.
+; %if the number is zero, the result is 0.
+; %if the number is greater than zero, the result is 1.
 
     mov     r0,r1           ; r0 is the number
     sar     r0,8            ; r0 is the coefficient
     mov     r8,r0           ; r8 is the coefficient too
     neg     r0              ; r0 is -coefficient
-    sar     r8,63           ; r8 is the extended sign (-1 if negative else 0)
-    shr     r0,63           ; r0 is 1 if the number was greater than 0
+    sar     r8,63           ; r8 is the extended sign (-1 %if negative else 0)
+    shr     r0,63           ; r0 is 1 %if the number was greater than 0
     mov     r2,128          ; r2 is nan
     or      r0,r8           ; r0 is -1, 0, or 1
     shl     r0,8            ; package the number with a zero exponent
     cmp     r1_b,r2_b       ; is the number nan?
-    cmove   r0,r2           ; if so, replace the answer
+    cmove   r0,r2           ; %if so, replace the answer
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -1241,8 +1275,8 @@ dec64_signum: function_with_one_parameter
 dec64_not: function_with_one_parameter
 ;(boolean: dec64) returns notation: dec64
 
-; If the number is 1, the result is 0.
-; If the number is 0, the result is 1.
+; %if the number is 1, the result is 0.
+; %if the number is 0, the result is 1.
 ; Otherwise, the result is nan.
 
     test    r1_b,r1_b
@@ -1280,10 +1314,10 @@ dec64_neg: function_with_one_parameter
     mov     r2,r1           ; r2 is the number
     mov     r0,-256         ; r0 is the coefficient mask
     sar     r2,8            ; r2 is the coefficient
-    cmovz   r1,r2           ; if the coefficient is zero, then the exponent too
+    cmovz   r1,r2           ; %if the coefficient is zero, then the exponent too
     xor     r0,r1           ; r0 has the exponent and complemented coefficient
     add     r0,256          ; r0 has the exponent and negated coefficient
-    jo      neg_overflow    ; nice day if it don't overflow
+    jo      neg_overflow    ; nice day %if it don't overflow
     ret
 
 neg_overflow:
@@ -1301,7 +1335,7 @@ neg_overflow:
 dec64_abs: function_with_one_parameter
 ;(number: dec64) returns absolution: dec64
 
-; Find the absolute value of a number. If the number is negative, hand it off
+; Find the absolute value of a number. %if the number is negative, hand it off
 ; to dec64_neg. Otherwise, return the number unless it is nan or zero.
 
     test    r1,r1           ; examine r1
@@ -1310,7 +1344,7 @@ dec64_abs: function_with_one_parameter
     mov     r0,r1           ; r0 is the number
     mov     r2,128          ; r2 is nan
     and     r10,-256        ; r10 is the coefficient without an exponent
-    cmovz   r0,r10          ; if the coefficient is zero, the number is zero
+    cmovz   r0,r10          ; %if the coefficient is zero, the number is zero
     cmp     r1_b,r2_b       ; compare r1 to nan
     cmovz   r0,r2           ; is the number nan?
     ret                     ; return the number
@@ -1320,31 +1354,31 @@ dec64_abs: function_with_one_parameter
 dec64_equal: function_with_two_parameters
 ;(comparahend: dec64, comparator: dec64) returns comparison: dec64
 
-; Compare two dec64 numbers. If they are equal, return 1, otherwise return 0.
+; Compare two dec64 numbers. %if they are equal, return 1, otherwise return 0.
 ; Denormal zeroes are equal but denormal nans are not.
 
-; If the numbers are trivally equal, then return 1.
+; %if the numbers are trivally equal, then return 1.
 
     cmp     r1,r2           ; compare the two numbers
     je      return_one
 
-; If the exponents match or if their signs are different, then return false.
+; %if the exponents match or %if their signs are d%ifferent, then return false.
 
     mov     r0,r1           ; r0 is the first number
     xor     r0,r2           ; r0 the xor of the two numbers
-    sets    r0_h            ; r0_h is 1 if the signs are different
+    sets    r0_h            ; r0_h is 1 %if the signs are d%ifferent
     cmp     r1_b,r2_b       ; compare the two exponents
-    sete    r0_b            ; r0_b is 1 if the exponents are the same
+    sete    r0_b            ; r0_b is 1 %if the exponents are the same
     or      r0_b,r0_h
     jnz     return_zero
 
-; Do it the hard way by subtraction. Is the difference zero?
+; Do it the hard way by subtraction. Is the d%ifference zero?
 
     call_with_two_parameters dec64_subtract ; r0 is r1 - r2
-    cmp     r0_b,128        ; is the difference nan?
+    cmp     r0_b,128        ; is the d%ifference nan?
     je      return_zero
-    or      r0,r0           ; examine the difference
-    setz    r0_b            ; r0 is 1 if the numbers are equal
+    or      r0,r0           ; examine the d%ifference
+    setz    r0_b            ; r0 is 1 %if the numbers are equal
     movzx   r0,r0_b
     shl     r0,8
     ret
@@ -1354,8 +1388,8 @@ dec64_equal: function_with_two_parameters
 dec64_less: function_with_two_parameters
 ;(comparahend: dec64, comparator: dec64) returns comparison: dec64
 
-; Compare two dec64 numbers. If either argument is any nan, then the result is
-; nan. If the first is less than the second, return 1, otherwise return 0.
+; Compare two dec64 numbers. %if either argument is any nan, then the result is
+; nan. %if the first is less than the second, return 1, otherwise return 0.
 
 ; The other 3 comparison functions are easily implemented with dec64_less:
 
@@ -1364,25 +1398,25 @@ dec64_less: function_with_two_parameters
 ;    dec64_less_or_equal(a, b)    => dec64_not(dec64_less(b, a))
 
     cmp     r1_b,128        ; is the first argument nan?
-    setne   r8_b            ; r8_b is 1 if first is not nan
+    setne   r8_b            ; r8_b is 1 %if first is not nan
     cmp     r2_b,128        ; is the second argument nan?
-    setne   r9_b            ; r9_b is 1 if second is not nan
+    setne   r9_b            ; r9_b is 1 %if second is not nan
     test    r8_b,r9_b       ; is either nan?
     jz      return_nan
 
-; If the exponents are the same, or the coefficient signs are different, then
+; %if the exponents are the same, or the coefficient signs are d%ifferent, then
 ; do a simple compare.
 
     mov     r10,r1          ; r10 is the first number
     cmp     r1_b,r2_b       ; are the two exponents equal?
-    setne   r8_b            ; r8_b is 0 if the exponents are equal
+    setne   r8_b            ; r8_b is 0 %if the exponents are equal
     xor     r10,r2          ; r10 is the two numbers xor together
-    setns   r10_b           ; r10_b is 0 if the sign bits were different
-    test    r10_b,r8_b      ; exponents equal or sign bits different
+    setns   r10_b           ; r10_b is 0 %if the sign bits were d%ifferent
+    test    r10_b,r8_b      ; exponents equal or sign bits d%ifferent
     jnz     less_slow       ; do it another way
     cmp     r1,r2           ; compare the numbers
-    setl    r0_b            ; r0_b is 1 if the first number is less
-    movzx   r0,r0_b         ; r0 is 1 if the first number is less
+    setl    r0_b            ; r0_b is 1 %if the first number is less
+    movzx   r0,r0_b         ; r0 is 1 %if the first number is less
     shl     r0,8            ; that bit distinguishes true from false
     ret
     pad
@@ -1392,9 +1426,9 @@ less_slow:
 ; Do it the hard way with a subtraction.
 
     call_with_two_parameters dec64_subtract ; r0 is r1 - r2
-    cmp     r0_b,128        ; is the difference nan?
+    cmp     r0_b,128        ; is the d%ifference nan?
     je      return_nan
-    shr     r0,63           ; r0 is 1 if the first number is less
+    shr     r0,63           ; r0 is 1 %if the first number is less
     shl     r0,8            ; that bit distinguishes true from false
     ret
 
@@ -1403,14 +1437,14 @@ less_slow:
 dec64_is_integer: function_with_one_parameter
 ;(number: dec64) returns comparison: dec64
 
-; If the number contains a non-zero fractional part or if it is nan, return
+; %if the number contains a non-zero fractional part or %if it is nan, return
 ; false. Otherwise, return true.
 
     cmp     r1_b,128        ; nan exponent?
     je      return_zero     ; nan is not an integer
     mov     r0,r1           ; r0 is the number
     sar     r0,8            ; r0 is the coefficient
-    cmovz   r1,r0           ; if the coefficient is zero, so is the exponent
+    cmovz   r1,r0           ; %if the coefficient is zero, so is the exponent
     movsx   r8,r1_b         ; r8 is the exponent
     test    r1_b,r1_b       ; examine the exponent
     jns     return_one
@@ -1418,12 +1452,12 @@ dec64_is_integer: function_with_one_parameter
     cmp     r8_b,17         ; extreme negative exponents can never be integer
     jae     return_zero
     mov     r9,power
-    mov     r10,[r9][r8*8]  ; r10 is 10^-exponent
+    mov     r10,[r9+r8*8]  ; r10 is 10^-exponent
     cqo                     ; sign extend r0 into r2
     idiv    r10             ; divide r2:r0 by the power of ten
     xor     r0,r0           ; r0 is zero
     test    r2,r2           ; examine the remainder
-    setz    r0_b            ; if the remainder is zero, then return one
+    setz    r0_b            ; %if the remainder is zero, then return one
     movzx   r0,r0_b
     shl     r0,8
     ret
@@ -1434,7 +1468,7 @@ dec64_is_any_nan: function_with_one_parameter
 ;(number: dec64) returns comparison: dec64
 
     cmp     r1_b,128        ; is r1 nan?
-    sete    r0_b            ; r0 is 1 if r1 is nan
+    sete    r0_b            ; r0 is 1 %if r1 is nan
     movzx   r0,r0_b
     shl     r0,8
     ret
@@ -1446,10 +1480,10 @@ dec64_is_zero: function_with_one_parameter
 
     xor     r0,r0           ; r0 is zero
     test    r1,-256         ; coefficient mask
-    setz    r0_b            ; r0 is one if the coefficient is zero
+    setz    r0_b            ; r0 is one %if the coefficient is zero
     cmp     r1_b,128        ; is the number nan?
-    setnz   r0_h            ; r0_h is 1 if the number is not nan
-    and     r0_b,r0_h       ; r0 is one if the coefficient is zero and not nan
+    setnz   r0_h            ; r0_h is 1 %if the number is not nan
+    and     r0_b,r0_h       ; r0 is one %if the coefficient is zero and not nan
     movzx   r0,r0_b
     shl     r0,8
     ret
@@ -1460,7 +1494,7 @@ dec64_int: function_with_one_parameter
 ;(number: dec64) returns integer: dec64
 
 ; Convert the number such that the exponent will be zero, discarding the
-; fraction part. It will produce nan if the result cannot be represented in
+; fraction part. It will produce nan %if the result cannot be represented in
 ; 56 signed bits. This is used to extract an int56 from a dec64 for bitwise
 ; operations. It accepts a broader range than the safe integer range:
 ; -36028797018963968 thru 72057594037927935.
@@ -1470,17 +1504,17 @@ dec64_int: function_with_one_parameter
     mov     r0,r1           ; r0 is the number
     test    r1_b,r1_b       ; examine the exponent
     jz      return          ; nothing to do it the exponent is zero
-    js      dec64_floor     ; shed the fraction part if exponent is negative
+    js      dec64_floor     ; shed the fraction part %if exponent is negative
     movzx   r8,r1_b         ; r8 is the exponent
     mov     r2,18           ; r2 is 18
     cmp     r1_b,18         ; is the exponent too enormous?
     cmovae  r8,r2           ; r8 is min(exponent, 18)
-    and     r0,-256         ; r0 is the coefficient, shifted 8
+    and     r0,-256         ; r0 is the coefficient, sh%ifted 8
     mov     r9,power
-    mov     r10,[r9][r8*8]  ; r10 is 10^exponent
+    mov     r10,[r9+r8*8]  ; r10 is 10^exponent
     imul    r10             ; r0 is coefficient * 10^exponent
-    sar     r2,1            ; shift the lsb of the overflow into carry
-    adc     r2,0            ; if r2 was 0 or -1, it is now 0
+    sar     r2,1            ; sh%ift the lsb of the overflow into carry
+    adc     r2,0            ; %if r2 was 0 or -1, it is now 0
     jnz     return_nan      ; was the coefficient too enormous?
     ret
 
@@ -1495,14 +1529,14 @@ dec64_normal: function_with_one_parameter
 
     mov     r0,r1           ; r0 is the number
     cmp     r1_b,128        ; compare the exponent to nan
-    jz      return_nan      ; if exponent is nan, the result is nan
-    and     r0,-256         ; r0 is the coefficient shifted 8 bits
+    jz      return_nan      ; %if exponent is nan, the result is nan
+    and     r0,-256         ; r0 is the coefficient sh%ifted 8 bits
     mov     r8,10           ; r8 is the divisor
-    cmovz   r1,r0           ; r1 is zero if r0 is zero
-    mov     r10,r0          ; r10 is the coefficient shifted 8 bits
+    cmovz   r1,r0           ; r1 is zero %if r0 is zero
+    mov     r10,r0          ; r10 is the coefficient sh%ifted 8 bits
     test    r1_b,r1_b       ; examine the exponent
-    jz      return          ; if the exponent is zero, return r0
-    jns     normal_multiply ; if the exponent is positive
+    jz      return          ; %if the exponent is zero, return r0
+    jns     normal_multiply ; %if the exponent is positive
     sar     r0,8            ; r0 is the coefficient
     sar     r10,8           ; r10 is the coefficient
     pad
@@ -1515,7 +1549,7 @@ normal_divide:
     cqo                     ; sign extend r0 into r2
     idiv    r8              ; divide r2:r0 by 10
     test    r2,r2           ; examine the remainder
-    jnz     normal_divide_done ; if r2 is not zero, we are done
+    jnz     normal_divide_done ; %if r2 is not zero, we are done
     mov     r10,r0          ; r10 is the coefficient
     add     r1_b,1          ; increment the exponent
     jnz     normal_divide   ; until the exponent is zero
@@ -1532,10 +1566,10 @@ normal_divide_done:
 normal_multiply:
 
 ; While the exponent is greater than zero, multiply the coefficient by 10 and
-; decrement the exponent. If the coefficient gets too large, wrap it up.
+; decrement the exponent. %if the coefficient gets too large, wrap it up.
 
     imul    r0,10           ; r0 is r0 * 10
-    jo      normal_multiply_done ; return zero if overflow
+    jo      normal_multiply_done ; return zero %if overflow
     mov     r10,r0          ; r10 is the coefficient
     sub     r1_b,1          ; decrement the exponent
     jnz     normal_multiply ; until the exponent is zero
@@ -1579,5 +1613,4 @@ return_zero:
     xor     r0,r0           ; zero
     ret
 
-dec64_code ends
-    end
+

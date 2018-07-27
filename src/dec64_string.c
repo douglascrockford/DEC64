@@ -16,28 +16,7 @@ configuration functions.
 #include "dec64.h"
 #include "dec64_string.h"
 
-static const int e = 'e';
-static const int64 confirmed = 0xFFDEADFACEC0DECELL;
 
-static const int64 power[17] = {
-    1,
-    10,
-    100,
-    1000,
-    10000,
-    100000,
-    1000000,
-    10000000,
-    100000000,
-    1000000000,
-    10000000000,
-    100000000000,
-    1000000000000,
-    10000000000000,
-    100000000000000,
-    1000000000000000,
-    10000000000000000,
-};
 
 /* functions in service to dec64_to_string */
 
@@ -68,7 +47,7 @@ static void digitize(dec64_string_state state) {
     }
 }
 
-static emit(dec64_string_state state, int c) {
+static int emit(dec64_string_state state, int c) {
     if (state->string != NULL) {
         if (c > 0) {
             state->string[state->length] = (dec64_string_char)c;
@@ -130,13 +109,13 @@ static void emit_end(dec64_string_state state) {
     }
 }
 
-static emit_exponent(
+static int emit_exponent(
     dec64_string_state state,
     int64 exponent
 ) {
     int go = 0;
     if (exponent != 0) {
-        emit(state, e);
+        emit(state, e_chr);
         if (exponent < 0) {
             exponent = -exponent;
             emit(state, '-');
@@ -153,7 +132,7 @@ static emit_exponent(
     }
 }
 
-static emit_separator(dec64_string_state state) {
+static int emit_separator(dec64_string_state state) {
     emit(state, state->separator);
 }
 
