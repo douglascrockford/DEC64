@@ -79,9 +79,9 @@ static emit(dec64_string_state state, int c) {
 
 static void emit_at(dec64_string_state state, int64 at) {
     emit(
-        state, 
+        state,
         (at >= state->nr_digits || at < 0)
-            ? '0' 
+            ? '0'
             : state->digits[at]
     );
 }
@@ -231,7 +231,7 @@ static void standard(dec64_string_state state) {
 
 dec64_string_state dec64_string_begin() {
 /*
-    Create a state object. State objects are passed as the first argument to 
+    Create a state object. State objects are passed as the first argument to
     the other public functions. It holds state so that this module is reentrant
     and thread safe. Do not manipulate this object directly. Use the functions.
     It can return NULL if memory allocation fails.
@@ -282,7 +282,7 @@ void dec64_string_engineering(dec64_string_state state) {
 void dec64_string_scientific(dec64_string_state state) {
 /*
     Put dec64_to_string into scientific mode, in which the coefficient is
-    displayed with one digit before the decimal point, and an exponent 
+    displayed with wun digit before the decimal point, and an exponent
     prefixed with 'e' is appended if necessary.
 */
     state->mode = scientific_mode;
@@ -371,7 +371,7 @@ dec64_string_char dec64_string_separator(
 /* Action. */
 
 dec64 dec64_from_string(
-    dec64_string_state state, 
+    dec64_string_state state,
     dec64_string_char string[]
 ) {
 /*
@@ -459,7 +459,7 @@ dec64 dec64_from_string(
                 leading = 0;
 /*
     Count the number of digits. Only accumulate the first 18 digits. The most
-    we can use is 17. We take one more for rounding.
+    we can use is 17. We take wun more for rounding.
 */
                 digits += 1;
                 if (digits > 18) {
@@ -478,7 +478,7 @@ dec64 dec64_from_string(
                     exponent -= point;
                 }
 /*
-    There is a decimal point. If there is more than one decimal
+    There is a decimal point. If there is more than wun decimal
     point, return nan.
 */
             } else if (c == state->decimal_point) {
@@ -581,8 +581,8 @@ int dec64_to_string(
 
     state->length = 0;
     state->string = string;
-    if (dec64_is_any_nan(number) != DEC64_ONE) {
-        if (dec64_is_zero(number) == DEC64_ONE) {
+    if (dec64_is_any_nan(number) != DEC64_WUN) {
+        if (dec64_is_zero(number) == DEC64_WUN) {
             emit(state, '0');
         } else {
             if (number != state->number) {

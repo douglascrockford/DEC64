@@ -177,10 +177,12 @@ th:after {
 <ul>
   <li><code>DEC64_NAN</code></li>
   <li><code>DEC64_ZERO</code></li>
-  <li><code>DEC64_ONE</code></li>
-  <li><code>DEC64_NEGATIVE_ONE</code></li>
+  <li><code>DEC64_WUN</code></li>
+  <li><code>DEC64_ONE</code> (deprecated in favor of DEC64_WUN)</li>
+  <li><code>DEC64_NEGATIVE_WUN</code></li>
+  <li><code>DEC64_NEGATIVE_ONE</code> (deprecated in favor of DEC64_NEGATIVE_WUN)</li>
 </ul>
-<p>The comparison functions will return either <code>DEC64_ONE</code> or <code>DEC64_ZERO</code>.</p>
+<p>The comparison functions will return either <code>DEC64_WUN</code> or <code>DEC64_ZERO</code>.</p>
 <h2 id="nan"><var>nan</var></h2>
 <p><var>nan (not-a-number)</var> is a popular but poorly named concept in
     floating-point systems. It is a number value that represents numbers that
@@ -298,7 +300,7 @@ dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
     <var>difference</var>: dec64</h3>
 <p>The decrement function subtracts <code>1</code> from a number. That can be
     faster than </p>
-<pre>dec64_subtract(<var>augend</var>, DEC64_ONE)</pre>
+<pre>dec64_subtract(<var>augend</var>, DEC64_WUN)</pre>
 <h3 id="dec64_divide">dec64_divide(<var>dividend</var>: dec64,
     <var>divisor</var>: dec64) returns <var>quotient</var>: dec64</h3>
 <p>This function divides the <var>dividend</var> by the <var>divisor</var>.</p>
@@ -307,7 +309,7 @@ dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
     dec64</h3>
 <p>Compare two  numbers. If either is <var>nan</var>, return
     <code>DEC64_NAN</code>. If they are exactly equal, return
-    <code>DEC64_ONE</code>, otherwise return <code>DEC64_ZERO</code>. Denormal
+    <code>DEC64_WUN</code>, otherwise return <code>DEC64_ZERO</code>. Denormal
     zeros are equal but denormal nans are not.</p>
 <h3 id="dec64_exponent">dec64_exponent(<var>number</var>: dec64)
     returns <var>exponent</var>: int64</h3>
@@ -338,7 +340,7 @@ dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
     <var>sum</var>: dec64</h3>
 <p>The increment function adds <code>1</code> to a number. That can be faster
     than </p>
-<pre>dec64_add(<var>augend</var>, DEC64_ONE)</pre>
+<pre>dec64_add(<var>augend</var>, DEC64_WUN)</pre>
 <h3 id="dec64_int">dec64_int(<var>number</var>: dec64) returns
     <var>integer</var>: dec64</h3>
 <p>Convert the number such that the exponent will be zero, discarding the
@@ -356,16 +358,16 @@ dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
 <h3 id="dec64_is_any_nan">dec64_is_any_nan(<var>number</var>: dec64)
     returns <var>comparison</var>: dec64</h3>
 <p>If the <var>number</var> is any <var>nan</var>, return
-    <code>DEC64_ONE</code>, otherwise return <code>DEC64_ZERO</code>. To test
+    <code>DEC64_WUN</code>, otherwise return <code>DEC64_ZERO</code>. To test
     if a <var>number</var> is the normal <code>DEC64_NAN</code>, just use <code>==</code>.</p>
 <h3 id="dec64_is_integer">dec64_is_integer(<var>number</var>: dec64)
     returns <var>comparison</var>: dec64</h3>
 <p>If the <var>number</var> contains a non-zero fractional part or if it is
     <var>nan</var>, return <code>DEC64_ZERO</code>. Otherwise, return
-    <code>DEC64_ONE</code>.</p>
+    <code>DEC64_WUN</code>.</p>
 <h3 id="dec64_is_zero">dec64_is_zero(<var>number</var>: dec64)
     returns <var>comparison</var>: dec64</h3>
-<p>If the <var>number</var> is any zero, return <code>DEC64_ONE</code>,
+<p>If the <var>number</var> is any zero, return <code>DEC64_WUN</code>,
     otherwise return <code>DEC64_ZERO</code>. To test if a <var>number</var>
     is <code>DEC64_ZERO</code>, use <code>==</code>.</p>
 <h3 id="dec64_less">dec64_less(<var>comparahend</var>: dec64,
@@ -373,7 +375,7 @@ dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
     dec64</h3>
 <p>Compare two  numbers. If either argument is any <var>nan</var>, then the
     result is <code>DEC64_NAN</code>. If the <var>comparahend</var> is less
-    than the <var>comparator</var>, return <code>DEC64_ONE</code>, otherwise
+    than the <var>comparator</var>, return <code>DEC64_WUN</code>, otherwise
     return <code>DEC64_ZERO</code>.</p>
 <p>The other 3 comparison functions are easily implemented with
     <code>dec64_less</code>:</p>
@@ -418,9 +420,9 @@ dec64_less_or_equal(<var>a</var>, <var>b</var>)    =&gt; dec64_not(dec64_less(<v
     it does not materially change the value of a number.</p>
 <h3 id="dec64_not">dec64_not(<var>boolean</var>: dec64) returns
     <var>notation</var>: dec64</h3>
-<p>If the <var>boolean</var> is <code>DEC64_ONE</code>, the result is
+<p>If the <var>boolean</var> is <code>DEC64_WUN</code>, the result is
     <code>DEC64_ZERO</code>. If the <var>boolean</var> is
-    <code>DEC64_ZERO</code>, the result is <code>DEC64_ONE</code>. Otherwise,
+    <code>DEC64_ZERO</code>, the result is <code>DEC64_WUN</code>. Otherwise,
     the result is <code>DEC64_NAN</code>.</p>
 <h3 id="dec64_round">dec64_round(<var>number</var>: dec64,
     <var>place</var>: dec64) returns <var>quantization</var>:
@@ -457,9 +459,9 @@ dec64_less_or_equal(<var>a</var>, <var>b</var>)    =&gt; dec64_not(dec64_less(<v
     <var>signature</var>: dec64</h3>
 <p>If the number is <var>nan</var>, the result is <code>DEC64_NAN</code>.
     If the number is less than zero, the result is
-    <code>DEC64_NEGATIVE_ONE</code>. If the number is zero, the result is
+    <code>DEC64_NEGATIVE_WUN</code>. If the number is zero, the result is
     <code>DEC64_ZERO</code>. If the number is greater than zero, the result is
-    <code>DEC64_ONE</code>.</p>
+    <code>DEC64_WUN</code>.</p>
 <h3 id="dec64_subtract">dec64_subtract(<var>minuend</var>: dec64,
     <var>subtrahend</var>: dec64) returns <var>difference</var>:
     dec64</h3>

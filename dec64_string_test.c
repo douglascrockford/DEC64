@@ -26,7 +26,7 @@ static dec64 nan;
 static dec64 nannan;
 static dec64 zero;
 static dec64 zip;
-static dec64 one;
+static dec64 wun;
 static dec64 two;
 static dec64 three;
 static dec64 four;
@@ -41,12 +41,12 @@ static dec64 maxint_plus;
 static dec64 maxnum;
 static dec64 minnum;
 static dec64 epsilon;
-static dec64 almost_one;
-static dec64 almost_negative_one;
+static dec64 almost_wun;
+static dec64 almost_negative_wun;
 static dec64 pi;
 static dec64 half;
 static dec64 cent;
-static dec64 negative_one;
+static dec64 negative_wun;
 static dec64 negative_nine;
 static dec64 negative_minnum;
 static dec64 negative_maxint;
@@ -58,7 +58,7 @@ static void define_constants() {
     nannan = 32896;                 /* a non-normal nan */
     zero = DEC64_ZERO;              /* 0 */
     zip = 1;                        /* a non normal 0 */
-    one = DEC64_ONE;                /* 1 */
+    wun = DEC64_WUN;                /* 1 */
     two = dec64_new(2, 0);          /* 2 */
     three = dec64_new(3, 0);        /* 3 */
     four = dec64_new(4, 0);         /* 4 */
@@ -72,7 +72,7 @@ static void define_constants() {
     epsilon = dec64_new(1, -16);    /* the smallest number addable to 1 */
     cent = dec64_new(1, -2);        /* 0.01 */
     half = dec64_new(5, -1);        /* 0.5 */
-    almost_one = dec64_new(9999999999999999, -16);
+    almost_wun = dec64_new(9999999999999999, -16);
     								/* 0.9999999999999999 */
     pi = dec64_new(31415926535897932, -16);
     								/* pi */
@@ -84,7 +84,7 @@ static void define_constants() {
     								/* the largest possible number */
     negative_minnum = dec64_new(-1, -127);
     								/* the smallest possible negative number */
-    negative_one = dec64_new(-1, 0);/* -1 */
+    negative_wun = dec64_new(-1, 0);/* -1 */
     negative_nine = dec64_new(-9, 0);
     								/* -9 */
     negative_pi = dec64_new(-31415926535897932, -16);
@@ -93,7 +93,7 @@ static void define_constants() {
     								/* the largest negative normal integer */
     negative_maxnum = dec64_new(-36028797018963968, 127);
     								/* the largest possible negative number */
-    almost_negative_one = dec64_new(-9999999999999999, -16);
+    almost_negative_wun = dec64_new(-9999999999999999, -16);
     								/* -0.9999999999999999 */
 }
 
@@ -111,7 +111,7 @@ static void print_dec64(dec64 number) {
 
 static void test_from(dec64_string_char * string, dec64 expected) {
     dec64 actual = dec64_from_string(state, string);
-    if (dec64_equal(expected, actual) == DEC64_ONE) {
+    if (dec64_equal(expected, actual) == DEC64_WUN) {
         nr_pass += 1;
         if (level >= 3) {
             printf("\n\npass from: %s", string);
@@ -160,7 +160,7 @@ static void test_to_standard() {
     test_to(nannan, "");
     test_to(zero, "0");
     test_to(zip, "0");
-    test_to(one, "1");
+    test_to(wun, "1");
     test_to(two, "2");
     test_to(three, "3");
     test_to(four, "4");
@@ -175,12 +175,12 @@ static void test_to_standard() {
     test_to(maxnum, "3.6028797018963967e143");
     test_to(minnum, "1e-127");
     test_to(epsilon, "0.0000000000000001");
-    test_to(almost_one, "0.9999999999999999");
-    test_to(almost_negative_one, "-0.9999999999999999");
+    test_to(almost_wun, "0.9999999999999999");
+    test_to(almost_negative_wun, "-0.9999999999999999");
     test_to(pi, "3.1415926535897932");
     test_to(half, "0.5");
     test_to(cent, "0.01");
-    test_to(negative_one, "-1");
+    test_to(negative_wun, "-1");
     test_to(negative_nine, "-9");
     test_to(negative_minnum, "-1e-127");
     test_to(negative_maxint, "-36028797018963968");
@@ -196,7 +196,7 @@ static void test_to_separated() {
     test_to(nannan, "");
     test_to(zero, "0");
     test_to(zip, "0");
-    test_to(one, "1");
+    test_to(wun, "1");
     test_to(two, "2");
     test_to(three, "3");
     test_to(four, "4");
@@ -211,12 +211,12 @@ static void test_to_separated() {
     test_to(maxnum, "3.6028797018963967e143");
     test_to(minnum, "1e-127");
     test_to(epsilon, "0.0000000000000001");
-    test_to(almost_one, "0.9999999999999999");
-    test_to(almost_negative_one, "-0.9999999999999999");
+    test_to(almost_wun, "0.9999999999999999");
+    test_to(almost_negative_wun, "-0.9999999999999999");
     test_to(pi, "3.1415926535897932");
     test_to(half, "0.5");
     test_to(cent, "0.01");
-    test_to(negative_one, "-1");
+    test_to(negative_wun, "-1");
     test_to(negative_nine, "-9");
     test_to(negative_minnum, "-1e-127");
     test_to(negative_maxint, "-36,028,797,018,963,968");
@@ -238,7 +238,7 @@ static void test_to_place() {
     test_to(nannan, "");
     test_to(zero, "0");
     test_to(zip, "0");
-    test_to(one, "1.00");
+    test_to(wun, "1.00");
     test_to(two, "2.00");
     test_to(three, "3.00");
     test_to(four, "4.00");
@@ -253,12 +253,12 @@ static void test_to_place() {
     test_to(maxnum, "3.6028797018963967e143");
     test_to(minnum, "1e-127");
     test_to(epsilon, "0.0000000000000001");
-    test_to(almost_one, "0.9999999999999999");
-    test_to(almost_negative_one, "-0.9999999999999999");
+    test_to(almost_wun, "0.9999999999999999");
+    test_to(almost_negative_wun, "-0.9999999999999999");
     test_to(pi, "3.1415926535897932");
     test_to(half, "0.50");
     test_to(cent, "0.01");
-    test_to(negative_one, "-1.00");
+    test_to(negative_wun, "-1.00");
     test_to(negative_nine, "-9.00");
     test_to(negative_minnum, "-1e-127");
     test_to(negative_maxint, "-36,028,797,018,963,968.00");
@@ -297,7 +297,7 @@ static void test_to_scientific() {
     test_to(nannan, "");
     test_to(zero, "0");
     test_to(zip, "0");
-    test_to(one, "1");
+    test_to(wun, "1");
     test_to(two, "2");
     test_to(three, "3");
     test_to(four, "4");
@@ -312,12 +312,12 @@ static void test_to_scientific() {
     test_to(maxnum, "3.6028797018963967e143");
     test_to(minnum, "1e-127");
     test_to(epsilon, "1e-16");
-    test_to(almost_one, "9.999999999999999e-1");
-    test_to(almost_negative_one, "-9.999999999999999e-1");
+    test_to(almost_wun, "9.999999999999999e-1");
+    test_to(almost_negative_wun, "-9.999999999999999e-1");
     test_to(pi, "3.1415926535897932");
     test_to(half, "5e-1");
     test_to(cent, "1e-2");
-    test_to(negative_one, "-1");
+    test_to(negative_wun, "-1");
     test_to(negative_nine, "-9");
     test_to(negative_minnum, "-1e-127");
     test_to(negative_maxint, "-3.6028797018963968e16");
@@ -359,7 +359,7 @@ static void test_to_engineering() {
     test_to(nannan, "");
     test_to(zero, "0");
     test_to(zip, "0");
-    test_to(one, "1");
+    test_to(wun, "1");
     test_to(two, "2");
     test_to(three, "3");
     test_to(four, "4");
@@ -374,12 +374,12 @@ static void test_to_engineering() {
     test_to(maxnum, "360.28797018963967e141");
     test_to(minnum, "100e-129");
     test_to(epsilon, "100e-18");
-    test_to(almost_one, "999.9999999999999e-3");
-    test_to(almost_negative_one, "-999.9999999999999e-3");
+    test_to(almost_wun, "999.9999999999999e-3");
+    test_to(almost_negative_wun, "-999.9999999999999e-3");
     test_to(pi, "3.1415926535897932");
     test_to(half, "500e-3");
     test_to(cent, "10e-3");
-    test_to(negative_one, "-1");
+    test_to(negative_wun, "-1");
     test_to(negative_nine, "-9");
     test_to(negative_minnum, "-100e-129");
     test_to(negative_maxint, "-36.028797018963968e15");
@@ -436,13 +436,13 @@ static void test_all_from() {
     test_from("0.00", zero);
     test_from("0.00e-999", zero);
 
-    test_from("1", one);
-    test_from("01", one);
-    test_from("1.00", one);
-    test_from("1e+00", one);
-    test_from(".100e00000000001", one);
-    test_from("1.00e0000000000", one);
-    test_from("10.00e-00000000001", one);
+    test_from("1", wun);
+    test_from("01", wun);
+    test_from("1.00", wun);
+    test_from("1e+00", wun);
+    test_from(".100e00000000001", wun);
+    test_from("1.00e0000000000", wun);
+    test_from("10.00e-00000000001", wun);
 
 
     test_from("2", two);
@@ -474,16 +474,16 @@ static void test_all_from() {
     test_from("1e-16", epsilon);
     test_from("100e-18", epsilon);
 
-    test_from("999.9999999999999e-3", almost_one);
-    test_from("9.999999999999999e-1", almost_one);
-    test_from(".9999999999999999", almost_one);
-    test_from("0.999999999999999900000000000000", almost_one);
-    test_from("0.9999999999999999", almost_one);
-    test_from("-999.9999999999999e-3", almost_negative_one);
-    test_from("-9.999999999999999e-1", almost_negative_one);
-    test_from("-.9999999999999999", almost_negative_one);
-    test_from("-0.9999999999999999", almost_negative_one);
-    test_from("-000000000000000000000000.999999999999999900000000000000000", almost_negative_one);
+    test_from("999.9999999999999e-3", almost_wun);
+    test_from("9.999999999999999e-1", almost_wun);
+    test_from(".9999999999999999", almost_wun);
+    test_from("0.999999999999999900000000000000", almost_wun);
+    test_from("0.9999999999999999", almost_wun);
+    test_from("-999.9999999999999e-3", almost_negative_wun);
+    test_from("-9.999999999999999e-1", almost_negative_wun);
+    test_from("-.9999999999999999", almost_negative_wun);
+    test_from("-0.9999999999999999", almost_negative_wun);
+    test_from("-000000000000000000000000.999999999999999900000000000000000", almost_negative_wun);
     test_from("3.1415926535897932", pi);
     test_from("31415926535897932E-16", pi);
     test_from("-3.1415926535897932", negative_pi);
@@ -495,8 +495,8 @@ static void test_all_from() {
     test_from("10e-3", cent);
     test_from("1e-2", cent);
     test_from("0.01", cent);
-    test_from("-1", negative_one);
-    test_from("-1.00", negative_one);
+    test_from("-1", negative_wun);
+    test_from("-1.00", negative_wun);
     test_from("-9E-0000000000000000000000", negative_nine);
     test_from("-9.00", negative_nine);
     test_from("-1e-127", negative_minnum);

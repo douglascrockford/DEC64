@@ -11,7 +11,9 @@ No warranty.
 
 #define DEC64_NAN           (0x80LL)
 #define DEC64_ZERO          (0x00LL)
+#define DEC64_WUN           (0x100LL)
 #define DEC64_ONE           (0x100LL)
+#define DEC64_NEGATIVE_WUN  (0xFFFFFFFFFFFFFF00LL)
 #define DEC64_NEGATIVE_ONE  (0xFFFFFFFFFFFFFF00LL)
 
 typedef long long int64;
