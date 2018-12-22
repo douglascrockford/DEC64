@@ -3,7 +3,7 @@ dec64_string.c
 Conversion between DEC64 and strings.
 
 dec64.com
-2017-06-03
+2018-12-20
 Public Domain
 
 No warranty.
@@ -79,9 +79,9 @@ static emit(dec64_string_state state, int c) {
 
 static void emit_at(dec64_string_state state, int64 at) {
     emit(
-        state, 
+        state,
         (at >= state->nr_digits || at < 0)
-            ? '0' 
+            ? '0'
             : state->digits[at]
     );
 }
@@ -130,7 +130,7 @@ static void emit_end(dec64_string_state state) {
     }
 }
 
-static emit_exponent(
+static void emit_exponent(
     dec64_string_state state,
     int64 exponent
 ) {
@@ -153,26 +153,26 @@ static emit_exponent(
     }
 }
 
-static emit_separator(dec64_string_state state) {
+static void emit_separator(dec64_string_state state) {
     emit(state, state->separator);
 }
 
-static void engineering(dec64_string_state state) {
+static void emit_engineering(dec64_string_state state) {
     int64 exponent = dec64_exponent(state->number) + state->nr_digits;
     int to = state->nr_digits - state->nr_zeros;
-    int fudge = (int)exponent % 3;
-    if (fudge <= 0) {
-        fudge += 3;
+    int trine = (int)exponent % 3;
+    if (trine <= 0) {
+        trine += 3;
     }
-    emit_digits(state, 0, fudge);
-    if (fudge < to) {
+    emit_digits(state, 0, trine);
+    if (trine < to) {
         emit_decimal_point(state);
-        emit_digits(state, fudge, to);
+        emit_digits(state, trine, to);
     }
-    emit_exponent(state, exponent - fudge);
+    emit_exponent(state, exponent - trine);
 }
 
-static void scientific(dec64_string_state state) {
+static void emit_scientific(dec64_string_state state) {
     int64 exponent = dec64_exponent(state->number) + state->nr_digits;
     int nr_digits = (state->nr_digits - state->nr_zeros);
     int at = 1;
@@ -184,7 +184,7 @@ static void scientific(dec64_string_state state) {
     emit_exponent(state, exponent - 1);
 }
 
-static void standard(dec64_string_state state) {
+static void emit_standard(dec64_string_state state) {
     int from = 0;
     int to;
     int places;
@@ -193,7 +193,7 @@ static void standard(dec64_string_state state) {
     if (exponent >= 0) {
         to = state->nr_digits + (int)exponent;
         if (to + state->places > 20) {
-            scientific(state);
+            emit_scientific(state);
         } else {
             emit_digits_separated(state, 0, to);
             if (state->places > 0) {
@@ -207,7 +207,7 @@ static void standard(dec64_string_state state) {
         if (from <= 0) {
             places = to - from;
             if (places > 18) {
-                scientific(state);
+                emit_scientific(state);
             } else {
                 emit(state, '0');
                 emit_decimal_point(state);
@@ -231,14 +231,15 @@ static void standard(dec64_string_state state) {
 
 dec64_string_state dec64_string_begin() {
 /*
-    Create a state object. State objects are passed as the first argument to 
+    Create a state object. State objects are passed as the first argument to
     the other public functions. It holds state so that this module is reentrant
     and thread safe. Do not manipulate this object directly. Use the functions.
     It can return NULL if memory allocation fails.
 */
-    dec64_string_state state =
-            (dec64_string_state)malloc(sizeof (struct dec64_string_state));
-    if (state) {
+    dec64_string_state state = (
+        (dec64_string_state)malloc(sizeof (struct dec64_string_state))
+    );
+    if (state != NULL) {
         state->decimal_point = '.';
         state->mode = standard_mode;
         state->nr_digits = 0;
@@ -259,7 +260,7 @@ void dec64_string_end(dec64_string_state state) {
 /*
     Dispose of the state object.
 */
-    if (state->valid == confirmed) {
+    if (state != NULL && state->valid == confirmed) {
         state->valid = 0;
         free(state);
     }
@@ -276,16 +277,20 @@ void dec64_string_engineering(dec64_string_state state) {
     except that the exponent is constrained to be a multiple of 3. There can
     be up to three digits before the decimal point.
 */
-    state->mode = engineering_mode;
+    if (state != NULL && state->valid == confirmed) {
+        state->mode = engineering_mode;
+    }
 }
 
 void dec64_string_scientific(dec64_string_state state) {
 /*
     Put dec64_to_string into scientific mode, in which the coefficient is
-    displayed with one digit before the decimal point, and an exponent 
+    displayed with one digit before the decimal point, and an exponent
     prefixed with 'e' is appended if necessary.
 */
-    state->mode = scientific_mode;
+    if (state != NULL && state->valid == confirmed) {
+        state->mode = scientific_mode;
+    }
 }
 
 void dec64_string_standard(dec64_string_state state) {
@@ -294,12 +299,14 @@ void dec64_string_standard(dec64_string_state state) {
     some digits if requested. If the number might be too long, then scientific
     mode might be used instead.
 */
-    state->mode = standard_mode;
+    if (state != NULL && state->valid == confirmed) {
+        state->mode = standard_mode;
+    }
 }
 
 /* There are several formatting options. */
 
-dec64_string_char dec64_string_decimal_point(
+void dec64_string_decimal_point(
     dec64_string_state state,
     dec64_string_char decimal_point
 ) {
@@ -307,49 +314,37 @@ dec64_string_char dec64_string_decimal_point(
     Specify the decimal point character. The default is '.'. If it is '\0',
     then the decimal point will be suppressed. This is used by both
     dec64_to_string and dec64_from_string.
-
-    It returns the previous value.
 */
-    int old_decimal_point = state->decimal_point;
-    state->decimal_point = decimal_point;
-    return old_decimal_point;
+    if (state != NULL && state->valid == confirmed) {
+        state->decimal_point = decimal_point;
+    }
 }
 
-int dec64_string_places(
-    dec64_string_state state,
-    dec64_string_char places
-) {
+void dec64_string_places(dec64_string_state state, dec64_string_char places) {
 /*
     Specify the minimum number of decimal places output by dec64_to_string in
     standard mode. This is commonly used to format money values.
-
-    It returns the previous value.
 */
-    int old_places = state->places;
-    state->places = places;
-    return old_places;
+    if (state != NULL && state->valid == confirmed) {
+        state->places = places;
+    }
 }
 
-int dec64_string_separation(
-    dec64_string_state state,
-    int separation
-) {
+void dec64_string_separation(dec64_string_state state, int separation) {
 /*
     Specify the number of digits output between separators by dec64_to_string
     in standard mode. The default is 3. If separation is 1 or less, then
     separation is suppressed.
-
-    It returns the previous value.
 */
-    int old_separation = state->separation;
-    if (separation < 2) {
-        separation = 0;
+    if (state != NULL && state->valid == confirmed) {
+        if (separation < 2) {
+            separation = 0;
+        }
+        state->separation = separation;
     }
-    state->separation = separation;
-    return old_separation;
 }
 
-dec64_string_char dec64_string_separator(
+void dec64_string_separator(
     dec64_string_state state,
     dec64_string_char separator
 ) {
@@ -360,23 +355,18 @@ dec64_string_char dec64_string_separator(
     then separation will be supressed. The default is '\0'.
 
     dec64_from_string will ignore this character.
-
-    It returns the previous value.
 */
-    int old_separator = state->separator;
-    state->separator = separator;
-    return old_separator;
+    if (state != NULL && state->valid == confirmed) {
+        state->separator = separator;
+    }
 }
 
 /* Action. */
 
-dec64 dec64_from_string(
-    dec64_string_state state, 
-    dec64_string_char string[]
-) {
+dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
 /*
     Convert a string into a dec64. If conversion is not possible for any
-    reason, the result will be nan.
+    reason, the result will be DEC64_NAN.
 */
     int at;
     int c;
@@ -392,7 +382,7 @@ dec64 dec64_from_string(
     int64 sign_exp;
 
     if (state == NULL || state->valid != confirmed || string == NULL) {
-        return 128;
+        return DEC64_NAN;
     }
 /*
     Get the first character.
@@ -437,7 +427,7 @@ dec64 dec64_from_string(
                 } else {
 /*
     This is not a leading zero. We will only accumulate the
-    first 18 digits. An excess digit isn't accumlated, but
+    first 18 digits. An excess digit isn't accumulated, but
     it can influence the exponent.
 */
                     digits += 1;
@@ -478,8 +468,8 @@ dec64 dec64_from_string(
                     exponent -= point;
                 }
 /*
-    There is a decimal point. If there is more than one decimal
-    point, return nan.
+    There is a decimal point. If there is more than one decimal point,
+    return DEC64_NAN.
 */
             } else if (c == state->decimal_point) {
                 if (point) {
@@ -535,7 +525,7 @@ dec64 dec64_from_string(
                         );
                     }
 /*
-    If any other character is seen, return nan.
+    If any other character is seen, return DEC64_NAN.
 */
                 }
                 return DEC64_NAN;
@@ -581,8 +571,8 @@ int dec64_to_string(
 
     state->length = 0;
     state->string = string;
-    if (dec64_is_any_nan(number) != DEC64_ONE) {
-        if (dec64_is_zero(number) == DEC64_ONE) {
+    if (dec64_is_nan(number) != DEC64_TRUE) {
+        if (dec64_is_zero(number) == DEC64_TRUE) {
             emit(state, '0');
         } else {
             if (number != state->number) {
@@ -594,13 +584,13 @@ int dec64_to_string(
             }
             switch (state->mode) {
             case engineering_mode:
-                engineering(state);
+                emit_engineering(state);
                 break;
             case scientific_mode:
-                scientific(state);
+                emit_scientific(state);
                 break;
             case standard_mode:
-                standard(state);
+                emit_standard(state);
                 break;
             }
         }

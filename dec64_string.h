@@ -3,7 +3,7 @@
 The dec64_string header file. This is the companion to dec64_string.c.
 
 dec64.com
-2014-04-12
+2018-12-20
 Public Domain
 
 No warranty.
@@ -53,7 +53,7 @@ extern void dec64_string_end(
     configuration
 */
 
-extern dec64_string_char dec64_string_decimal_point(
+extern void dec64_string_decimal_point(
     dec64_string_state state,
     dec64_string_char decimal_point
 );
@@ -62,7 +62,7 @@ extern void dec64_string_engineering(
     dec64_string_state state
 );
 
-extern int dec64_string_places(
+extern void dec64_string_places(
     dec64_string_state state,
     dec64_string_char places
 );
@@ -71,12 +71,12 @@ extern void dec64_string_scientific(
     dec64_string_state state
 );
 
-extern int dec64_string_separation(
+extern void dec64_string_separation(
     dec64_string_state state,
     int separation
 );
 
-extern dec64_string_char dec64_string_separator(
+extern void dec64_string_separator(
     dec64_string_state state,
     dec64_string_char separator
 );
@@ -95,7 +95,7 @@ extern dec64 dec64_from_string(
 );
 
 extern int dec64_to_string(
-    dec64_string_state state, 
+    dec64_string_state state,
     dec64 number,
     dec64_string_char string[]
 );

@@ -20,7 +20,7 @@ extern dec64 dec64_log(dec64 x);
 extern dec64 dec64_raise(dec64 coefficient, dec64 exponent);
 extern dec64 dec64_random();
 extern dec64 dec64_root(dec64 index, dec64 radicand);
-extern void  dec64_seed(dec64 seed);
+extern void  dec64_seed(uint64 part_0, uint64 part_1);
 extern dec64 dec64_sin(dec64 radians);
 extern dec64 dec64_sqrt(dec64 radicand);
 extern dec64 dec64_tan(dec64 radians);

@@ -132,15 +132,15 @@ dec64 dec64_acos(dec64 slope) {
 }
 
 dec64 dec64_asin(dec64 slope) {
-    if (dec64_equal(slope, DEC64_ONE) == DEC64_ONE) {
+    if (dec64_is_equal(slope, DEC64_ONE) == DEC64_TRUE) {
         return D_HALF_PI;
     }
-    if (dec64_equal(slope, DEC64_NEGATIVE_ONE) == DEC64_ONE) {
+    if (dec64_is_equal(slope, DEC64_NEGATIVE_ONE) == DEC64_TRUE) {
         return D_NHALF_PI;
     }
     if (
-        dec64_is_any_nan(slope) == DEC64_ONE ||
-        dec64_less(DEC64_ONE, dec64_abs(slope)) == DEC64_ONE
+        dec64_is_nan(slope) == DEC64_TRUE ||
+        dec64_is_less(DEC64_ONE, dec64_abs(slope)) == DEC64_TRUE
     ) {
         return DEC64_NAN;
     }
@@ -179,8 +179,8 @@ dec64 dec64_atan(dec64 slope) {
 }
 
 dec64 dec64_atan2(dec64 y, dec64 x) {
-    if (dec64_is_zero(x) == DEC64_ONE) {
-        if (dec64_is_zero(y) == DEC64_ONE) {
+    if (dec64_is_zero(x) == DEC64_TRUE) {
+        if (dec64_is_zero(y) == DEC64_TRUE) {
             return DEC64_NAN;
         } else if (y < 0) {
             return D_NHALF_PI;
@@ -224,8 +224,8 @@ dec64 dec64_exp(dec64 exponent) {
         return result;
 }
 
-dec64 dec64_exponentiate(dec64 coefficient, dec64 exponent) {
-    if (dec64_is_zero(exponent) == DEC64_ONE) {
+dec64 dec64_raise(dec64 coefficient, dec64 exponent) {
+    if (dec64_is_zero(exponent) == DEC64_TRUE) {
         return DEC64_ONE;
     }
 
@@ -235,10 +235,10 @@ dec64 dec64_exponentiate(dec64 coefficient, dec64 exponent) {
         coefficient = dec64_divide(DEC64_ONE, coefficient);
         exponent = dec64_neg(exponent);
     }
-    if (dec64_is_any_nan(coefficient) == DEC64_ONE) {
+    if (dec64_is_nan(coefficient) == DEC64_TRUE) {
         return DEC64_NAN;
     }
-    if (dec64_is_zero(coefficient) == DEC64_ONE) {
+    if (dec64_is_zero(coefficient) == DEC64_TRUE) {
         return 0;
     }
 
@@ -280,13 +280,13 @@ dec64 dec64_factorial(dec64 x) {
 }
 
 dec64 dec64_log(dec64 x) {
-    if (x <= 0 || dec64_is_any_nan(x) == DEC64_ONE) {
+    if (x <= 0 || dec64_is_nan(x) == DEC64_TRUE) {
         return DEC64_NAN;
     }
-    if (dec64_equal(x, DEC64_ONE) == DEC64_ONE) {
+    if (dec64_is_equal(x, DEC64_ONE) == DEC64_TRUE) {
         return DEC64_ZERO;
     }
-    if (dec64_equal(x, D_HALF) == DEC64_ONE) {
+    if (dec64_is_equal(x, D_HALF) == DEC64_TRUE) {
         return dec64_new(-6931471805599453, -16);
     }
     if (x == D_E) {
@@ -347,8 +347,8 @@ dec64 dec64_root(dec64 index, dec64 radicand) {
     dec64 result;
     index = dec64_normal(index);
     if (
-        dec64_is_any_nan(radicand) == DEC64_ONE
-        || dec64_is_zero(index) == DEC64_ONE
+        dec64_is_nan(radicand) == DEC64_TRUE
+        || dec64_is_zero(index) == DEC64_TRUE
         || index < 0
         || dec64_exponent(index) != 0
         || (
@@ -358,7 +358,7 @@ dec64 dec64_root(dec64 index, dec64 radicand) {
     ) {
         return DEC64_NAN;
     }
-    if (dec64_is_zero(radicand) == DEC64_ONE) {
+    if (dec64_is_zero(radicand) == DEC64_TRUE) {
         return DEC64_ZERO;
     }
     if (index == DEC64_ONE) {
@@ -376,7 +376,7 @@ dec64 dec64_root(dec64 index, dec64 radicand) {
                 dec64_multiply(result, index_minus_one),
                 dec64_divide(
                     radicand,
-                    dec64_exponentiate(result, index_minus_one)
+                    dec64_raise(result, index_minus_one)
                 )
             ),
             index
@@ -392,21 +392,24 @@ dec64 dec64_root(dec64 index, dec64 radicand) {
     }
 }
 
-void dec64_seed(dec64 seed) {
+void dec64_seed(uint64 part_0, uint64 part_1) {
 /*
-    Seed the dec64_random function. It takes any 64 bits as the seed value.
-    It initializes the seed variables.
+    Seed the dec64_random function. It takes any 128 bits as the seed value.
+    The seed must contain at least one 1 bit.
 */
-    seed_0 = seed;
-    seed_1 = (seed | 1) * D_2PI;
+    seed_0 = part_0;
+    seed_1 = part_1;
+    if ((seed_0 | seed_1) == 0) {
+        seed_1 = 1;
+    }
 }
 
 dec64 dec64_sin(dec64 radians) {
-    while (dec64_less(D_PI, radians) == DEC64_ONE) {
+    while (dec64_is_less(D_PI, radians) == DEC64_TRUE) {
         radians = dec64_subtract(radians, D_PI);
         radians = dec64_subtract(radians, D_PI);
     }
-    while (dec64_less(radians, D_NPI) == DEC64_ONE) {
+    while (dec64_is_less(radians, D_NPI) == DEC64_TRUE) {
         radians = dec64_add(radians, D_PI);
         radians = dec64_add(radians, D_PI);
     }
@@ -415,7 +418,7 @@ dec64 dec64_sin(dec64 radians) {
         radians = dec64_neg(radians);
         neg = -1;
     }
-    if (dec64_less(D_HALF_PI, radians) == DEC64_ONE) {
+    if (dec64_is_less(D_HALF_PI, radians) == DEC64_TRUE) {
         radians = dec64_subtract(D_PI, radians);
     }
     dec64 result;
@@ -454,7 +457,7 @@ dec64 dec64_sin(dec64 radians) {
 }
 
 dec64 dec64_sqrt(dec64 radicand) {
-    if (dec64_is_any_nan(radicand) != DEC64_ONE && radicand >= 0) {
+    if (dec64_is_nan(radicand) == DEC64_FALSE && radicand >= 0) {
         if (dec64_coefficient(radicand) == 0) {
             return DEC64_ZERO;
         }
