@@ -26,7 +26,6 @@ code var, pre var, h3 var {
     font-weight: normal;
 }
 
-
 pre {
     padding-left: 2em;
     padding-bottom: 0.25em;
@@ -349,14 +348,13 @@ a <var>coefficient</var> and an <var>exponent</var>.</p>
 <h3 id="dec64_is_equal">dec64_is_equal(<var>comparahend</var>: dec64,
     <var>comparator</var>: dec64) returns <var>comparison</var>:
 dec64</h3>
-<p>Compare two  numbers. If either is <var>nan</var>, return
-    <code>DEC64_NAN</code>. If they are exactly equal, return
-    <code>DEC64_FALSE</code>, otherwise return <code>DEC64_FALSE</code>. Denormal
+<p>Compare two  numbers. If they are exactly equal, return
+    <code>DEC64_TRUE</code>, otherwise return <code>DEC64_FALSE</code>. Denormal
     zeros are equal but denormal nans are not.</p>
 <h3 id="dec64_is_false">dec64_is_false(<var>boolean</var>: dec64) returns
 <var>comparison</var>: dec64</h3>
 <p>If the <var>boolean</var> is <code>DEC64_FALSE</code>, the result is <code>DEC64_TRUE</code>. Otherwise,
-    the result is <code>DEC64_FALSE</code>.</p>
+    the result is <code>DEC64_FALSE</code>. This is similar to the <var>not</var> function.</p>
 <h3 id="dec64_is_integer">dec64_is_integer(<var>number</var>: dec64)
     returns <var>comparison</var>: dec64</h3>
 <p>If the <var>number</var> contains a non-zero fractional part or if it is
