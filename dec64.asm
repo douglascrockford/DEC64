@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2018-12-20
+; 2019-01-06
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -76,21 +76,23 @@ title   dec64.asm for x64.
 
 ; There are 72057594037927936 possible nan values. Three are reserved:
 ;
-;       DEC64_NAN
+;       DEC64_NULL
 ;       DEC64_TRUE
 ;       DEC64_FALSE
 ;
-; The other 72057594037927933 nan values can be used for any purpose, including
-; object pointers.
+; The other 72057594037927933 nan values can be used for any purpose,
+; including object pointers.
 
-; When these functions return nan, they will always return 0x080, the normal
-; nan.
+; When these functions return nan, they will always return DEC64_NULL,
+; the normal nan.
 
 ; The comparison functions will return DEC64_TRUE or DEC64_FALSE.
 
+null    equ     8000000000000080h
+true    equ     8000000000000380h
+false   equ     8000000000000280h
 
-; Sometimes multiplication by a magic number can be faster than and as
-; accurate as division.
+; Multiplication by a magic number can be faster than division.
 
 eight_over_ten equ -3689348814741910323
 
@@ -428,14 +430,14 @@ pack_decrease:
 ; This can salvage values in a small set of cases.
 
     imul    r0,10           ; try multiplying the coefficient by 10
-    jo      return_nan      ; if it overflows, we failed to salvage
+    jo      return_null     ; if it overflows, we failed to salvage
     sub     r8,1            ; decrement the exponent
     test    r8,-128         ; is the exponent still over 127?
     jnz     pack_decrease   ; until the exponent is less than 127
     mov     r9,r0           ; r9 is the coefficient
     sar     r9,56           ; r9 is top 8 bits of the coefficient
     adc     r9,0            ; add the ninth bit
-    jnz     return_nan      ; the number is still too large
+    jnz     return_null     ; the number is still too large
     shl     r0,8            ; shift the exponent into position
     cmovz   r8,r0           ; if the coefficient is zero, also zero the exponent
     movzx   r8,r8_b         ; zero out all but the bottom 8 bits of the exponent
@@ -468,7 +470,7 @@ dec64_round: function_with_two_parameters
     movsx   r8,r11_b        ; r8 is the current exponent
     mov     r0,r11          ; r0 is the number
     test    r1_b,r1_h       ; is either nan?
-    jz      return_nan      ; if so, the result is nan
+    jz      return_null     ; if so, the result is nan
 
     sar     r0,8            ; r0 is the coefficient
     jz      return          ; if the coefficient is zero, the result is zero
@@ -544,7 +546,7 @@ add_slow:
 
     mov     r1,r0           ; restore r1
     cmp     r0_b,128        ; is the first operand nan?
-    je      return_nan      ; if nan, get out
+    je      return_null     ; if nan, get out
 
 ; Are the two exponents the same? This will happen often, especially with
 ; money values.
@@ -574,7 +576,7 @@ add_slower:
 ; than the first.
 
     cmp     r2_b,128        ; Is the second operand nan?
-    je      return_nan
+    je      return_null
     cmp     r1_b,r2_b       ; compare the exponents
     mov     r0,r1           ; r0 is the first number
     cmovl   r1,r2           ; r1 is the number with the larger exponent
@@ -682,7 +684,7 @@ inc_hardway:
 inc_negative_exponent:
 
     cmp     r1_b,128        ; is the number nan?
-    je      return_nan
+    je      return_null
     cmp     r1_b,-17        ; is the number too small to increment?
     jle     return_one      ; then return one
 
@@ -733,7 +735,7 @@ dec_hardway:
 dec_negative_exponent:
 
     cmp     r1_b,128        ; is the number nan?
-    je      return_nan
+    je      return_null
     cmp     r1_b,-17        ; is the number too small to decrement?
     jle     dec_neg_one     ; then return negative one
 
@@ -787,7 +789,7 @@ dec64_floor: function_with_one_parameter
 floor_begin:
 
     cmp     r1_b,128        ; compare the exponent to nan
-    je      return_nan       ; if the exponent is nan, the result is nan
+    je      return_null       ; if the exponent is nan, the result is nan
     mov     r0,r1           ; r0 is the number
     movsx   r8,r1_b         ; r8 is the exponent
     sar     r0,8            ; r0 is the coefficient
@@ -849,7 +851,7 @@ dec64_subtract: function_with_two_parameters
     cmp     r2_b,128        ; is the second operand nan?
     sete    r0_h
     or      r0_b,r0_h       ; is either nan?
-    jnz     return_nan
+    jnz     return_null
     mov     r10,r1          ; r10 is the first coefficient
     movsx   r8,r1_b         ; r8 is the first exponent
     sar     r10,8
@@ -953,7 +955,7 @@ dec64_multiply: function_with_two_parameters
     or      r1_w,r0_w       ; is either coefficient zero and not nan?
     xchg    r1_b,r1_h
     test    r0_w,r1_w
-    jnz     return_nan
+    jnz     return_null
 
     mov     r0,r10          ; r0 is the first coefficient
     add     r8,r9           ; r8 is the product exponent
@@ -1002,15 +1004,15 @@ dec64_divide: function_with_two_parameters
     sete    r0_h            ; r0_h is 1 if the second operand is nan
 
     sar     r10,8           ; r10 is the dividend coefficient
-    setnz   r1_b            ; r1_b is 1 if the dividend coefficient is zero
-    sar     r11,8           ; r11 is the divisor coefficient
-    setz    r1_h            ; r1_h is 1 if dividing by zero
-    or      r0_h,r0_b       ; r0_h is 1 if either is nan
-    or      r1_b,r0_b       ; r1_b is zero if the dividend is zero and not nan
+    setnz   r1_b            ; r1_b is 1 if the dividend coefficient is not zero
+    or      r1_b,r0_b       ; r0_b is 1 if either is nan or the divisor is zero
     jz      return_zero     ; if the dividend is zero, the quotient is zero
+    sar     r11,8           ; r11 is the divisor coefficient
+    setz    r1_b            ; r1_h is 1 if dividing by zero
+    or      r0_h,r0_b       ; r0_h is 1 if either is nan
+    or      r1_b,r0_h       ; r1_b is zero if the dividend is zero and not nan
+    jnz     return_null
     sub     r8,r9           ; r8 is the quotient exponent
-    or      r0_b,r1_h       ; r0_b is 1 if either is nan or the divisor is zero
-    jnz     return_nan
     pad
 
 divide_measure:
@@ -1097,7 +1099,7 @@ dec64_integer_divide: function_with_two_parameters
     sar     r11,8           ; r11 is the divisor coefficient
     setz    r2_h            ; r2_h is 1 if the divisor coefficient is zero
     or      r2_b,r2_h       ; r2_b is 1 if the result is nan
-    jnz     return_nan
+    jnz     return_null
     cqo                     ; sign extend r0 into r2
     idiv    r11             ; r0 is the quotient
     and     r0,-256         ; zero the exponent again
@@ -1139,7 +1141,7 @@ dec64_modulo: function_with_two_parameters
     sar     r11,8           ; r11 is the divisor coefficient
     setnz   r2_b            ; r2_b is 1 if the divisor coefficient is not zero
     test    r2_h,r2_b       ; is either operand nan or is the divisor zero?
-    jz      return_nan
+    jz      return_null
     cqo                     ; sign extend r0 into r2
     idiv    r11             ; divide r2:r0 by the divisor
 
@@ -1182,7 +1184,7 @@ dec64_half: function_with_one_parameter
 ; Divide a dec64 number by two. This will always be faster than dec64_divide.
 
     cmp     r1_b,128
-    je      return_nan
+    je      return_null
     test    r1_h,1
     jz      half_fast
 
@@ -1219,17 +1221,16 @@ dec64_signum: function_with_one_parameter
 ; If the number is zero, the result is 0.
 ; If the number is greater than zero, the result is 1.
 
+    cmp     r1_b,128
+    jz      return_null
     mov     r0,r1           ; r0 is the number
     sar     r0,8            ; r0 is the coefficient
     mov     r8,r0           ; r8 is the coefficient too
     neg     r0              ; r0 is -coefficient
     sar     r8,63           ; r8 is the extended sign (-1 if negative else 0)
     shr     r0,63           ; r0 is 1 if the number was greater than 0
-    mov     r2,128          ; r2 is nan
     or      r0,r8           ; r0 is -1, 0, or 1
     shl     r0,8            ; package the number with a zero exponent
-    cmp     r1_b,r2_b       ; is the number nan?
-    cmove   r0,r2           ; if so, replace the answer
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -1241,7 +1242,7 @@ dec64_neg: function_with_one_parameter
 ; exponent.
 
     cmp     r1_b,128        ; compare the exponent to nan
-    je      return_nan      ; is the number nan?
+    je      return_null     ; is the number nan?
     mov     r2,r1           ; r2 is the number
     mov     r0,-256         ; r0 is the coefficient mask
     sar     r2,8            ; r2 is the coefficient
@@ -1269,15 +1270,13 @@ dec64_abs: function_with_one_parameter
 ; Find the absolute value of a number. If the number is negative, hand it off
 ; to dec64_neg. Otherwise, return the number unless it is nan or zero.
 
+    cmp     r1_b,128        ; is the number nan?
+    je      return_null
     test    r1,r1           ; examine r1
     js      dec64_neg       ; is the number negative?
-    mov     r10,r1          ; r10 is the number
     mov     r0,r1           ; r0 is the number
-    mov     r2,128          ; r2 is nan
-    and     r10,-256        ; r10 is the coefficient without an exponent
-    cmovz   r0,r10          ; if the coefficient is zero, the number is zero
-    cmp     r1_b,r2_b       ; compare r1 to nan
-    cmovz   r0,r2           ; is the number nan?
+    sar     r1,8            ; r1 is the coefficient
+    cmovz   r0,r1           ; if the coefficient is zero, the result is zero
     ret                     ; return the number
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -1338,7 +1337,7 @@ dec64_int: function_with_one_parameter
     imul    r10             ; r0 is coefficient * 10^exponent
     sar     r2,1            ; shift the lsb of the overflow into carry
     adc     r2,0            ; if r2 was 0 or -1, it is now 0
-    jnz     return_nan      ; was the coefficient too enormous?
+    jnz     return_null     ; was the coefficient too enormous?
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -1352,7 +1351,7 @@ dec64_normal: function_with_one_parameter
 
     mov     r0,r1           ; r0 is the number
     cmp     r1_b,128        ; compare the exponent to nan
-    jz      return_nan      ; if exponent is nan, the result is nan
+    jz      return_null     ; if exponent is nan, the result is nan
     and     r0,-256         ; r0 is the coefficient shifted 8 bits
     mov     r8,10           ; r8 is the divisor
     cmovz   r1,r0           ; r1 is zero if r0 is zero
@@ -1415,11 +1414,11 @@ return:
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-return_nan:
+return_null:
 
 ; All of the dec64_ functions return only this form of nan.
 
-    mov     r0,080H         ; nan
+    mov     r0,null
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -1455,9 +1454,9 @@ dec64_is_less: function_with_two_parameters
     cmp     r1_b,r2_b       ; are the two exponents equal?
     jne     less_slow
     cmp     r1,r2           ; compare the numbers
-    jge     return_false 
+    jge     return_false
     cmp     r1_b,128        ; is the first argument nan?
-    je      return_false 
+    je      return_false
     jmp     return_true
     pad
 
@@ -1517,10 +1516,10 @@ dec64_is_zero: function_with_one_parameter
 ;(number: dec64) returns comparison: dec64
 
     cmp     r1_b,128        ; is r1 nan?
-    setne   r0_b            ; r0_b is 1 if not nan  
+    setne   r0_b            ; r0_b is 1 if not nan
     sar     r1,8            ; r1 is the coefficient
     setz    r0_h            ; r0_h is 1 if zero
-    test    r0_b,r0_h       
+    test    r0_b,r0_h
     jnz     return_true
     jnz     return_true
     jmp     return_false
@@ -1533,17 +1532,18 @@ dec64_is_false: function_with_one_parameter
 ; If the number is 0, the result is 1.
 ; Otherwise, the result is nan.
 
-    cmp     r1,0280H
+    mov     r0, false
+    cmp     r1,r0
     je      return_true
 
 return_false:
 
-    mov     r0,0280H        ; false
+    mov     r0,false
     ret
 
 return_true:
 
-    mov     r0,0380H        ; true
+    mov     r0,true
     ret
 
 dec64_code ends

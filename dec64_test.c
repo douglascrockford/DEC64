@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2018-12-20
+2019-01-06
 Public Domain
 
 No warranty.
@@ -13,7 +13,7 @@ No warranty.
 #include "dec64.h"
 
 #define false DEC64_FALSE
-#define true DEC64_TRUE
+#define true  DEC64_TRUE
 
 static int level;
 static int nr_fail;
@@ -21,43 +21,43 @@ static int nr_pass;
 
 /* constants */
 
-static dec64 nan;
-static dec64 nannan;
-static dec64 zero;
-static dec64 zip;
-static dec64 one;
-static dec64 two;
-static dec64 three;
-static dec64 four;
-static dec64 five;
-static dec64 six;
-static dec64 seven;
+static dec64 almost_negative_one;
+static dec64 almost_one;
+static dec64 cent;
+static dec64 e;
 static dec64 eight;
-static dec64 nine;
-static dec64 ten;
+static dec64 epsilon;
+static dec64 five;
+static dec64 four;
+static dec64 googol;
+static dec64 half;
 static dec64 maxint;
 static dec64 maxint_plus;
-static dec64 one_over_maxint;
 static dec64 maxnum;
-static dec64 googol;
 static dec64 minnum;
+static dec64 nan;
+static dec64 nannan;
 static dec64 negative_epsilon;
-static dec64 epsilon;
-static dec64 almost_one;
-static dec64 almost_negative_one;
-static dec64 e;
-static dec64 pi;
-static dec64 half;
-static dec64 cent;
-static dec64 negative_one;
-static dec64 negative_nine;
-static dec64 negative_minnum;
 static dec64 negative_maxint;
+static dec64 negative_maxint_minus;
 static dec64 negative_maxnum;
+static dec64 negative_minnum;
+static dec64 negative_nine;
+static dec64 negative_one;
 static dec64 negative_pi;
-
+static dec64 nine;
+static dec64 one;
+static dec64 one_over_maxint;
+static dec64 pi;
+static dec64 seven;
+static dec64 six;
+static dec64 ten;
+static dec64 three;
+static dec64 two;
+static dec64 zero;
+static dec64 zip;
 static void define_constants() {
-    nan = DEC64_NAN;                                        /* not a number */
+    nan = DEC64_NULL;                                       /* not a number */
     nannan = 32896;                                         /* a non-normal nan */
     zero = DEC64_ZERO;                                      /* 0 */
     zip = 250;                                              /* a non normal 0 */
@@ -92,6 +92,7 @@ static void define_constants() {
     negative_nine = dec64_new(-9, 0);                       /* -9 */
     negative_pi = dec64_new(-31415926535897932, -16);       /* -pi */
     negative_maxint = dec64_new(-36028797018963968, 0);     /* the largest negative normal integer */
+    negative_maxint_minus = dec64_new(-3602879701896397, 1);/* negative_maxint - 1 */
     negative_maxnum = dec64_new(-36028797018963968, 127);   /* the largest possible negative number */
     almost_negative_one = dec64_new(-9999999999999999, -16);/* -0.9999999999999999 */
 }
@@ -99,7 +100,7 @@ static void define_constants() {
 static void print_dec64(dec64 number) {
     int64 exponent = dec64_exponent(number);
     int64 coefficient = dec64_coefficient(number);
-    if (number == DEC64_NAN) {
+    if (number == nan) {
         printf("                   nan");
     } else if (number == DEC64_TRUE) {
         printf("                   true");
@@ -951,6 +952,8 @@ static void test_all_is_less() {
 static void test_all_is_nan() {
     test_is_nan(nan, true, "nan");
     test_is_nan(nannan, true, "nannan");
+    test_is_nan(true, true, "true");
+    test_is_nan(false, true, "false");
     test_is_nan(zero, false, "zero");
     test_is_nan(zip, false, "zip");
     test_is_nan(one, false, "one");

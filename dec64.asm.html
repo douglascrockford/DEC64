@@ -174,7 +174,7 @@ th:after {
 </ul>
 <p>These constants are also provided:</p>
 <ul>
-  <li><code>DEC64_NAN</code></li>
+  <li><code>DEC64_NULL</code></li>
   <li><code>DEC64_ZERO</code></li>
   <li><code>DEC64_ONE</code></li>
   <li><code>DEC64_NEGATIVE_ONE</code></li>
@@ -187,12 +187,12 @@ th:after {
     floating-point systems. It is a number value that represents numbers that
     are undefined or not representable. <span class=dec64>DEC64</span> has
     72 057 594 037 927 936 possible <var>nan</var> values. When these functions return a
-    <var>nan</var> value, they will always return <code>DEC64_NAN</code>, the
+    <var>nan</var> value, they will always return <code>DEC64_NULL</code>, the
     normal <var>nan</var>, regardless of the input.</p>
 <p>Two <var>nan</var> values, <code>DEC64_TRUE</code> and <code>DEC64_FALSE</code>, are reserved for representing boolean values.</p>
 <p>The remaining <var>nan</var> values may be used to hold object pointers or
     other useful values.</p>
-<p>These operations will produce a result of <code>DEC64_NAN</code>:</p>
+<p>These operations will produce a result of <code>DEC64_NULL</code>:</p>
 <pre>dec64_abs(<var>nan</var>)
 dec64_ceiling(<var>nan</var>)
 dec64_dec(<var>nan</var>)
@@ -210,7 +210,7 @@ dec64_integer_divide(0, <var>n</var>)
 dec64_modulo(0, <var>n</var>)
 dec64_multiply(0, <var>n</var>)
 dec64_multiply(<var>n</var>, 0)</pre>
-<p>These operations will produce a result of <code>DEC64_NAN</code> for all
+<p>These operations will produce a result of <code>DEC64_NULL</code> for all
     values of <var>n</var> except <code>0</code>:</p>
 <pre>dec64_divide(<var>n</var>, 0)
 dec64_divide(<var>n</var>, <var>nan</var>)
@@ -220,7 +220,7 @@ dec64_modulo(<var>n</var>, 0)
 dec64_modulo(<var>n</var>, <var>nan</var>)
 dec64_multiply(<var>n</var>, <var>nan</var>)
 dec64_multiply(<var>nan</var>, <var>n</var>)</pre>
-<p>These operations will produce a result of <code>DEC64_NAN</code> for all
+<p>These operations will produce a result of <code>DEC64_NULL</code> for all
     values of <var>n</var>:</p>
 <pre>dec64_add(<var>n</var>, <var>nan</var>)
 dec64_add(<var>nan</var>, <var>n</var>)
@@ -250,7 +250,7 @@ dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
   </tr>
   <tr>
     <th>&nbsp;&nbsp;<var>nan</var></th>
-    <td><code>DEC64_NAN</code></td>
+    <td><code>DEC64_NULL</code></td>
   </tr>
   <tr>
     <th>&nbsp;&nbsp;zero</th>
@@ -270,12 +270,12 @@ dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
     dec64</h3>
 <p>The add function adds an <var>augend</var> and an <var>addend</var> and
     returns the sum. If either is <var>nan</var>, or if the sum is not
-    representable, then the result is <code>DEC64_NAN</code>.</p>
+    representable, then the result is <code>DEC64_NULL</code>.</p>
 <h3 id="dec64_ceiling">dec64_ceiling(<var>number</var>: dec64)
     returns <var>integer</var>: dec64</h3>
 <p>The ceiling function returns the smallest integer that is greater than or
     equal to the <var>number</var>. If the <var>number</var> is <var>nan</var>,
-    the result is <code>DEC64_NAN</code>. If the <var>number</var> is zero, the
+    the result is <code>DEC64_NULL</code>. If the <var>number</var> is zero, the
     result is <code>DEC64_ZERO</code>. If the <var>number</var> is an integer,
     the result is the <var>number</var>.</p>
 <h3 id="dec64_coefficient">dec64_coefficient(<var>number</var>:
@@ -291,7 +291,7 @@ dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
 </table>
 <p>This function returns the <var>coefficient</var> part as an
     <code>int64</code>.  </p>
-<pre>dec64_coefficient(DEC64_NAN)</pre>
+<pre>dec64_coefficient(DEC64_NULL)</pre>
 <p>returns <code>0</code>.</p>
 <h3 id="dec64_dec">dec64_dec(<var>augend</var>: dec64) returns
     <var>difference</var>: dec64</h3>
@@ -320,7 +320,7 @@ a <var>coefficient</var> and an <var>exponent</var>.</p>
 <p>Produce the largest integer that is less than or equal to the number. This
     is sometimes called the <code>entier</code> function. In the result, the
     exponent will be greater than or equal to zero unless it is
-    <code>DEC64_NAN</code>. Numbers with positive exponents will not be
+    <code>DEC64_NULL</code>. Numbers with positive exponents will not be
     modified, even if the numbers are outside of the safe integer range.</p>
 <h3 id="dec64_half">dec64_half(<var>dividend</var>: dec64) returns
     <var>quotient</var>: dec64</h3>
@@ -375,7 +375,7 @@ dec64_is_less_or_equal(<var>a</var>, <var>b</var>)    =&gt; dec64_is_false(dec64
     returns <var>comparison</var>: dec64</h3>
 <p>If the <var>number</var> is any <var>nan</var>, return
     <code>DEC64_TRUE</code>, otherwise return <code>DEC64_FALSE</code>. To test
-    if a <var>number</var> is the normal <code>DEC64_NAN</code>, just use <code>==</code>.</p>
+    if a <var>number</var> is the normal <code>DEC64_NULL</code>, just use <code>==</code>.</p>
 <h3 id="dec64_is_zero">dec64_is_zero(<var>number</var>: dec64)
 returns <var>comparison</var>: dec64</h3>
 <p>If the <var>number</var> is any zero, return <code>DEC64_TRUE</code>,
@@ -450,7 +450,7 @@ dec64</h3>
 </table>
 <h3 id="dec64_signum">dec64_signum(<var>number</var>: dec64) returns
     <var>signature</var>: dec64</h3>
-<p>If the number is <var>nan</var>, the result is <code>DEC64_NAN</code>.
+<p>If the number is <var>nan</var>, the result is <code>DEC64_NULL</code>.
     If the number is less than zero, the result is
     <code>DEC64_NEGATIVE_ONE</code>. If the number is zero, the result is
     <code>DEC64_ZERO</code>. If the number is greater than zero, the result is
@@ -460,8 +460,7 @@ dec64</h3>
     dec64</h3>
 <p>Subtract a <var>subtrahend</var> from from a <var>minuend</var>.</p>
 <h2>MASM</h2>
-<p>This file can be processed with Microsoft's
-    <a href="https://msdn.microsoft.com/en-us/library/hb5z4sxd.aspx">ML64.exe</a>.
+<p><code>dec64.asm</code> can be processed with Microsoft's <a href="https://msdn.microsoft.com/en-us/library/hb5z4sxd.aspx">ML64.exe</a>.
     Visual Studio does not have good defaults for building with MASM, and
     apparently provides no documentation. These hints may be useful:</p>
 <pre>Platform &gt; x64
