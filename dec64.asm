@@ -788,8 +788,6 @@ dec64_floor: function_with_one_parameter
 
 floor_begin:
 
-    cmp     r1_b,128        ; compare the exponent to nan
-    je      return_null       ; if the exponent is nan, the result is nan
     mov     r0,r1           ; r0 is the number
     movsx   r8,r1_b         ; r8 is the exponent
     sar     r0,8            ; r0 is the coefficient
@@ -811,6 +809,8 @@ floor_begin:
 
 floor_micro:
 
+    cmp     r1_b,128        ; compare the exponent to nan
+    je      return_null     ; if the exponent is nan, the result is nan
     mov     r2,r0           ; r2 is the coefficient
     xor     r0,r0           ; r0 is zero
     pad
