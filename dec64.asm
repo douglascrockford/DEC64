@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2019-01-06
+; 2019-03-25
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -1452,29 +1452,76 @@ dec64_is_less: function_with_two_parameters
 ; If the exponents are the same, then do a simple compare.
 
     cmp     r1_b,r2_b       ; are the two exponents equal?
-    jne     less_slow
+    jne     less_slow       ; deal with unequal exponents
     cmp     r1,r2           ; compare the numbers
-    jge     return_false
-    cmp     r1_b,128        ; is the first argument nan?
-    je      return_false
-    jmp     return_true
+    jge     return_false    ; greater or equal
+    cmp     r1_b,128        ; are the arguments nan?
+    jne     return_true     ; less than
+    jmp     return_false    ; nan is not less than nan
     pad
 
 less_slow:
 
+ ; The exponents are not the same.
+
     cmp     r1_b,128        ; is the first argument nan?
-    je      return_false
+    je      return_false    ; nan is greater than numbers
     cmp     r2_b,128        ; is the second argument nan?
-    je      return_true
+    je      return_true     ; numbers are less than nan
 
-; Do it the hard way with a subtraction.
+; Unpack the numbers.
 
-    call_with_two_parameters dec64_subtract ; r0 is r1 - r2
-    test    r0,r0
-    js      return_true
+    mov     r11,r2          ; r11 is the second number
+    movsx   r8,r1_b         ; r8 is the first exponent
+    movsx   r9,r2_b         ; r9 is the second exponent
+    mov     r0,power        ; r0 is the power array
+    mov     r2,18           ; r2 is 18
+    sar     r1,8            ; r1 is the first coefficient
+    sar     r11,8           ; r11 is the second coefficient
+
+; The maximum cofficient is 36028797018963967. 10**18 is more than that.
+
+    sub     r8,r9           ; r8 is the exponent difference
+    js      less_second     ; is the difference negative?
+    cmp     r8,r2           ; compare the exponent difference to 18
+    cmovge  r8,r2           ; r8 is min(exponent difference, 18)
+
+; We need to make them conform before we can compare. Multiply the first
+; coefficient by 10**(first exponent - second exponent)
+
+    mov     r0,[r0][r8*8]   ; r0 is power[difference]
+    imul    r1              ; r2,r0 is the amplified first coefficient
+    jo      less_overflow_first
+    cmp     r0,r11          ; is the first coefficient less than the other?
+    jl      return_true
     jmp     return_false
-    ret
+    pad
 
+less_second:
+
+    neg     r8
+    cmp     r8,r2           ; compare the exponent difference to 18
+    cmovge  r8,r2           ; r8 is min(exponent difference, 18)
+    mov     r0,[r0][r8*8]   ; r0 is 10 ** min(exponent difference, 18)
+    imul    r11             ; r2,r0 is the amplified second coefficient
+    jo      less_overflow_second
+    cmp     r1,r0           ; is the first coefficient less than the other?
+    jl      return_true
+    jmp     return_false
+    pad
+
+less_overflow_first:
+
+    test    r2,r2
+    jns     return_false
+    jmp     return_true
+    pad
+
+less_overflow_second:
+
+    test    r2,r2
+    jns     return_true
+    jmp     return_false
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 dec64_is_integer: function_with_one_parameter
@@ -1521,16 +1568,14 @@ dec64_is_zero: function_with_one_parameter
     setz    r0_h            ; r0_h is 1 if zero
     test    r0_b,r0_h
     jnz     return_true
-    jnz     return_true
     jmp     return_false
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 dec64_is_false: function_with_one_parameter
 ;(boolean: dec64) returns notation: dec64
 
-; If the number is 1, the result is 0.
-; If the number is 0, the result is 1.
-; Otherwise, the result is nan.
+; If the argument is false, the result is true.
+; Otherwise, the result is false.
 
     mov     r0, false
     cmp     r1,r0

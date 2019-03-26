@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2019-01-06
+2019-03-25
 Public Domain
 
 No warranty.
@@ -38,6 +38,7 @@ static dec64 minnum;
 static dec64 nan;
 static dec64 nannan;
 static dec64 negative_epsilon;
+static dec64 negative_four;
 static dec64 negative_maxint;
 static dec64 negative_maxint_minus;
 static dec64 negative_maxnum;
@@ -45,6 +46,7 @@ static dec64 negative_minnum;
 static dec64 negative_nine;
 static dec64 negative_one;
 static dec64 negative_pi;
+static dec64 negative_three;
 static dec64 nine;
 static dec64 one;
 static dec64 one_over_maxint;
@@ -89,6 +91,8 @@ static void define_constants() {
 
     negative_minnum = dec64_new(-1, -127);                  /* the smallest possible negative number */
     negative_one = dec64_new(-1, 0);                        /* -1 */
+    negative_three = dec64_new(-3, 0);                      /* -3 */
+    negative_four = dec64_new(-4, 0);                       /* -4 */
     negative_nine = dec64_new(-9, 0);                       /* -9 */
     negative_pi = dec64_new(-31415926535897932, -16);       /* -pi */
     negative_maxint = dec64_new(-36028797018963968, 0);     /* the largest negative normal integer */
@@ -947,6 +951,15 @@ static void test_all_is_less() {
     test_is_less(googol, maxint, false, "googol < maxint");
     test_is_less(googol, maxnum, true, "googol < maxnum");
     test_is_less(maxint, maxint_plus, true, "maxint < maxint+1");
+    test_is_less(negative_pi, pi, true, "-pi < pi");
+    test_is_less(negative_three, negative_pi, false, "-3 < -pi");
+    test_is_less(negative_four, negative_pi, true, "-4 < -pi");
+    test_is_less(negative_three, negative_four, false, "-3 < -4");
+    test_is_less(negative_epsilon, zip, true, "-epsilon < zip");
+    test_is_less(negative_epsilon, negative_minnum, true, "-epsilon < -minnum");
+    test_is_less(negative_epsilon, negative_maxint, false, "-epsilon < -maxint");
+    test_is_less(negative_maxint_minus, negative_maxint, true, "-maxint < -maxint-1");
+    test_is_less(negative_minnum, negative_maxnum, false, "-minnum < -maxnum");
 }
 
 static void test_all_is_nan() {
