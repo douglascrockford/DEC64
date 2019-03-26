@@ -80,9 +80,11 @@ static emit(dec64_string_state state, int c) {
 static void emit_at(dec64_string_state state, int64 at) {
     emit(
         state,
-        (at >= state->nr_digits || at < 0)
+        (
+            at >= state->nr_digits || at < 0
             ? '0'
             : state->digits[at]
+        )
     );
 }
 
@@ -90,21 +92,14 @@ static void emit_decimal_point(dec64_string_state state) {
     emit(state, state->decimal_point);
 }
 
-static void emit_digits(
-    dec64_string_state state,
-    int from,
-    int to
-) {
+static void emit_digits(dec64_string_state state, int from, int to) {
     int at;
     for (at = from; at < to; at += 1) {
         emit_at(state, at);
     }
 }
 
-static void emit_digits_separated(
-    dec64_string_state state,
-    int from, int to
-) {
+static void emit_digits_separated(dec64_string_state state, int from, int to) {
     int sep;
     if (state->separation <= 0) {
         emit_digits(state, from, to);
@@ -130,10 +125,7 @@ static void emit_end(dec64_string_state state) {
     }
 }
 
-static void emit_exponent(
-    dec64_string_state state,
-    int64 exponent
-) {
+static void emit_exponent(dec64_string_state state, int64 exponent) {
     int go = 0;
     if (exponent != 0) {
         emit(state, e);
@@ -540,9 +532,11 @@ dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
 /*
     If everything is ok, return the number.
 */
-    return (ok)
+    return (
+        ok
         ? dec64_new(sign * coefficient, exponent)
-        : DEC64_NAN;
+        : DEC64_NAN
+    );
 }
 
 int dec64_to_string(
