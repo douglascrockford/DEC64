@@ -1,9 +1,9 @@
 /* dec64_test.c
 
-This is a test of dec64.asm.
+This is a test of dec64.obj.
 
 dec64.com
-2019-09-03
+2019-09-12
 Public Domain
 
 No warranty.
@@ -1318,13 +1318,9 @@ static int do_tests(int level_of_detail) {
     test_all_abs();
     test_all_add();
     test_all_ceiling();
-/*
     test_all_divide();
-*/
     test_all_floor();
-/*
     test_all_integer_divide();
-*/
     test_all_is_equal();
     test_all_is_false();
     test_all_is_integer();
