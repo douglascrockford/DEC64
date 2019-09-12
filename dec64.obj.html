@@ -1,6 +1,6 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
-<head><title>dec64.asm</title>
+<head><title>dec64.obj</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style>
 @import url(http://fonts.googleapis.com/css?family=Cousine:700);
@@ -97,14 +97,14 @@ th:after {
 
 <body>
 <img src="dec64.png" width="398" height="103" alt="DEC64">
-<h1>dec64.asm</h1>
+<h1>dec64.obj</h1>
 <p><a href="https://github.com/douglascrockford/DEC64/blob/master/dec64.asm">dec64.asm</a>
     is a software implementation of elementary operators of
     <span class=dec64><a href="http://www.DEC64.com/">DEC64</a></span> for
     <a href="https://en.wikipedia.org/wiki/X86-64">x64</a> processors.
     (<a href="http://dec64.com/dec64.obj">obj</a>
     <a href="http://dec64.com/dec64.listing">listing</a>)    </p>
-<p><a href="https://github.com/douglascrockford/DEC64/blob/master/dec64.h">dec64.h</a>
+    <p><a href="https://github.com/douglascrockford/DEC64/blob/master/dec64.h">dec64.h</a>
   includes C function prototypes for these functions:</p>
 <ul><li><a href="#dec64_abs"><code>dec64_abs(<var>number</var>: dec64) returns
     <var>absolution</var>: dec64</code></a></li>
@@ -114,8 +114,6 @@ th:after {
     returns <var>integer</var>: dec64</code></a></li>
 <li><a href="#dec64_coefficient"><code>dec64_coefficient(<var>number</var>:
     dec64) returns <var>coefficient</var>: int64</code></a></li>
-<li><a href="#dec64_dec"><code>dec64_dec(<var>minuend</var>: dec64) returns
-    <var>difference</var>: dec64</code></a></li>
 <li><a href="#dec64_divide"><code>dec64_divide(<var>dividend</var>: dec64,
     <var>divisor</var>: dec64)
     returns <var>quotient</var>: dec64</code></a></li>
@@ -123,12 +121,6 @@ th:after {
   returns <var>exponent</var>: int64</code></a></li>
 <li><a href="#dec64_floor"><code>dec64_floor(<var>number</var>: dec64) returns
   <var>integer</var>: dec64</code></a></li>
-<li><a href="#dec64_half"><code>dec64_half(<var>dividend</var>: dec64) returns
-    <var>quotient</var>: dec64</code></a></li>
-<li><a href="#dec64_inc"><code>dec64_inc(<var>augend</var>: dec64) returns
-    <var>difference</var>: dec64</code></a></li>
-<li><a href="#dec64_int"><code>dec64_int(<var>number</var>: dec64)
-  returns <var>integer</var>: dec64</code></a></li>
 <li><a href="#dec64_integer_divide"><code>dec64_integer_divide(<var>dividend</var>:
     dec64, <var>divisor</var>: dec64) returns
   <var>quotient</var>: dec64</code></a></li>
@@ -177,6 +169,7 @@ th:after {
   <li><code>DEC64_NULL</code></li>
   <li><code>DEC64_ZERO</code></li>
   <li><code>DEC64_ONE</code></li>
+  <li><code>DEC64_TWO</code></li>
   <li><code>DEC64_NEGATIVE_ONE</code></li>
   <li><code>DEC64_TRUE</code></li>
   <li><code>DEC64_FALSE</code></li>
@@ -195,11 +188,7 @@ th:after {
 <p>These operations will produce a result of <code>DEC64_NULL</code>:</p>
 <pre>dec64_abs(<var>nan</var>)
 dec64_ceiling(<var>nan</var>)
-dec64_dec(<var>nan</var>)
 dec64_floor(<var>nan</var>)
-dec64_half(<var>nan</var>)
-dec64_inc(<var>nan</var>)
-dec64_int(<var>nan</var>)
 dec64_neg(<var>nan</var>)
 dec64_normal(<var>nan</var>)
 dec64_signum(<var>nan</var>)</pre>
@@ -293,11 +282,6 @@ dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
     <code>int64</code>.  </p>
 <pre>dec64_coefficient(DEC64_NULL)</pre>
 <p>returns <code>0</code>.</p>
-<h3 id="dec64_dec">dec64_dec(<var>augend</var>: dec64) returns
-    <var>difference</var>: dec64</h3>
-<p>The decrement function subtracts <code>1</code> from a number. That can be
-    faster than </p>
-<pre>dec64_subtract(<var>augend</var>, DEC64_ONE)</pre>
 <h3 id="dec64_divide">dec64_divide(<var>dividend</var>: dec64,
     <var>divisor</var>: dec64) returns <var>quotient</var>: dec64</h3>
 <p>This function divides the <var>dividend</var> by the <var>divisor</var>.</p>
@@ -322,23 +306,6 @@ a <var>coefficient</var> and an <var>exponent</var>.</p>
     exponent will be greater than or equal to zero unless it is
     <code>DEC64_NULL</code>. Numbers with positive exponents will not be
     modified, even if the numbers are outside of the safe integer range.</p>
-<h3 id="dec64_half">dec64_half(<var>dividend</var>: dec64) returns
-    <var>quotient</var>: dec64</h3>
-<p>Divide a dec64 number by two. This will always be faster than </p>
-<pre>dec64_divide(<var>dividend</var>, dec64_new(2, 0))</pre>
-<h3 id="dec64_inc">dec64_inc(<var>augend</var>: dec64) returns
-    <var>sum</var>: dec64</h3>
-<p>The increment function adds <code>1</code> to a number. That can be faster
-    than </p>
-<pre>dec64_add(<var>augend</var>, DEC64_ONE)</pre>
-<h3 id="dec64_int">dec64_int(<var>number</var>: dec64) returns
-    <var>integer</var>: dec64</h3>
-<p>Convert the number such that the exponent will be zero, discarding the
-    fraction part. It will produce <var>nan</var> if the result cannot be
-    represented in 56 signed bits. This is used to extract an
-    <code>int56</code> from a <code>dec64</code> for bitwise operations. It
-    accepts a broader range than the safe integer range:</p>
-<pre>-36028797018963968 thru 72057594037927935</pre>
 <h3 id="dec64_integer_divide">dec64_integer_divide(<var>dividend</var>:
     dec64, <var>divisor</var>: dec64) returns
     <var>quotient</var>: dec64</h3>
@@ -379,8 +346,8 @@ dec64_is_less_or_equal(<var>a</var>, <var>b</var>)    =&gt; dec64_is_false(dec64
 <h3 id="dec64_is_zero">dec64_is_zero(<var>number</var>: dec64)
 returns <var>comparison</var>: dec64</h3>
 <p>If the <var>number</var> is any zero, return <code>DEC64_TRUE</code>,
-    otherwise return <code>DEC64_FALSE</code>. To test if a <var>number</var>
-    is <code>DEC64_ZERO</code>, use <code>==</code>.</p>
+    otherwise return <code>DEC64_FALSE</code>.
+</p>
 <h3 id="dec64_modulo">dec64_modulo(<var>dividend</var>: dec64,
     <var>divisor</var>: dec64) returns <var>modulus</var>:
     dec64</h3>

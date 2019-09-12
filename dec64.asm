@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2019-03-25
+; 2019-09-03
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -24,11 +24,7 @@ title   dec64.asm for x64.
 ;
 ;   dec64_abs(nan)
 ;   dec64_ceiling(nan)
-;   dec64_dec(nan)
 ;   dec64_floor(nan)
-;   dec64_half(nan)
-;   dec64_inc(nan)
-;   dec64_int(nan)
 ;   dec64_neg(nan)
 ;   dec64_normal(nan)
 ;   dec64_signum(nan)
@@ -92,7 +88,7 @@ null    equ     8000000000000080h
 true    equ     8000000000000380h
 false   equ     8000000000000280h
 
-; Multiplication by a magic number can be faster than division.
+; Multiplication by a scaled reciprocal can be faster than division.
 
 eight_over_ten equ -3689348814741910323
 
@@ -108,9 +104,6 @@ public dec64_ceiling;(number: dec64)
 public dec64_coefficient;(number: dec64)
 ;   returns coefficient: int64
 
-public dec64_dec;(minuend: dec64)
-;   returns difference: dec64
-
 public dec64_divide;(dividend: dec64, divisor: dec64)
 ;   returns quotient: dec64
 
@@ -118,15 +111,6 @@ public dec64_exponent;(number: dec64)
 ;   returns exponent: int64
 
 public dec64_floor;(number: dec64)
-;   returns integer: dec64
-
-public dec64_half;(dividend: dec64)
-;   returns quotient: dec64
-
-public dec64_inc;(augend: dec64)
-;   returns sum: dec64
-
-public dec64_int;(number: dec64)
 ;   returns integer: dec64
 
 public dec64_integer_divide;(dividend: dec64, divisor: dec64)
@@ -458,53 +442,56 @@ dec64_round: function_with_two_parameters
 
 ; The place should be between -16 and 16.
 
-    mov     r11,r1          ; preserve the number
-    mov     r1,r2           ; pass the place
-    call_with_one_parameter dec64_int
-    mov     r9,r0           ; r9 is the normalized place
-    cmp     r11_b,128       ; is the first operand not nan?
-    setne   r1_b
-    sar     r9,8            ; r9 is the place as int64
-    cmp     r0_b,128        ; is the second operand nan?
-    setne   r1_h
-    movsx   r8,r11_b        ; r8 is the current exponent
-    mov     r0,r11          ; r0 is the number
-    test    r1_b,r1_h       ; is either nan?
-    jz      return_null     ; if so, the result is nan
+    cmp     r1_b,128                ; is the number nan?
+    jz      return_null
+    mov     r10,r1                  ; r10 is the number
+    mov     r11,r2                  ; r11 is the places
+    test    r2_b,r2_b               ; is places already an integer?
+    jz      round_to_it             ; yes, places is an integer
+    mov     r1,r2                   ; pass the place
+    call_with_one_parameter dec64_normal
+    test    r0_b,r0_b               ; is the number of places a normal integer?
+    jnz     return_null
+    mov     r11,r0                  ; r11 is the normalized place
+    pad
 
-    sar     r0,8            ; r0 is the coefficient
-    jz      return          ; if the coefficient is zero, the result is zero
-    cmp     r8,r9           ; compare the exponents
-    jge     pack            ; no rounding required
-    mov     r2,r0           ; r2 is the coefficient
-    neg     r2              ; r2 is the coefficient negated
-    cmovns  r0,r2           ; r0 is absolute value of the coefficient
-    mov     r10,eight_over_ten ; magic
+round_to_it:
+
+    movsx   r8,r10_b                ; r8 is the current exponent
+    mov     r0,r10                  ; r0 is the coefficient
+    sar     r11,8                   ; r11 is place: int64
+    sar     r0,8                    ; r0 is the coefficient of the number
+    jz      return_zero             ; if the coefficient is 0, the result is 0
+    cmp     r8,r11                  ; compare the exponents
+    jge     pack                    ; no rounding required
+    mov     r9,eight_over_ten       ; magic
+    test    r0,r0                   ; is the coefficient negative?
+    jns     round_loop              ; it is positive
+    neg     r0                      ; r0 is absolute value of coefficient
     pad
 
 round_loop:
 
 ; Increment the exponent and divide the coefficient by 10 until the target
-; exponent is reached.
+; exponent is reached. The division is accomplished by multiplying with a
+; scaled reciprocal.
 
-    mul     r10             ; r2 is the coefficient * 8 / 10
-    mov     r0,r2           ; r0 is the coefficient * 8 / 10
-    shr     r0,3            ; r0 is the coefficient / 10
-
-    add     r8,1            ; increment the exponent
-    cmp     r8,r9           ; compare the exponents
-    jne     round_loop      ; loop if the exponent has not reached the target
+    mul     r9                      ; r2 is the coefficient * 8 / 10
+    mov     r0,r2                   ; r0 is the coefficient * 8 / 10
+    sar     r0,3                    ; r0 is the coefficient / 10
+    add     r8,1                    ; increment the exponent
+    cmp     r8,r11                  ; compare the exponent with the target
+    jne     round_loop              ; loop if the exponent is not at the target
 
 ; Round if necessary and return the result.
 
-    shr     r2,2            ; Isolate the carry bit
-    and     r2,1            ; r2 is 1 if rounding is needed
-    add     r0,r2           ; r0 is rounded
-    mov     r2,r0           ; r2 is the result
-    neg     r2              ; r2 is the result negated
-    test    r11,r11         ; was the original number negative
-    cmovs   r0,r2           ; if so, use the negated result
-    jmp     pack            ; pack it up
+    shr     r2,2                    ; isolate the carry bit
+    and     r2,1                    ; r2 is 1 if rounding is needed
+    add     r0,r2                   ; r0 is rounded
+    test    r10,r10                 ; was the original number negative?
+    jns     pack                    ; positive
+    neg     r0                      ; negative
+    jmp     pack                    ; pack it up
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
@@ -645,114 +632,6 @@ add_slower_increase:
 return_r1:
 
     mov     r0,r1           ; r0 is the original number
-    ret
-
-    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
-dec64_inc: function_with_one_parameter
-;(augend: dec64) returns sum: dec64
-
-; Increment a number. In most cases, this will be a faster way to add one than
-; dec64_add.
-
-    test    r1_b,r1_b       ; what is the exponent?
-    jnz     inc_not_integer
-
-; The number is an integer. This might be easy.
-
-    mov     r0,100h         ; r0 is one
-    add     r0,r1           ; r0 is the sum
-    jo      inc_hardway     ; overflow (very rare)
-    ret
-    pad
-
-inc_not_integer:
-
-    js      inc_negative_exponent
-
-    test    r1,-256         ; is the coefficient zero?
-    jz      return_one      ; if so, the result is one
-    cmp     r1_b,17         ; is the number too enormous to increment?
-    jge     return_r1       ; then return the number
-
-inc_hardway:
-
-    mov     r2,100h         ; r2 is one
-    tail_with_two_parameters dec64_add
-    pad
-
-inc_negative_exponent:
-
-    cmp     r1_b,128        ; is the number nan?
-    je      return_null
-    cmp     r1_b,-17        ; is the number too small to increment?
-    jle     return_one      ; then return one
-
-    movsx   r8,r1_b         ; r8 is the negative exponent
-    neg     r8              ; flip the sign
-    mov     r9,power
-    mov     r0,[r9][r8*8]   ; r0 is 10^(-exponent)
-    shl     r0,8            ; convert to dec64
-    add     r0,r1           ; now we add
-    jo      inc_hardway     ; if it overflows, do it the hard way
-    ret
-
-    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
-dec64_dec: function_with_one_parameter
-;(minuend: dec64) returns difference: dec64
-
-; Increment a number. In most cases, this will be a faster way to subtract one
-; than dec64_subtract.
-
-    test    r1_b,r1_b       ; what is the exponent?
-    jnz     dec_not_integer
-
-
-; The number is an integer. This might be easy.
-
-    mov     r0,-256         ; r0 is negative one
-    add     r0,r1           ; r0 is the difference
-    jo      dec_hardway     ; overflow (very rare)
-    ret
-    pad
-
-dec_not_integer:
-
-    js      dec_negative_exponent
-
-    test    r1,-256         ; is the coefficient zero?
-    jz      dec_neg_one     ; if so, the result is negative one
-    cmp     r1_b,17         ; is the number too enormous to decrement?
-    jge     return_r1       ; then return the number
-
-dec_hardway:
-
-    mov     r2,100h         ; r2 is one
-    tail_with_two_parameters dec64_subtract
-    pad
-
-dec_negative_exponent:
-
-    cmp     r1_b,128        ; is the number nan?
-    je      return_null
-    cmp     r1_b,-17        ; is the number too small to decrement?
-    jle     dec_neg_one     ; then return negative one
-
-    movsx   r8,r1_b         ; r8 is the negative exponent
-    neg     r8              ; flip the sign
-    mov     r9,power
-    mov     r0,[r9][r8*8]   ; r0 is 10^(-exponent)
-    neg     r0              ; go negative
-    shl     r0,8            ; convert to dec64
-    add     r0,r1           ; now we subtract
-    jo      dec_hardway     ; if it overflows, do it the hard way
-    ret
-    pad
-
-dec_neg_one:
-
-    mov     r0,-256         ; r0 is -1
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -991,6 +870,8 @@ dec64_divide: function_with_two_parameters
 
 ; Begin unpacking the components.
 
+    cmp     r2,200h
+    jz      divide_two
     movsx   r8,r1_b         ; r8 is the first exponent
     movsx   r9,r2_b         ; r9 is the second exponent
     mov     r10,r1          ; r10 is the first number
@@ -1074,6 +955,38 @@ divide_prescale:
     imul    r10,qword ptr [r9][r1*8] ; multiply the dividend by power of ten
     sub     r8,r1           ; reduce the exponent
     jmp     divide_measure  ; try again
+
+divide_two:
+
+; Divide a dec64 number by two.
+
+    cmp     r1_b,128
+    je      return_null
+    test    r1_h,1
+    jz      divide_half
+
+; Unpack the components into r8 and r1, multiply by 5 and divide by 10.
+
+    movsx   r8,r1_b         ; r8 is the exponent
+    sar     r1,8            ; r1 is the coefficient
+    sub     r8,1            ; bump down the exponent
+    lea     r0,[r1+r1*4]    ; r0 is the coefficient * 5
+    jmp     pack
+    pad
+
+divide_half:
+
+; If the least significant bit of the coefficient is 0, then we can do this
+; the fast way. Shift the coefficient by 1 bit and restore the exponent. If
+; the shift produces zero, even easier.
+
+    mov     r0,-256         ; r0 is the coefficient mask
+    and     r0,r1           ; r0 is the coefficient shifted 8 bits
+    jz      return
+    sar     r0,1            ; r0 is divided by 2
+    movzx   r1,r1_b         ; zero out r1 except lowest 8 bits
+    or      r0,r1           ; mix in the exponent
+    ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
@@ -1178,41 +1091,6 @@ modulo_slow:
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-dec64_half: function_with_one_parameter
-;(dividend: dec64) returns quotient: dec64
-
-; Divide a dec64 number by two. This will always be faster than dec64_divide.
-
-    cmp     r1_b,128
-    je      return_null
-    test    r1_h,1
-    jz      half_fast
-
-; Unpack the components into r8 and r1, multiply by 5 and divide by 10.
-
-    movsx   r8,r1_b         ; r8 is the exponent
-    sar     r1,8            ; r1 is the coefficient
-    sub     r8,1            ; bump down the exponent
-    lea     r0,[r1+r1*4]    ; r0 is the coefficient * 5
-    jmp     pack
-    pad
-
-half_fast:
-
-; If the least significant bit of the coefficient is 0, then we can do this
-; the fast way. Shift the coefficient by 1 bit and restore the exponent. If
-; the shift produces zero, even easier.
-
-    mov     r0,-256         ; r0 is the coefficient mask
-    and     r0,r1           ; r0 is the coefficient shifted 8 bits
-    jz      return
-    sar     r0,1            ; r0 is divided by 2
-    movzx   r1,r1_b         ; zero out r1 except lowest 8 bits
-    or      r0,r1           ; mix in the exponent
-    ret
-
-    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
 dec64_signum: function_with_one_parameter
 ;(number: dec64) returns signature: dec64
 
@@ -1312,36 +1190,6 @@ dec64_is_equal: function_with_two_parameters
     jmp     return_false
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-dec64_int: function_with_one_parameter
-;(number: dec64) returns integer: dec64
-
-; Convert the number such that the exponent will be zero, discarding the
-; fraction part. It will produce nan if the result cannot be represented in
-; 56 signed bits. This is used to extract an int56 from a dec64 for bitwise
-; operations. It accepts a broader range than the safe integer range:
-; -36028797018963968 thru 72057594037927935.
-
-; Preserved: r11
-
-    mov     r0,r1           ; r0 is the number
-    test    r1_b,r1_b       ; examine the exponent
-    jz      return          ; nothing to do it the exponent is zero
-    js      dec64_floor     ; shed the fraction part if exponent is negative
-    movzx   r8,r1_b         ; r8 is the exponent
-    mov     r2,18           ; r2 is 18
-    cmp     r1_b,18         ; is the exponent too enormous?
-    cmovae  r8,r2           ; r8 is min(exponent, 18)
-    and     r0,-256         ; r0 is the coefficient, shifted 8
-    mov     r9,power
-    mov     r10,[r9][r8*8]  ; r10 is 10^exponent
-    imul    r10             ; r0 is coefficient * 10^exponent
-    sar     r2,1            ; shift the lsb of the overflow into carry
-    adc     r2,0            ; if r2 was 0 or -1, it is now 0
-    jnz     return_null     ; was the coefficient too enormous?
-    ret
-
-    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
 dec64_normal: function_with_one_parameter
 ;(number: dec64) returns normalization: dec64
 
@@ -1349,18 +1197,20 @@ dec64_normal: function_with_one_parameter
 ; Usually normalization is not needed since it does not materially change the
 ; value of a number.
 
+; Preserves r10 and r11.
+
     mov     r0,r1           ; r0 is the number
     cmp     r1_b,128        ; compare the exponent to nan
     jz      return_null     ; if exponent is nan, the result is nan
     and     r0,-256         ; r0 is the coefficient shifted 8 bits
     mov     r8,10           ; r8 is the divisor
     cmovz   r1,r0           ; r1 is zero if r0 is zero
-    mov     r10,r0          ; r10 is the coefficient shifted 8 bits
+    mov     r9,r0           ; r9 is the coefficient shifted 8 bits
     test    r1_b,r1_b       ; examine the exponent
     jz      return          ; if the exponent is zero, return r0
     jns     normal_multiply ; if the exponent is positive
     sar     r0,8            ; r0 is the coefficient
-    sar     r10,8           ; r10 is the coefficient
+    sar     r9,8            ; r9 is the coefficient
     pad
 
 normal_divide:
@@ -1372,14 +1222,14 @@ normal_divide:
     idiv    r8              ; divide r2:r0 by 10
     test    r2,r2           ; examine the remainder
     jnz     normal_divide_done ; if r2 is not zero, we are done
-    mov     r10,r0          ; r10 is the coefficient
+    mov     r9,r0           ; r9 is the coefficient
     add     r1_b,1          ; increment the exponent
     jnz     normal_divide   ; until the exponent is zero
     pad
 
 normal_divide_done:
 
-    mov     r0,r10          ; r0 is the finished coefficient
+    mov     r0,r9           ; r0 is the finished coefficient
     shl     r0,8            ; put it in position
     mov     r0_b,r1_b       ; mix in the exponent
     ret
@@ -1392,7 +1242,7 @@ normal_multiply:
 
     imul    r0,10           ; r0 is r0 * 10
     jo      normal_multiply_done ; return zero if overflow
-    mov     r10,r0          ; r10 is the coefficient
+    mov     r9,r0           ; r9 is the coefficient
     sub     r1_b,1          ; decrement the exponent
     jnz     normal_multiply ; until the exponent is zero
     ret
@@ -1400,7 +1250,7 @@ normal_multiply:
 
 normal_multiply_done:
 
-    mov     r0,r10          ; r0 is the finished positioned coefficient
+    mov     r0,r9           ; r0 is the finished positioned coefficient
     mov     r0_b,r1_b       ; mix in the exponent
     ret
 
@@ -1425,7 +1275,7 @@ return_null:
 
 return_one:
 
-    mov     r0,0100H        ; one
+    mov     r0,0100h        ; one
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

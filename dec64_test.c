@@ -3,7 +3,7 @@
 This is a test of dec64.asm.
 
 dec64.com
-2019-03-25
+2019-09-03
 Public Domain
 
 No warranty.
@@ -56,6 +56,7 @@ static dec64 six;
 static dec64 ten;
 static dec64 three;
 static dec64 two;
+static dec64 two_55;
 static dec64 zero;
 static dec64 zip;
 static void define_constants() {
@@ -64,7 +65,7 @@ static void define_constants() {
     zero = DEC64_ZERO;                                      /* 0 */
     zip = 250;                                              /* a non normal 0 */
     one = DEC64_ONE;                						/* 1 */
-    two = dec64_new(2, 0);          						/* 2 */
+    two = DEC64_TWO;                                        /* 2 */
     three = dec64_new(3, 0);        						/* 3 */
     four = dec64_new(4, 0);         						/* 4 */
     five = dec64_new(5, 0);         						/* 5 */
@@ -88,6 +89,7 @@ static void define_constants() {
     one_over_maxint = dec64_new(27755575615628914, -33);    /* one / maxint */
     maxnum = dec64_new(36028797018963967, 127);             /* the largest possible number */
     googol = dec64_new(1, 100);                             /* googol */
+    two_55 = dec64_new(36028797018963968, 0);               /* 2 ** 55 */
 
     negative_minnum = dec64_new(-1, -127);                  /* the smallest possible negative number */
     negative_one = dec64_new(-1, 0);                        /* -1 */
@@ -283,11 +285,6 @@ static void test_ceiling(dec64 first, dec64 expected, char * comment) {
     judge_unary(first, expected, actual, "ceiling", "c", comment);
 }
 
-static void test_dec(dec64 first, dec64 expected, char * comment) {
-    dec64 actual = dec64_dec(first);
-    judge_unary(first, expected, actual, "dec", "-", comment);
-}
-
 static void test_divide(dec64 first, dec64 second, dec64 expected, char * comment) {
     dec64 actual = dec64_divide(first, second);
     judge_binary(first, second, expected, actual, "divide", "/", comment);
@@ -296,21 +293,6 @@ static void test_divide(dec64 first, dec64 second, dec64 expected, char * commen
 static void test_floor(dec64 first, dec64 expected, char * comment) {
     dec64 actual = dec64_floor(first);
     judge_unary(first, expected, actual, "floor", "f", comment);
-}
-
-static void test_half(dec64 first, dec64 expected, char * comment) {
-    dec64 actual = dec64_half(first);
-    judge_unary(first, expected, actual, "half", "h", comment);
-}
-
-static void test_inc(dec64 first, dec64 expected, char * comment) {
-    dec64 actual = dec64_inc(first);
-    judge_unary(first, expected, actual, "inc", "+", comment);
-}
-
-static void test_int(dec64 first, dec64 expected, char * comment) {
-    dec64 actual = dec64_int(first);
-    judge_unary(first, expected, actual, "int", "i", comment);
 }
 
 static void test_integer_divide(dec64 first, dec64 second, dec64 expected, char * comment) {
@@ -460,9 +442,10 @@ static void test_all_ceiling() {
     test_ceiling(nan, nan, "nan");
     test_ceiling(nannan, nan, "nannan");
     test_ceiling(zero, zero, "zero");
-    test_ceiling(zip, zero, "zero");
+    test_ceiling(zip, zero, "zip");
     test_ceiling(minnum, one, "minnum");
     test_ceiling(epsilon, one, "epsilon");
+    test_ceiling(negative_epsilon, zero, "negative_epsilon");
     test_ceiling(cent, one, "cent");
     test_ceiling(half, one, "half");
     test_ceiling(one, one, "one");
@@ -509,30 +492,21 @@ static void test_all_ceiling() {
     test_ceiling(dec64_new(-9999999999999998, -16), zero, "-0.9...8");
 }
 
-static void test_all_dec() {
-    test_dec(nannan, nan, "nannan");
-    test_dec(nan, nan, "nan");
-    test_dec(zero, negative_one, "zero");
-    test_dec(zip, negative_one, "zip");
-    test_dec(one, zero, "one");
-    test_dec(half, dec64_new(-5, -1), "half");
-    test_dec(cent, dec64_new(-99, -2), "cent");
-    test_dec(epsilon, almost_negative_one, "epsilon");
-    test_dec(dec64_new(9999999999999999, 0), dec64_new(9999999999999998, 0), "9999999999999999");
-    test_dec(dec64_new(10000000000000000, 0), dec64_new(9999999999999999, 0), "10000000000000000");
-    test_dec(maxint_plus, maxint_plus, "maxint plus");
-    test_dec(maxint, maxint - 256, "maxint");
-    test_dec(one_over_maxint, negative_one, "1/maxint");
-    test_dec(maxnum, maxnum, "maxnum");
-    test_dec(googol, googol, "googol");
-    test_dec(almost_one, negative_epsilon, "almost_one");
-    test_dec(negative_maxint, dec64_new(-3602879701896397, 1), "negative_maxint");
-
-}
-
 static void test_all_divide() {
-    test_divide(dec64_new(4195835, 0), dec64_new(3145727, 0), dec64_new(13338204491362410, -16), "4195835 / 3145727");
+    test_divide(nannan, DEC64_TWO, nan, "nannan");
+    test_divide(nan, DEC64_TWO, nan, "nan");
+    test_divide(zero, DEC64_TWO, zero, "zero");
+    test_divide(zip, DEC64_TWO, zero, "zip");
+    test_divide(one, DEC64_TWO, half, "one");
+    test_divide(two, DEC64_TWO, one, "two");
+    test_divide(ten, DEC64_TWO, five, "ten");
+    test_divide(minnum, DEC64_TWO, minnum, "minnum");
+    test_divide(dec64_new(-2, 0), DEC64_TWO, dec64_new(-1, 0), "-2");
+    test_divide(dec64_new(-1, 0), DEC64_TWO, dec64_new(-5, -1), "-1");
     test_divide(nan, nan, nan, "nan / nan");
+    test_divide(four, two, two, "4 / 2");
+    test_divide(six, two, three, "6 / 2");
+    test_divide(dec64_new(4195835, 0), dec64_new(3145727, 0), dec64_new(13338204491362410, -16), "4195835 / 3145727");
     test_divide(nan, three, nan, "nan / 3");
     test_divide(nannan, nannan, nan, "nannan / nannan");
     test_divide(nannan, one, nan, "nannan / 1");
@@ -618,6 +592,7 @@ static void test_all_floor() {
     test_floor(zip, zero, "zero");
     test_floor(minnum, zero, "minnum");
     test_floor(epsilon, zero, "epsilon");
+    test_floor(negative_epsilon, negative_one, "negative_epsilon");
     test_floor(cent, zero, "cent");
     test_floor(half, zero, "half");
     test_floor(one, one, "one");
@@ -676,88 +651,6 @@ static void test_all_floor() {
     test_floor(almost_negative_one, negative_one, "almost_negative_one");
     test_floor(dec64_new(-999999999999999, -15), negative_one, "-0.9...");
     test_floor(dec64_new(-9999999999999998, -16), negative_one, "-0.9...8");
-}
-
-static void test_all_half() {
-    test_half(nannan, nan, "nannan");
-    test_half(nan, nan, "nan");
-    test_half(zero, zero, "zero");
-    test_half(zip, zero, "zip");
-    test_half(one, half, "one");
-    test_half(two, one, "two");
-    test_half(ten, five, "ten");
-    test_half(minnum, minnum, "minnum");
-    test_half(dec64_new(-2, 0), dec64_new(-1, 0), "-2");
-    test_half(dec64_new(-1, 0), dec64_new(-5, -1), "-1");
-}
-
-static void test_all_inc() {
-    test_inc(nannan, nan, "nannan");
-    test_inc(nan, nan, "nan");
-    test_inc(zero, one, "zero");
-    test_inc(one, two, "one");
-    test_inc(cent, dec64_new(101, -2), "cent");
-    test_inc(epsilon, dec64_new(10000000000000001, -16), "epsilon");
-    test_inc(dec64_new(9999999999999999, 0), dec64_new(10000000000000000, 0), "9999999999999999");
-    test_inc(maxint, maxint_plus, "maxint");
-    test_inc(one_over_maxint, one, "1/maxint");
-    test_inc(maxnum, maxnum, "maxnum");
-    test_inc(googol, googol, "googol");
-    test_inc(almost_negative_one, epsilon, "almost_negative_one");
-}
-
-void test_all_int() {
-    test_int(nan, nan, "nan");
-    test_int(nannan, nan, "nannan");
-    test_int(zero, zero, "zero");
-    test_int(zip, zero, "zip");
-    test_int(epsilon, 0, "epsilon");
-    test_int(ten, ten, "ten");
-    test_int(dec64_new(-10000000000000000, -16), negative_one, "-1");
-    test_int(one, one, "one");
-    test_floor(almost_one, zero, "almost_one");
-    test_floor(almost_negative_one, negative_one, "almost_negative_one");
-    test_int(dec64_new(1, 1), dec64_new(10, 0), "10");
-    test_int(dec64_new(1, 2), dec64_new(100, 0), "100");
-    test_int(dec64_new(1, 3), dec64_new(1000, 0), "1000");
-    test_int(dec64_new(1, 4), dec64_new(10000, 0), "10000");
-    test_int(dec64_new(1, 5), dec64_new(100000, 0), "100000");
-    test_int(dec64_new(1, 6), dec64_new(1000000, 0), "1000000");
-    test_int(dec64_new(1, 7), dec64_new(10000000, 0), "10000000");
-    test_int(dec64_new(1, 8), dec64_new(100000000, 0), "100000000");
-    test_int(dec64_new(1, 9), dec64_new(1000000000, 0), "1000000000");
-    test_int(dec64_new(1, 10), dec64_new(10000000000, 0), "100000000000");
-    test_int(dec64_new(1, 11), dec64_new(100000000000, 0), "1000000000000");
-    test_int(dec64_new(1, 12), dec64_new(1000000000000, 0), "10000000000000");
-    test_int(dec64_new(1, 13), dec64_new(10000000000000, 0), "100000000000000");
-    test_int(dec64_new(1, 14), dec64_new(100000000000000, 0), "1000000000000000");
-    test_int(dec64_new(1, 15), dec64_new(1000000000000000, 0), "10000000000000000");
-    test_int(dec64_new(1, 16), dec64_new(10000000000000000, 0), "100000000000000000");
-    test_int(dec64_new(1, 17), nan, "1000000000000000000");
-    test_int(cent, 0, "cent");
-    test_int(dec64_new(10, -1), one, "one alias 1");
-    test_int(dec64_new(100, -2), one, "one alias 2");
-    test_int(dec64_new(1000, -3), one, "one alias 3");
-    test_int(dec64_new(10000, -4), one, "one alias 4");
-    test_int(dec64_new(100000, -5), one, "one alias 5");
-    test_int(dec64_new(1000000, -6), one, "one alias 6");
-    test_int(dec64_new(10000000, -7), one, "one alias 7");
-    test_int(dec64_new(100000000, -8), one, "one alias 8");
-    test_int(dec64_new(1000000000, -9), one, "one alias 9");
-    test_int(dec64_new(10000000000, -10), one, "one alias 10");
-    test_int(dec64_new(100000000000, -11), one, "one alias 11");
-    test_int(dec64_new(1000000000000, -12), one, "one alias 12");
-    test_int(dec64_new(10000000000000, -13), one, "one alias 13");
-    test_int(dec64_new(100000000000000, -14), one, "one alias 14");
-    test_int(dec64_new(1000000000000000, -15), one, "one alias 15");
-    test_int(dec64_new(10000000000000000, -16), one, "one alias 16");
-    test_int(dec64_new(-12500000000000000, -16), dec64_new(-2, -0), "-1.25");
-    test_int(maxint, maxint, "maxint");
-    test_int(negative_maxint, negative_maxint, "negative_maxint");
-    test_int(maxint_plus, 36028797018963970 << 8, "maxint_plus");
-    test_int(maxnum, nan, "maxnum");
-    test_int(dec64_new(7205759403792793, 1), 72057594037927930 << 8, "7205759403792793e1");
-    test_int(dec64_new(7205759403792794, 1), nan, "7205759403792794e1");
 }
 
 static void test_all_integer_divide() {
@@ -829,6 +722,7 @@ static void test_all_is_equal() {
     test_is_equal(negative_maxint, maxint, false, "-maxint = maxint");
     test_is_equal(negative_maxint, negative_one, false, "-maxint = -1");
     test_is_equal(0x1437EEECD800000LL, 0x52D09F700003LL, true, "17!");
+    test_is_equal(two_55, maxint_plus, true, "two_55");
 }
 
 static void test_all_is_false() {
@@ -1098,7 +992,7 @@ static void test_all_new() {
     test_new(1, 0, (1 << 8), "one");
     test_new(1, 1000, nan, "0e1000");
     test_new(1, -1000, zero, "0e-1000");
-    test_new(-1, 127, (-1 << 8) + 127, "-1e127");
+    test_new(-1, 127, 0xFFFFFFFFFFFFFF7F, "-1e127");
     test_new(-1, 128, (-10 << 8) + 127, "-1e128");
     test_new(1, -128, zero, "1e-128");
     test_new(-1, 143, (-10000000000000000LL << 8) + 127, "-1e143");
@@ -1181,7 +1075,7 @@ static void test_all_new() {
     test_new(9223372036854775807, -144, (92LL << 8) + (0xff & -127), "9223372036854775807e-144");
     test_new(-9223372036854775807, -145, (-9 << 8) + (0x81), "-9223372036854775807e-145");
     test_new(9223372036854775807, -145, (9LL << 8) + (0xff & -127), "9223372036854775807e-145");
-    test_new(-9223372036854775807, -146, (-1 << 8) + (0x81), "-9223372036854775807e-146");
+    test_new(-9223372036854775807, -146, 0xFFFFFFFFFFFFFF00 + (0x81), "-9223372036854775807e-146");
     test_new(9223372036854775807, -146, (1LL << 8) + (0xff & -127), "9223372036854775807e-146");
 }
 
@@ -1424,13 +1318,13 @@ static int do_tests(int level_of_detail) {
     test_all_abs();
     test_all_add();
     test_all_ceiling();
-    test_all_dec();
+/*
     test_all_divide();
+*/
     test_all_floor();
-    test_all_half();
-    test_all_inc();
-    test_all_int();
+/*
     test_all_integer_divide();
+*/
     test_all_is_equal();
     test_all_is_false();
     test_all_is_integer();

@@ -3,7 +3,7 @@ dec64_math.c
 Elementary functions for DEC64.
 
 dec64.com
-2018-01-20
+2019-09-03
 Public Domain
 
 No warranty.
@@ -12,6 +12,7 @@ This file is a placeholder. It should be replaced with functions that are
 faster and more accurate.
 */
 
+#include <stdlib.h>
 #include <stdlib.h>
 #include "dec64.h"
 #include "dec64_math.h"
@@ -151,14 +152,14 @@ dec64 dec64_asin(dec64 slope) {
     while (1) {
         factor = dec64_divide(
             dec64_multiply(
-                dec64_multiply(dec64_dec(bottom), x2),
+                dec64_multiply(dec64_add(DEC64_NEGATIVE_ONE, bottom), x2),
                 factor
             ),
             bottom
         );
         dec64 progress = dec64_add(
             result,
-            dec64_divide(factor, dec64_inc(bottom))
+            dec64_divide(factor, dec64_add(DEC64_ONE, bottom))
         );
         if (result == progress) {
             break;
@@ -173,7 +174,7 @@ dec64 dec64_atan(dec64 slope) {
     return dec64_asin(
         dec64_divide(
             slope,
-            dec64_sqrt(dec64_inc(dec64_multiply(slope, slope)))
+            dec64_sqrt(dec64_add(DEC64_ONE, dec64_multiply(slope, slope)))
         )
     );
 }
@@ -206,7 +207,7 @@ dec64 dec64_cos(dec64 radians) {
 }
 
 dec64 dec64_exp(dec64 exponent) {
-        dec64 result = dec64_inc(exponent);
+        dec64 result = dec64_add(DEC64_ONE, exponent);
         dec64 divisor = D_2;
         dec64 term = exponent;
         while (1) {
@@ -219,7 +220,7 @@ dec64 dec64_exp(dec64 exponent) {
                 break;
             }
             result = progress;
-            divisor = dec64_inc(divisor);
+            divisor = dec64_add(DEC64_ONE, divisor);
         }
         return result;
 }
@@ -292,7 +293,7 @@ dec64 dec64_log(dec64 x) {
     if (x == D_E) {
         return DEC64_ONE;
     }
-    dec64 y = dec64_divide(dec64_dec(x), x);
+    dec64 y = dec64_divide(dec64_add(DEC64_NEGATIVE_ONE, x), x);
     dec64 factor = y;
     dec64 result = factor;
     dec64 divisor = D_2;
@@ -307,7 +308,7 @@ dec64 dec64_log(dec64 x) {
             break;
         }
         result = progress;
-        divisor = dec64_inc(divisor);
+        divisor = dec64_add(DEC64_ONE, divisor);
     }
     return result;
 }
@@ -367,7 +368,7 @@ dec64 dec64_root(dec64 index, dec64 radicand) {
     if (index == D_2) {
         return dec64_sqrt(radicand);
     }
-    dec64 index_minus_one = dec64_dec(index);
+    dec64 index_minus_one = dec64_add(DEC64_NEGATIVE_ONE, index);
     result = DEC64_ONE;
     dec64 prosult = DEC64_NAN;
     while (1) {
@@ -385,7 +386,7 @@ dec64 dec64_root(dec64 index, dec64 radicand) {
             return result;
         }
         if (progress == prosult) {
-            return dec64_half(dec64_add(progress, result));
+            return dec64_divide(dec64_add(progress, result), D_2);
         }
         prosult = result;
         result = progress;
@@ -431,16 +432,16 @@ dec64 dec64_sin(dec64 radians) {
         result = term;
         while (1) {
             term = dec64_multiply(term, x2);
-            order = dec64_inc(order);
+            order = dec64_add(DEC64_ONE, order);
             term = dec64_divide(term, order);
-            order = dec64_inc(order);
+            order = dec64_add(DEC64_ONE, order);
             term = dec64_divide(term, order);
             dec64 progress = dec64_subtract(result, term);
 
             term = dec64_multiply(term, x2);
-            order = dec64_inc(order);
+            order = dec64_add(DEC64_ONE, order);
             term = dec64_divide(term, order);
-            order = dec64_inc(order);
+            order = dec64_add(DEC64_ONE, order);
             term = dec64_divide(term, order);
             progress = dec64_add(progress, term);
 
@@ -463,10 +464,13 @@ dec64 dec64_sqrt(dec64 radicand) {
         }
         dec64 result = radicand;
         while (1) {
-            dec64 progress = dec64_half(dec64_add(
-                result,
-                dec64_divide(radicand, result)
-            ));
+            dec64 progress = dec64_divide(
+                dec64_add(
+                    result,
+                    dec64_divide(radicand, result)
+                ),
+                D_2
+            );
             if (progress == result) {
                 return result;
             }

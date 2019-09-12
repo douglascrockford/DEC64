@@ -3,7 +3,7 @@
 The DEC64 header file. This is the companion to dec64.asm.
 
 dec64.com
-2019-01-06
+2019-09-03
 Public Domain
 
 No warranty.
@@ -11,6 +11,7 @@ No warranty.
 
 #define DEC64_ZERO          (0x000LL)
 #define DEC64_ONE           (0x100LL)
+#define DEC64_TWO           (0x200LL)
 #define DEC64_NEGATIVE_ONE  (0xFFFFFFFFFFFFFF00LL)
 
 #define DEC64_NULL          (0x8000000000000080LL)
@@ -34,12 +35,8 @@ extern dec64 dec64_is_zero(dec64 number)                    /*    comparison */;
 extern dec64 dec64_abs(dec64 number)                        /*    absolution */;
 extern dec64 dec64_add(dec64 augend, dec64 addend)          /*           sum */;
 extern dec64 dec64_ceiling(dec64 number)                    /*       integer */;
-extern dec64 dec64_dec(dec64 minuend)                       /*    difference */;
 extern dec64 dec64_divide(dec64 dividend, dec64 divisor)    /*      quotient */;
 extern dec64 dec64_floor(dec64 dividend)                    /*       integer */;
-extern dec64 dec64_half(dec64 dividend)                     /*      quotient */;
-extern dec64 dec64_inc(dec64 augend)                        /*           sum */;
-extern dec64 dec64_int(dec64 number)                        /*       integer */;
 extern dec64 dec64_integer_divide(dec64 dividend, dec64 divisor)/*  quotient */;
 extern dec64 dec64_modulo(dec64 dividend, dec64 divisor)    /*    modulation */;
 extern dec64 dec64_multiply(dec64 multiplicand, dec64 multiplier)/*  product */;
