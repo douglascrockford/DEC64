@@ -57,7 +57,6 @@ title   dec64.asm for x64.
 ;   dec64_divide(nan, n)
 ;   dec64_integer_divide(nan, n)
 ;   dec64_modulo(nan, n)
-;   dec64_round(n, nan)
 ;   dec64_round(nan, n)
 ;   dec64_subtract(n, nan)
 ;   dec64_subtract(nan, n)
