@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2019-09-03
+; 2019-09-28
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -444,19 +444,10 @@ dec64_round: function_with_two_parameters
 
     cmp     r1_b,128                ; is the number nan?
     jz      return_null
+    test    r2_b,r2_b               ; is places already an integer?
+    jnz     round_places            ;   nope
     mov     r10,r1                  ; r10 is the number
     mov     r11,r2                  ; r11 is the places
-    test    r2_b,r2_b               ; is places already an integer?
-    jz      round_to_it             ; yes, places is an integer
-    mov     r1,r2                   ; pass the place
-    call_with_one_parameter dec64_normal
-    test    r0_b,r0_b               ; is the number of places a normal integer?
-    jnz     return_null
-    mov     r11,r0                  ; r11 is the normalized place
-    pad
-
-round_to_it:
-
     movsx   r8,r10_b                ; r8 is the current exponent
     mov     r0,r10                  ; r0 is the coefficient
     sar     r11,8                   ; r11 is place: int64
@@ -464,10 +455,10 @@ round_to_it:
     jz      return_zero             ; if the coefficient is 0, the result is 0
     cmp     r8,r11                  ; compare the exponents
     jge     pack                    ; no rounding required
+    mov     r1,r0
     mov     r9,eight_over_ten       ; magic
-    test    r0,r0                   ; is the coefficient negative?
-    jns     round_loop              ; it is positive
-    neg     r0                      ; r0 is absolute value of coefficient
+    neg     r1                      ; r1 is -coefficient
+    cmovns  r0,r1                   ; r0 is abs(coefficient)
     pad
 
 round_loop:
@@ -488,10 +479,33 @@ round_loop:
     shr     r2,2                    ; isolate the carry bit
     and     r2,1                    ; r2 is 1 if rounding is needed
     add     r0,r2                   ; r0 is rounded
+    mov     r1,r0
+    neg     r1
     test    r10,r10                 ; was the original number negative?
-    jns     pack                    ; positive
-    neg     r0                      ; negative
+    cmovs   r0,r1
     jmp     pack                    ; pack it up
+    pad
+
+round_places:
+
+; Places does not seem to be an integer. If it is nan, then default to zero.
+
+    cmp     r2_b, 128
+    jne     round_normal
+    xor     r2, r2
+    jmp     dec64_round
+    pad
+
+round_normal:
+
+    mov     r10, r1                 ; save the number
+    mov     r1,r2                   ; pass the place
+    call_with_one_parameter dec64_normal
+    test    r0_b,r0_b               ; is the number of places a normal integer?
+    jnz     return_null
+    mov     r1, r10
+    mov     r2, r0              
+    jmp     dec64_round
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
@@ -667,6 +681,8 @@ dec64_floor: function_with_one_parameter
 
 floor_begin:
 
+    cmp     r1_b, 128
+    je      return_null
     mov     r0,r1           ; r0 is the number
     movsx   r8,r1_b         ; r8 is the exponent
     sar     r0,8            ; r0 is the coefficient
@@ -688,8 +704,6 @@ floor_begin:
 
 floor_micro:
 
-    cmp     r1_b,128        ; compare the exponent to nan
-    je      return_null     ; if the exponent is nan, the result is nan
     mov     r2,r0           ; r2 is the coefficient
     xor     r0,r0           ; r0 is zero
     pad
@@ -1169,6 +1183,11 @@ dec64_is_equal: function_with_two_parameters
 
     cmp     r1,r2           ; compare the two numbers
     je      return_true
+
+; If the comparator is nan, then we ask dec64_is_nan.
+
+    cmp     r2_b, 128
+    je      dec64_is_nan
 
 ; If the exponents match or if their signs are different, then return false.
 
