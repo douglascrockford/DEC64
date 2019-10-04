@@ -1,5 +1,5 @@
 ; dec64.s
-; 2019-09-28
+; 2019-10-03
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -865,7 +865,12 @@ dec64_modulo;(dividend: dec64, divisor: dec64) returns modulus: dec64
 ;    dec64_subtract(
 ;        dividend,
 ;        dec64_multiply(
-;            dec64_integer_divide(dividend, divisor),
+;            dec64_floor(
+;                dec64_divide(
+;                    dividend,
+;                    divisor
+;                )
+;            ),
 ;            divisor
 ;        )
 ;    )
@@ -1104,6 +1109,7 @@ dec64_is_less;(comparahend: dec64, comparator: dec64) returns comparison: dec64
 
 ; Compare two dec64 numbers. If the first is less than the second, return true,
 ; otherwise return false.
+; Clobbers: x4 thru x11
 
 ; The other 3 comparison functions are easily implemented with dec64_is_less:
 
@@ -1118,8 +1124,8 @@ dec64_is_less;(comparahend: dec64, comparator: dec64) returns comparison: dec64
     sxtb    x7, w1                  ; x7 is the second exponent
     eor     x10, x0, x1             ; x10 is negative if the signs mismatch
     tbnz    x10, 63, less_sign
-    subs    x11, x5, x7             ; x11 is the exponent difference
-    b.ne    less_slow
+    subs    x9, x5, x7              ; x9 is the exponent difference
+    b.ne    less_hard
 
     subs    xzr, x0, x1             ; compare the numbers
     b.ge    return_false
@@ -1128,80 +1134,64 @@ dec64_is_less;(comparahend: dec64, comparator: dec64) returns comparison: dec64
     b.ne    return_true
     b       return_false            ; nan is never less than nan
 
-less_slow
-
-    subs    xzr, x5, -128           ; is the first argument nan?
-    b.eq    return_false
-    subs    xzr, x7, -128           ; is the second argument nan?
-    b.eq    return_true
-
-; The maximum coefficient is 36028797018963967. 10**18 is more than that. If the
-; exponential difference is large, then the coefficients do not matter.
-
-    asr     x6, x1, 8               ; x6 is the second coefficient
-    cbz     x6, return_false
-    asr     x4, x0, 8               ; x4 is the first coefficient
-    cbz     x4, return_true
-    adr     x10, power              ; x10 is the power of ten table
-    tbnz    x11, 63, less_second    ; was the exponent difference negative?
-
-; Amplify the first coefficient.
-
-    subs    xzr, x11, 18            ; compare the exponent difference to 18
-    b.ge    less_tar
-    ldr     x10, [x10, x11, lsl 3]  ; x10 is 10 ** max(exponent difference, 18)
-
-; The ARM64 mul instruction does not report overflow, so we must compute the
-; high part of the product and check that it is all 0 or all 1, and we must also
-; check that the low part of the product has the correct sign.
-
-    smulh   x9, x10, x4             ; x9 is the high part of the product
-    mul     x4, x10, x4             ; x4 is the low part of the product
-    eor     x8, x9, x4              ; x8 is negative if the sign is wrong
-    add     x9, x9, x9, lsr 63      ; x9 is 0 if the high part was all 0 or 1
-    orr     x9, x9, x8, asr 63      ; x9 remains 0 if the sign was correct
-    cbnz    x9, less_overflow
-
-; Compare the coefficients.
-
-    subs    xzr, x4, x6
-    b.lt    return_true
-    b       return_false
-
-less_second
-
-; Amplify the second coefficient.
-
-    sub     x11, xzr, x11           ; x11 is abs(exponent difference)
-    subs    xzr, x11, 18            ; compare the exponent difference to 18
-    b.ge    less_overflow
-    ldr     x10, [x10, x11, lsl 3]  ; x10 is 10 ** max(exponent difference, 18)
-    smulh   x9, x10, x6             ; x9 is the high part of the product
-    mul     x6, x10, x6             ; x6 is the low part of the product
-    eor     x8, x9, x6              ; x8 is negative if the sign is wrong
-    adds    x9, x9, x9, lsr 63      ; x9 is 0 if the high part was all 0 or 1
-    orr     x9, x9, x8, asr 63      ; x9 remains 0 if the sign was correct
-    cbnz    x9, less_overflow
-    subs    xzr, x4, x6
-    b.lt    return_true
-    b       return_false
-
-less_overflow
-
-    tbnz    x0, 63, return_false
-    b       return_true
-
 less_sign
 
     subs    xzr, x5, -128           ; is the first argument nan?
     b.eq    return_false
     subs    xzr, x7, -128           ; is the second argument nan?
     b.eq    return_true
-
-less_tar
-
     tbnz    x0, 63, return_true
     b       return_false
+
+less_hard
+
+    subs    xzr, x5, -128           ; is the first argument nan?
+    b.eq    return_false
+    subs    xzr, x7, -128           ; is the second argument nan?
+    b.eq    return_true
+    asr     x6, x1, 8               ; x6 is the second coefficient
+    cbz     x6, return_false
+    adds    x4, xzr, x0, asr 8      ; x4 is the first coefficient
+    b.eq    return_true
+    cneg    x4, x4, mi              ; x4 is abs(first coefficient)
+    cneg    x6, x6, mi              ; x6 is abs(second coefficient)
+    mov     x0, 0x8000000000000000
+    add     x0, x0, 0x280           ; x0 is false
+    lsr     x8, x1, 63              ; x8 is 1 if numbers are negative
+    eor     x0, x0, x8, lsl 8       ; flip x0 if the inputs are negative
+
+; Swap and flip if the difference of the exponents is negative.
+
+    ands    xzr, x9, x9
+    b.pl    less_hard_scale
+    mov     x11, x4
+    mov     x4, x6
+    mov     x6, x11
+    sub     x9, xzr, x9
+    eor     x0, x0, 0x100           ; flip x0
+
+less_hard_scale
+
+; The maximum possible coefficient is 36028797018963967. 10**18 is more than
+; that. If the exponential difference is large, then the coefficients do not
+; matter.
+
+    subs    xzr, x9, 18
+    b.ge    return
+
+; Amplify the first coefficient. This will make their exponents the same,
+; allowing a simple comparison.
+
+    adr     x10, power
+    ldr     x10, [x10, x9 lsl 3]    ; x10 is a power of ten
+    umulh   x8, x4, x10             ; x8 is the high extension of the product
+    cbnz    x8, return              ; if it overflowed, it can not be less
+    mul     x4, x4, x10             ; x4 is the scaled coefficient
+    subs    xzr, x4, x6             ; now we can compare
+    b.eq    return_false
+    b.hi    return
+    eor     x0, x0, 0x100           ; flip one more time
+    ret
 
 ; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
