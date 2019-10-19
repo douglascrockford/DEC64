@@ -150,7 +150,7 @@
 ; The stack is not touched in any way.
 ; Register x14 is used as an auxiliary return link register.
 
-    area dec64, align=4, code, readonly
+    area dec64, align=8, code, readonly
 
 power                               ; the powers of 10
     dcq     1                       ; 0
@@ -1117,13 +1117,14 @@ dec64_is_less;(comparahend: dec64, comparator: dec64) returns comparison: dec64
 ;    dec64_is_greater_or_equal(a, b) => dec64_is_false(dec64_is_less(a, b))
 ;    dec64_is_less_or_equal(a, b)    => dec64_is_false(dec64_is_less(b, a))
 
-; If the exponents are the same, then do a simple compare. If the exponents
-; are both nan, then the result must be false because nan is not less than nan.
+; If the exponents are the same, then do a simple compare. nan is not less than
+; any number. If the exponents are both nan, then the result must be false
+; because nan is not less than nan.
 
     sxtb    x5, w0                  ; x5 is the first exponent
     sxtb    x7, w1                  ; x7 is the second exponent
-    eor     x10, x0, x1             ; x10 is negative if the signs mismatch
-    tbnz    x10, 63, less_sign
+    eor     x4, x0, x1              ; x4 is negative if the signs mismatch
+    tbnz    x4, 63, less_sign
     subs    x9, x5, x7              ; x9 is the exponent difference
     b.ne    less_hard
 
