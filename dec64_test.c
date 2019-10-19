@@ -3,7 +3,7 @@
 This is a test of dec64.obj.
 
 dec64.com
-2019-09-28
+2019-10-18
 Public Domain
 
 No warranty.
@@ -64,22 +64,22 @@ static void define_constants() {
     nonnan = 128;                                           /* a non-normal nan */
     zero = DEC64_ZERO;                                      /* 0 */
     zip = 250;                                              /* a non normal 0 */
-    one = DEC64_ONE;                						/* 1 */
+    one = DEC64_ONE;                                        /* 1 */
     two = DEC64_TWO;                                        /* 2 */
-    three = dec64_new(3, 0);        						/* 3 */
-    four = dec64_new(4, 0);         						/* 4 */
-    five = dec64_new(5, 0);         						/* 5 */
-    six = dec64_new(6, 0);          						/* 6 */
-    seven = dec64_new(7, 0);        						/* 7 */
-    eight = dec64_new(8, 0);        						/* 8 */
-    nine = dec64_new(9, 0);         						/* 9 */
-    ten = dec64_new(10, 0);         						/* 10 */
-    minnum = dec64_new(1, -127);    						/* the smallest possible number */
-    epsilon = dec64_new(1, -16);    						/* the smallest number addable to 1 */
+    three = dec64_new(3, 0);                                /* 3 */
+    four = dec64_new(4, 0);                                 /* 4 */
+    five = dec64_new(5, 0);                                 /* 5 */
+    six = dec64_new(6, 0);                                  /* 6 */
+    seven = dec64_new(7, 0);                                /* 7 */
+    eight = dec64_new(8, 0);                                /* 8 */
+    nine = dec64_new(9, 0);                                 /* 9 */
+    ten = dec64_new(10, 0);                                 /* 10 */
+    minnum = dec64_new(1, -127);                            /* the smallest possible number */
+    epsilon = dec64_new(1, -16);                            /* the smallest number addable to 1 */
     negative_epsilon = dec64_new(-1, -16);
 
-    cent = dec64_new(1, -2);        						/* 0.01 */
-    half = dec64_new(5, -1);        						/* 0.5 */
+    cent = dec64_new(1, -2);                                /* 0.01 */
+    half = dec64_new(5, -1);                                /* 0.5 */
     almost_one = dec64_new(9999999999999999, -16);          /* 0.9999999999999999 */
     e = dec64_new(27182818284590452, -16);                  /* e */
     pi = dec64_new(31415926535897932, -16);                 /* pi */
@@ -152,14 +152,24 @@ static dec64 normal(dec64 number) {
 }
 
 static int compare(dec64 first, dec64 second) {
-    if (first != 0 && second != 0 && (first & 255) != 128 && (second & 255) != 128) {
+    if (
+        first != 0
+        && second != 0
+        && (first & 255) != 128
+        && (second & 255) != 128
+    ) {
         first = normal(first);
         second = normal(second);
     }
     return first == second;
 }
 
-static void judge_is_false(dec64 expected, dec64 actual, char * name, char * comment) {
+static void judge_is_false(
+    dec64 expected,
+    dec64 actual,
+    char* name,
+    char* comment
+) {
     if (compare(expected, actual)) {
         nr_pass += 1;
         if (level >= 3) {
@@ -181,7 +191,14 @@ static void judge_is_false(dec64 expected, dec64 actual, char * name, char * com
     }
 }
 
-static void judge_unary(dec64 first, dec64 expected, dec64 actual, char * name, char * op, char * comment) {
+static void judge_unary(
+    dec64 first,
+    dec64 expected,
+    dec64 actual,
+    char* name,
+    char* op,
+    char* comment
+) {
     if (compare(expected, actual)) {
         nr_pass += 1;
         if (level >= 3) {
@@ -207,7 +224,14 @@ static void judge_unary(dec64 first, dec64 expected, dec64 actual, char * name, 
     }
 }
 
-static void judge_unary_exact(dec64 first, dec64 expected, dec64 actual, char * name, char * op, char * comment) {
+static void judge_unary_exact(
+    dec64 first,
+    dec64 expected,
+    dec64 actual,
+    char* name,
+    char* op,
+    char* comment
+) {
     if (expected == actual) {
         nr_pass += 1;
         if (level >= 3) {
@@ -233,7 +257,15 @@ static void judge_unary_exact(dec64 first, dec64 expected, dec64 actual, char * 
     }
 }
 
-static void judge_binary(dec64 first, dec64 second, dec64 expected, dec64 actual, char * name, char * op, char * comment) {
+static void judge_binary(
+    dec64 first,
+    dec64 second,
+    dec64 expected,
+    dec64 actual,
+    char* name,
+    char* op,
+    char* comment
+) {
     if (compare(expected, actual)) {
         nr_pass += 1;
         if (level >= 3) {
@@ -263,109 +295,178 @@ static void judge_binary(dec64 first, dec64 second, dec64 expected, dec64 actual
     }
 }
 
-static void judge_communitive(dec64 first, dec64 second, dec64 expected, dec64 actual, char * name, char * op, char * comment) {
+static void judge_communitive(
+    dec64 first,
+    dec64 second,
+    dec64 expected,
+    dec64 actual,
+    char* name,
+    char* op,
+    char* comment
+) {
     judge_binary(first, second, expected, actual, name, op, comment);
     if (first != second) {
         judge_binary(second, first, expected, actual, name, op, comment);
     }
 }
 
-static void test_abs(dec64 first, dec64 expected, char * comment) {
+static void test_abs(dec64 first, dec64 expected, char* comment) {
     dec64 actual = dec64_abs(first);
     judge_unary(first, expected, actual, "abs", "a", comment);
 }
 
-static void test_add(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_add(dec64 first, dec64 second, dec64 expected, char* comment) {
     dec64 actual = dec64_add(first, second);
     judge_communitive(first, second, expected, actual, "add", "+", comment);
 }
 
-static void test_ceiling(dec64 first, dec64 expected, char * comment) {
+static void test_ceiling(dec64 first, dec64 expected, char* comment) {
     dec64 actual = dec64_ceiling(first);
     judge_unary(first, expected, actual, "ceiling", "c", comment);
 }
 
-static void test_divide(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_divide(
+    dec64 first,
+    dec64 second,
+    dec64 expected,
+    char* comment
+) {
     dec64 actual = dec64_divide(first, second);
     judge_binary(first, second, expected, actual, "divide", "/", comment);
 }
 
-static void test_floor(dec64 first, dec64 expected, char * comment) {
+static void test_floor(dec64 first, dec64 expected, char* comment) {
     dec64 actual = dec64_floor(first);
     judge_unary(first, expected, actual, "floor", "f", comment);
 }
 
-static void test_integer_divide(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_integer_divide(
+    dec64 first,
+    dec64 second,
+    dec64 expected,
+    char* comment
+) {
     dec64 actual = dec64_integer_divide(first, second);
-    judge_binary(first, second, expected, actual, "integer_divide", "/", comment);
+    judge_binary(
+        first,
+        second,
+        expected,
+        actual,
+        "integer_divide",
+        "/",
+        comment
+    );
 }
 
-static void test_is_equal(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_is_equal(
+    dec64 first,
+    dec64 second,
+    dec64 expected,
+    char* comment
+) {
     dec64 actual = dec64_is_equal(first, second);
     judge_communitive(first, second, expected, actual, "equal", "=", comment);
 }
 
-static void test_is_integer(dec64 first, dec64 expected, char * comment) {
+static void test_is_integer(dec64 first, dec64 expected, char* comment) {
     dec64 actual = dec64_is_integer(first);
     judge_unary(first, expected, actual, "is_integer", "i", comment);
 }
 
-static void test_is_less(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_is_less(
+    dec64 first,
+    dec64 second,
+    dec64 expected,
+    char* comment
+) {
     dec64 actual = dec64_is_less(first, second);
     judge_binary(first, second, expected, actual, "less", "<", comment);
 }
 
-static void test_is_nan(dec64 first, dec64 expected, char * comment) {
+static void test_is_nan(dec64 first, dec64 expected, char* comment) {
     dec64 actual = dec64_is_nan(first);
     judge_unary(first, expected, actual, "is_nan", "n", comment);
 }
 
-static void test_is_zero(dec64 first, dec64 expected, char * comment) {
+static void test_is_zero(dec64 first, dec64 expected, char* comment) {
     dec64 actual = dec64_is_zero(first);
     judge_unary(first, expected, actual, "is_zero", "0", comment);
 }
 
-static void test_modulo(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_modulo(
+    dec64 first,
+    dec64 second,
+    dec64 expected,
+    char* comment
+) {
     dec64 actual = dec64_modulo(first, second);
     judge_binary(first, second, expected, actual, "modulo", "%", comment);
 }
 
-static void test_multiply(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_multiply(
+    dec64 first,
+    dec64 second,
+    dec64 expected,
+    char* comment
+) {
     dec64 actual = dec64_multiply(first, second);
-    judge_communitive(first, second, expected, actual, "multiply", "*", comment);
+    judge_communitive(
+        first,
+        second,
+        expected,
+        actual,
+        "multiply",
+        "*",
+        comment
+    );
 }
 
-static void test_neg(dec64 first, dec64 expected, char * comment) {
+static void test_neg(dec64 first, dec64 expected, char* comment) {
     dec64 actual = dec64_neg(first);
     judge_unary(first, expected, actual, "neg", "n", comment);
 }
 
-static void test_new(int64 coefficient, int64 exponent, dec64 expected, char * comment) {
+static void test_new(
+    int64 coefficient,
+    int64 exponent,
+    dec64 expected,
+    char* comment
+) {
     dec64 actual = dec64_new(coefficient, exponent);
     judge_is_false(expected, actual, "new", comment);
 }
 
-static void test_normal(dec64 first, dec64 expected, char * comment) {
+static void test_normal(dec64 first, dec64 expected, char* comment) {
     dec64 actual = dec64_normal(first);
     judge_unary_exact(first, expected, actual, "normal", "n", comment);
 }
 
-static void test_is_false(dec64 first, dec64 expected, char * comment) {
+static void test_is_false(dec64 first, dec64 expected, char* comment) {
     dec64 actual = dec64_is_false(first);
     judge_unary(first, expected, actual, "is_false", "!", comment);
 }
 
-static void test_round(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_round(
+    dec64 first,
+    dec64 second,
+    dec64 expected,
+    char* comment
+) {
     dec64 actual = dec64_round(first, second);
     judge_binary(first, second, expected, actual, "round", "r", comment);
 }
 
-static void test_signum(dec64 first, dec64 expected, char * comment) {
+static void test_signum(dec64 first, dec64 expected, char* comment) {
     dec64 actual = dec64_signum(first);
     judge_unary(first, expected, actual, "signum", "s", comment);
 }
 
-static void test_subtract(dec64 first, dec64 second, dec64 expected, char * comment) {
+static void test_subtract(
+    dec64 first,
+    dec64 second,
+    dec64 expected,
+    char* comment
+) {
     dec64 actual = dec64_subtract(first, second);
     judge_binary(first, second, expected, actual, "subtract", "-", comment);
 }
