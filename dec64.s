@@ -1,5 +1,5 @@
 ; dec64.s
-; 2019-10-03
+; 2019-11-02
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -145,10 +145,9 @@
 ; All of the public functions in this file accept up to two arguments,
 ; which are passed in registers (x0, x1), returning a result in x0.
 
-; Registers x0 thru x14 and x8 thru x7 may be clobbered.
+; Registers x0 thru x15 may be clobbered.
 ; The other registers are not disturbed.
 ; The stack is not touched in any way.
-; Register x14 is used as an auxiliary return link register.
 
     area dec64, align=8, code, readonly
 
@@ -657,12 +656,12 @@ dec64_divide;(dividend: dec64, divisor: dec64) returns quotient: dec64
 ; Clobbers x4 thru x11.
 
     asr     x4, x0, 8               ; x4 is the dividend coefficient
-    cbz     x4, divide_zero         ; is the dividend is 0?
+    cbz     x4, divide_zero         ; is the dividend 0?
     sxtb    x5, w0                  ; x5 is the dividend exponent
     asr     x6, x1, 8               ; x6 is the divisor coefficient
     sxtb    x7, w1                  ; x7 is the divisor exponent
 
-; If the divisor is zero, or if either number is nan, the result is nan.
+; If the divisor is zero, or if either number is nan, the result is null.
 
     subs    xzr, x5, -128
     csetm   x9, ne                  ; x9 is 0 if dividend exponent is nan
