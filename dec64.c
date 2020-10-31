@@ -704,5 +704,5 @@ dec64 dec64_from_double(double d)
     int e = (int)ceil(e10);
     m *= pow(10., (e10 - e));
     long long m64 = (long long)round(m*10000000000000000000.0);
-    return dec64_round(dec64_new(m64, e - shift), (int)ceil(e10-15)*256);
+    return dec64_round(dec64_new(m64, e - shift), (e-15)*256);
 }
