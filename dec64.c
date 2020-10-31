@@ -1,7 +1,7 @@
 /* dec64.c
 
 The DEC64 imlementation.
-Ported from dec64.asm by Douglas Crockford with a few tweaks.
+Ported from the original dec64.asm (created by Douglas Crockford) with a few tweaks.
 
 Copyright (c) 2020 by vpisarev
 
