@@ -170,13 +170,26 @@ dec64 dec64_asin(dec64 slope) {
     return result;
 }
 
-dec64 dec64_atan(dec64 slope) {
-    return dec64_asin(
+dec64 dec64_atan(dec64 x) {
+    int rev = 0, neg = 0;
+    if (x < 0) {
+        x = dec64_neg(x);
+        neg = 1;
+    }
+    if (dec64_is_less(DEC64_ONE, x) == DEC64_TRUE) {
+        x = dec64_divide(DEC64_ONE, x);
+        rev = 1;
+    }
+
+    dec64 a = dec64_asin(
         dec64_divide(
-            slope,
-            dec64_sqrt(dec64_add(DEC64_ONE, dec64_multiply(slope, slope)))
+            x,
+            dec64_sqrt(dec64_add(DEC64_ONE, dec64_multiply(x, x)))
         )
     );
+    if (rev) a = dec64_subtract(D_HALF_PI, a);
+    if (neg) a = dec64_neg(a);
+    return a;
 }
 
 dec64 dec64_atan2(dec64 y, dec64 x) {
@@ -303,7 +316,7 @@ dec64 dec64_exp(dec64 x) {
     // x = x0/log(10)
     // e10_ = ceil(x), x_ = x - e10_, -1 < x_ <= 0
     // e^x0 = 10^x = (10^x_) * 10^e10_ = e^(x_*log(10)) * 10^e10_
-    dec64 log10 = (23025850929940459 << 8) | (-16 & 255);
+    dec64 log10 = (23025850929940457 << 8) | (-16 & 255);
 
     if (dec64_is_nan(x) == DEC64_TRUE) return DEC64_NULL;
     x = dec64_divide(x, log10);
@@ -462,7 +475,7 @@ dec64 __dec64_sqrt10(dec64 x, int max_iters)
 
 dec64 dec64_log(dec64 x)
 {
-    dec64 log10 = (23025850929940459 << 8) | (-16 & 255);
+    dec64 log10 = (23025850929940457 << 8) | (-16 & 255);
     static signed char log10_prescale_tab[] =
     {
         0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7, 7,
@@ -594,6 +607,7 @@ void dec64_seed(uint64 part_0, uint64 part_1) {
 }
 
 dec64 dec64_sin(dec64 radians) {
+    radians = dec64_modulo(radians, D_2PI);
     while (dec64_is_less(D_PI, radians) == DEC64_TRUE) {
         radians = dec64_subtract(radians, D_PI);
         radians = dec64_subtract(radians, D_PI);

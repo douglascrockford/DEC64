@@ -133,7 +133,7 @@ static void judge_unary(
     char * op,
     char * comment
 ) {
-    dec64 eps = (3 << 8) | (-15 & 255);
+    dec64 eps = (2 << 8) | (-15 & 255);
     if (dec64_is_nan(expected) != DEC64_TRUE) {
         eps = dec64_multiply(eps, dec64_abs(expected));
     }
@@ -294,6 +294,13 @@ static void test_all_atan() {
     test_atan(e, dec64_new(12182829050172776, -16), "e");
     test_atan(pi, dec64_new(12626272556789117, -16), "pi");
     test_atan(ten, dec64_new(14711276743037346, -16), "10");
+
+    test_atan(dec64_neg(cent), dec64_new(-9999666686665238, -18), "-1/100");
+    test_atan(dec64_neg(half), dec64_new(-4636476090008061, -16), "-1/2");
+    test_atan(dec64_neg(half_pi), dec64_new(-10038848218538872, -16), "-pi/2");
+    test_atan(dec64_neg(e), dec64_new(-12182829050172776, -16), "-e");
+    test_atan(dec64_neg(pi), dec64_new(-12626272556789117, -16), "-pi");
+    test_atan(dec64_neg(ten), dec64_new(-14711276743037346, -16), "-10");
 }
 
 static void test_all_cos() {
