@@ -68,7 +68,7 @@ static void digitize(dec64_string_state state) {
     }
 }
 
-static emit(dec64_string_state state, int c) {
+static void emit(dec64_string_state state, int c) {
     if (state->string != NULL) {
         if (c > 0) {
             state->string[state->length] = (dec64_string_char)c;
@@ -233,7 +233,7 @@ dec64_string_state dec64_string_begin() {
     );
     if (state != NULL) {
         state->decimal_point = '.';
-        state->mode = standard_mode;
+        state->mode = dec64_standard_mode;
         state->nr_digits = 0;
         state->nr_zeros = 0;
         state->number = DEC64_NAN;
@@ -270,7 +270,7 @@ void dec64_string_engineering(dec64_string_state state) {
     be up to three digits before the decimal point.
 */
     if (state != NULL && state->valid == confirmed) {
-        state->mode = engineering_mode;
+        state->mode = dec64_engineering_mode;
     }
 }
 
@@ -281,7 +281,7 @@ void dec64_string_scientific(dec64_string_state state) {
     prefixed with 'e' is appended if necessary.
 */
     if (state != NULL && state->valid == confirmed) {
-        state->mode = scientific_mode;
+        state->mode = dec64_scientific_mode;
     }
 }
 
@@ -292,7 +292,7 @@ void dec64_string_standard(dec64_string_state state) {
     mode might be used instead.
 */
     if (state != NULL && state->valid == confirmed) {
-        state->mode = standard_mode;
+        state->mode = dec64_standard_mode;
     }
 }
 
@@ -577,13 +577,13 @@ int dec64_to_string(
                 emit(state, '-');
             }
             switch (state->mode) {
-            case engineering_mode:
+            case dec64_engineering_mode:
                 emit_engineering(state);
                 break;
-            case scientific_mode:
+            case dec64_scientific_mode:
                 emit_scientific(state);
                 break;
-            case standard_mode:
+            case dec64_standard_mode:
                 emit_standard(state);
                 break;
             }
@@ -592,4 +592,18 @@ int dec64_to_string(
     emit_end(state);
     state->string = NULL;
     return state->length;
+}
+
+static dec64_string_state g_state = 0;
+#undef UBUFS
+#define NBUFS 16
+static int g_bufidx = 0;
+static char g_bufs[NBUFS][100];
+
+char* dec64_dump(dec64 number) {
+    if (!g_state) g_state = dec64_string_begin();
+    char* buf = g_bufs[g_bufidx];
+    g_bufidx = (g_bufidx + 1) % NBUFS;
+    dec64_to_string(g_state, number, buf);
+    return buf;
 }

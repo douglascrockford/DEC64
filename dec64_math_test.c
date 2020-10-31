@@ -133,7 +133,11 @@ static void judge_unary(
     char * op,
     char * comment
 ) {
-    if (dec64_is_equal(expected, actual) == DEC64_TRUE) {
+    dec64 eps = (3 << 8) | (-15 & 255);
+    if (dec64_is_nan(expected) != DEC64_TRUE) {
+        eps = dec64_multiply(eps, dec64_abs(expected));
+    }
+    if (dec64_eps_equal(expected, actual, eps) == DEC64_TRUE) {
         nr_pass += 1;
         if (level >= 3) {
             printf("\n\npass %s: %s", name, comment);
@@ -169,7 +173,8 @@ static void judge_binary(
     char * op,
     char * comment
 ) {
-    if (dec64_is_equal(expected, actual) == DEC64_TRUE) {
+    dec64 eps = (1 << 8) | (-15 & 255);
+    if (dec64_eps_equal(expected, actual, eps) == DEC64_TRUE) {
         nr_pass += 1;
         if (level >= 3) {
             printf("\n\npass %s: %s\n    ", name, comment);
@@ -325,7 +330,7 @@ static void test_all_factorial() {
 
 static void test_all_log() {
     test_log(zero, nan, "0");
-    test_log(cent, dec64_new(-4605170185988091, -16), "0.01");
+    test_log(cent, dec64_new(-4605170185988091, -15), "0.01");
     test_log(half, dec64_new(-6931471805599453, -16), "1/2");
     test_log(one, zero, "1");
     test_log(half_pi, dec64_new(4515827052894549, -16), "pi/2");
@@ -428,12 +433,13 @@ static int do_tests(int level_of_detail) {
     test_all_sqrt();
     test_all_tan();
 
-    printf("\n\n%i pass, %i fail.\n", nr_pass, nr_fail);
+    printf("\n\nmath tests: %i pass, %i fail.\n", nr_pass, nr_fail);
     dec64_string_end(state);
     return nr_fail;
 }
 
-int main(int argc, char* argv[]) {
+int dec64_test_all_math(void)
+{
     define_constants();
     return do_tests(2);
 }

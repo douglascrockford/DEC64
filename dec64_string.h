@@ -8,11 +8,17 @@ Public Domain
 
 No warranty.
 */
+#ifndef __DEC64_STRING_H__
+#define __DEC64_STRING_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 enum dec64_string_mode {
-    engineering_mode,
-    scientific_mode,
-    standard_mode
+    dec64_engineering_mode,
+    dec64_scientific_mode,
+    dec64_standard_mode
 };
 
 typedef char dec64_string_char;
@@ -99,3 +105,11 @@ extern int dec64_to_string(
     dec64 number,
     dec64_string_char string[]
 );
+
+extern char* dec64_dump(dec64 number);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

@@ -573,12 +573,13 @@ static int do_tests(int level_of_detail) {
 
     test_all_from();
 
-    printf("\n\n%i pass, %i fail.\n", nr_pass, nr_fail);
+    printf("\n\nstring tests: %i pass, %i fail.\n", nr_pass, nr_fail);
     dec64_string_end(state);
     return nr_fail;
 }
 
-int main(int argc, char* argv[]) {
+int dec64_test_all_string(void)
+{
     define_constants();
     return do_tests(2);
 }

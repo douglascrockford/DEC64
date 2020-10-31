@@ -8,6 +8,12 @@ Public Domain
 
 No warranty.
 */
+#ifndef __DEC64_MATH_H__
+#define __DEC64_MATH_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern dec64 dec64_acos(dec64 slope);
 extern dec64 dec64_asin(dec64 slope);
@@ -24,3 +30,9 @@ extern void  dec64_seed(uint64 part_0, uint64 part_1);
 extern dec64 dec64_sin(dec64 radians);
 extern dec64 dec64_sqrt(dec64 radicand);
 extern dec64 dec64_tan(dec64 radians);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
