@@ -594,16 +594,22 @@ int dec64_to_string(
     return state->length;
 }
 
-static dec64_string_state g_state = 0;
-#undef UBUFS
+#undef NBUFS
 #define NBUFS 16
-static int g_bufidx = 0;
-static char g_bufs[NBUFS][100];
+typedef struct dec64_dump_state
+{
+    dec64_string_state state;
+    int bufidx;
+    char bufs[NBUFS][100];
+} dec64_dump_state;
+
+__thread dec64_dump_state g_dump_state;
 
 char* dec64_dump(dec64 number) {
-    if (!g_state) g_state = dec64_string_begin();
-    char* buf = g_bufs[g_bufidx];
-    g_bufidx = (g_bufidx + 1) % NBUFS;
-    dec64_to_string(g_state, number, buf);
+    dec64_dump_state* state = &g_dump_state;
+    if (!state->state) state->state = dec64_string_begin();
+    char* buf = state->bufs[state->bufidx];
+    state->bufidx = (state->bufidx + 1) % NBUFS;
+    dec64_to_string(state->state, number, buf);
     return buf;
 }

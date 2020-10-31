@@ -73,7 +73,7 @@ dec64 dec64_new(int64 x, int e)
     //static int dec64_new_adj_iters = 0;
     //++total_runs;
     //printf("\n==> dec64_new_adj_iters=%d out of %d runs\n", dec64_new_adj_iters, total_runs);
-    if((x == 0) | (e <= -150)) return 0;
+    if((x == 0) | (e <= -148)) return 0;
     while (e <= 127) {
         // If the exponent is too small, or if the coefficient is too large, then some
         // division is necessary. The "absolute" value of the coefficient (x_abs) is off by one
@@ -110,6 +110,8 @@ dec64 dec64_new(int64 x, int e)
             e += deficit;
         }    
     }
+
+    if (e >= 148) return DEC64_NULL;
 
     // If the exponent is too big (greater than 127).
     // We can attempt to reduce it by scaling back.
@@ -374,16 +376,34 @@ dec64 dec64_add(dec64 x, dec64 y)
 
 dec64 dec64_subtract(dec64 x, dec64 y)
 {
-    // Subtract the dec64 number in y from the dec64 number in x.
-    // This is the same as dec64_add, except that the operand in y has its
-    // coefficient complemented first.
-    dec64 neg_y;
-    if (!__builtin_add_overflow(y ^ ~255, 256, &neg_y))
-        return dec64_add(x, neg_y);
+    dec64 r;
+    // Add two dec64 numbers together.
+    // If the two exponents are both zero (which is usually the case for integers)
+    // we can take the fast path. Since the exponents are both zero, we can simply
+    // add the numbers together and check for overflow.
+
+    if ((unsigned char)(x | y) == 0) {
+        // integer case: both exponents are zero.
+        if(!__builtin_sub_overflow(x, y, &r))
+            return r;
+        // If there was an overflow (extremely unlikely) then we must make it fit.
+        // pack knows how to do that.
+        return dec64_new((x >> 8) - (y >> 8), 0);
+    }
+    else if ((unsigned char)(x ^ y) == 0) {
+        int e = (signed char)x;
+        if (e == -128) return DEC64_NULL;
+
+        // The exponents match so we may add now. Zero out one of the exponents so there
+        // will be no carry into the coefficients when the coefficients are added.
+        // If the result is zero, then return the normal zero.
+        if(!__builtin_sub_overflow(x, y & ~255, &r))
+            return (r & ~255) == 0 ? 0 : r;
+
+        return dec64_new((x >> 8) - (y >> 8), e);
+    }
     
-    // The b coefficient is -36028797018963968 (0x80.....0). This value cannot easily be
-    // complemented, so take the slower path. This should be extremely rare.
-    return __dec64_add_slow(x >> 8, (signed char)x, 36028797018963968, (signed char)y);
+    return __dec64_add_slow(x >> 8, (signed char)x, -(y >> 8), (signed char)y);
 }
 
 dec64 dec64_divide(dec64 x, dec64 y)
