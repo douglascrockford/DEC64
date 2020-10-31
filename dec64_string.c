@@ -14,7 +14,6 @@ configuration functions.
 
 #include <stdlib.h>
 #include "dec64.h"
-#include "dec64_string.h"
 
 static const int e = 'e';
 static const int64 confirmed = 0xFFDEADFACEC0DECELL;
@@ -228,9 +227,8 @@ dec64_string_state dec64_string_begin() {
     and thread safe. Do not manipulate this object directly. Use the functions.
     It can return NULL if memory allocation fails.
 */
-    dec64_string_state state = (
-        (dec64_string_state)malloc(sizeof (struct dec64_string_state))
-    );
+    dec64_string_state state = (dec64_string_state)malloc(sizeof(dec64_string_state_));
+
     if (state != NULL) {
         state->decimal_point = '.';
         state->mode = dec64_standard_mode;
@@ -355,7 +353,7 @@ void dec64_string_separator(
 
 /* Action. */
 
-dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
+dec64 dec64_from_string(dec64_string_state state, const dec64_string_char* string) {
 /*
     Convert a string into a dec64. If conversion is not possible for any
     reason, the result will be DEC64_NAN.
@@ -542,7 +540,7 @@ dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
 int dec64_to_string(
     dec64_string_state state,
     dec64 number,
-    dec64_string_char string[]
+    dec64_string_char* string
 ) {
 /*
     dec64_to_string converts a dec64 number into a string. The caller provides
@@ -604,6 +602,13 @@ typedef struct dec64_dump_state
 } dec64_dump_state;
 
 __thread dec64_dump_state g_dump_state;
+
+dec64_string_state dec64_default_state(void)
+{
+    dec64_dump_state* state = &g_dump_state;
+    if (!state->state) state->state = dec64_string_begin();
+    return state->state;
+}
 
 char* dec64_dump(dec64 number) {
     dec64_dump_state* state = &g_dump_state;

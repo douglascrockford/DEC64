@@ -23,7 +23,7 @@ enum dec64_string_mode {
 
 typedef char dec64_string_char;
 
-typedef struct dec64_string_state {
+typedef struct dec64_string_state_ {
 /*
     For internal use only.
 */
@@ -39,7 +39,9 @@ typedef struct dec64_string_state {
     enum dec64_string_mode mode;
     dec64_string_char decimal_point;
     dec64_string_char separator;
-}  * dec64_string_state;
+} dec64_string_state_;
+
+typedef dec64_string_state_* dec64_string_state;
 
 /*
     creation
@@ -97,15 +99,16 @@ extern void dec64_string_standard(
 
 extern dec64 dec64_from_string(
     dec64_string_state state,
-    dec64_string_char string[]
+    const dec64_string_char* string
 );
 
 extern int dec64_to_string(
     dec64_string_state state,
     dec64 number,
-    dec64_string_char string[]
+    dec64_string_char* string
 );
 
+extern dec64_string_state dec64_default_state(void);
 extern char* dec64_dump(dec64 number);
 
 #ifdef __cplusplus

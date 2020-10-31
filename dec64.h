@@ -54,7 +54,7 @@ extern dec64 dec64_normal(dec64 number)                     /* normalization */;
 extern dec64 dec64_round(dec64 number, dec64 place)         /*  quantization */;
 extern dec64 dec64_signum(dec64 number)                     /*     signature */;
 extern dec64 dec64_subtract(dec64 minuend, dec64 subtrahend)/*    difference */;
-
+extern dec64 dec64_from_double(double d);
 
 #ifdef __cplusplus
 }

@@ -26,6 +26,7 @@ SOFTWARE.
 
 #include "dec64.h"
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 
 #undef abs
@@ -693,4 +694,15 @@ dec64 dec64_signum(dec64 x)
     if (e == -128) return DEC64_NULL;
     
     return x < 0 ? -(1LL << 8) : (x >> 8) == 0 ? 0 : 1 << 8;
+}
+
+dec64 dec64_from_double(double d)
+{
+    int e2, shift = 19;
+    double m = frexp(d, &e2);
+    double e10 = e2*0.3010299956639811952137388947;
+    int e = (int)ceil(e10);
+    m *= pow(10., (e10 - e));
+    long long m64 = (long long)round(m*10000000000000000000.0);
+    return dec64_round(dec64_new(m64, e - shift), (int)ceil(e10-15)*256);
 }
