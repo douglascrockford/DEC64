@@ -340,6 +340,8 @@ static void test_all_log() {
     test_log(cent, dec64_new(-4605170185988091, -15), "0.01");
     test_log(half, dec64_new(-6931471805599453, -16), "1/2");
     test_log(one, zero, "1");
+    test_log(dec64_from_double(0.99), -(10050335853501441<<8) | (-18 & 255), "0.99");
+    test_log(12<<8, (24849066497880003<<8) | (-16 & 255), "12");
     test_log(half_pi, dec64_new(4515827052894549, -16), "pi/2");
     test_log(two, dec64_new(6931471805599453, -16), "2");
     test_log(e, one, "e");

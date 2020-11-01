@@ -407,7 +407,7 @@ dec64 dec64_subtract(dec64 x, dec64 y)
     return __dec64_add_slow(x >> 8, (signed char)x, -(y >> 8), (signed char)y);
 }
 
-dec64 dec64_divide(dec64 x, dec64 y)
+static int __dec64_divide(dec64 x, dec64 y, int64* q, int* qexp)
 {
     static const unsigned char fasttab[][2] = {
         {1, 0}, {5, 1}, {0, 0}, {25, 2}, {2, 1}, {0, 0}, {0, 0}, {125, 3}, {0, 0}, {1, 1},
@@ -423,8 +423,14 @@ dec64 dec64_divide(dec64 x, dec64 y)
     int ey = (signed char)y;
     x >>= 8;
     y >>= 8;
-    if (x == 0 && ex != -128) return 0; // 0/y ~ 0, even if y == 0 or y == nan
-    if ((ex == -128) | (ey == -128) | (y == 0)) return DEC64_NULL;
+    if (x == 0 && ex != -128) {
+        *q = 0; *qexp = 0;
+        return 0; // 0/y ~ 0, even if y == 0 or y == nan
+    }
+    if ((ex == -128) | (ey == -128) | (y == 0)) {
+        *q = 0; *qexp = -128;
+        return -1;
+    }
 
     // if both x and y are even then we can simplify the ratio lossless
     int b0 = __builtin_ctzll(x);
@@ -439,7 +445,9 @@ dec64 dec64_divide(dec64 x, dec64 y)
         // fast division by some popular small constants
         // x/2 ~ (x*5)/10, x/5 ~ (x*2)/10, ...
         // and division by a power of 10 is just shift of the exponent
-        return dec64_new(x*(y < 0 ? -scale : scale), ex - ey - fasttab[abs_y-1][1]);
+        *q = x*(y < 0 ? -scale : scale);
+        *qexp = ex - ey - fasttab[abs_y-1][1];
+        return 1;
     }
 
     // We want to get as many bits into the quotient as possible in order to capture
@@ -475,9 +483,30 @@ dec64 dec64_divide(dec64 x, dec64 y)
     // the divisor. Because of the scaling, the quotient is guaranteed to use most
     // of the 64 bits in r0, and never more. Reduce the final exponent by the number
     // of digits scaled.
-    dec64 q = (dec64)((__int128)x*power[log10_prescale]/y);
-    return dec64_new(q, ex - ey - log10_prescale);
-}        
+    *q = (int64)((__int128)x*power[log10_prescale]/y);
+    *qexp = ex - ey - log10_prescale;
+    return 1;
+}
+
+dec64 dec64_divide(dec64 x, dec64 y)
+{
+    int64 q;
+    int qexp;
+    int status = __dec64_divide(x, y, &q, &qexp);
+    return status == 0 ? 0 : status < 0 ? DEC64_NULL : dec64_new(q, qexp);
+}
+
+dec64 dec64_fda(dec64 x, dec64 y, dec64 z)
+{
+    int64 q;
+    int eq, ez = (signed char)z;
+    if (ez == -128) return DEC64_NULL;
+
+    int status = __dec64_divide(x, y, &q, &eq);
+    if (status == 0) return z;
+    if (status < 0) return DEC64_NULL;
+    return __dec64_add_slow(q, eq, z >> 8, ez);
+}
 
 static dec64 __dec64_to_int(dec64 x_, int round_dir)
 {
@@ -577,6 +606,39 @@ dec64 dec64_multiply(dec64 x, dec64 y)
     // divide by the power of ten & pack the final result
     r = (dec64)(r_big / power[delta_er]);
     return dec64_new(r, e + delta_er);
+}
+
+// x*y + z
+dec64 dec64_fma(dec64 x, dec64 y, dec64 z)
+{
+    // Multiply two dec64 numbers together, then add another number;
+    // Try to do it with higher precision than 2 separate operations
+    int ex = (signed char)x, ey = (signed char)y, ez = (signed char)z;
+
+    x >>= 8; y >>= 8;
+
+    // The result is nan if one or both of the operands is nan and neither of the
+    // operands is zero.
+    if ((x == 0 && ex != -128) || (y == 0 && ey != -128)) return z;
+    if (ex == -128 || ey == -128 || ez == -128) return DEC64_NULL;
+
+    z >>= 8;
+
+    __int128 r_big = (__int128)x*y;
+    dec64 r_high = (dec64)(r_big >> 64);
+    dec64 r = (dec64)r_big;
+    int e = ex + ey;
+    // this is the difference from dec64_multiply
+    // we need one extra bit for add_slow.
+    if (r_high == r >> 62)
+        return __dec64_add_slow(r, e, z, ez);
+
+    dec64 abs_r_high = abs(r_high);
+    int delta_er = abs_r_high == 0 ? 1 : ((63 - __builtin_clzll(abs_r_high))*77 >> 8) + 2;
+
+    // divide by the power of ten & add z
+    r = (dec64)(r_big / power[delta_er]);
+    return __dec64_add_slow(r, e + delta_er, z, ez);
 }
 
 dec64 dec64_neg(dec64 x)
@@ -698,11 +760,11 @@ dec64 dec64_signum(dec64 x)
 
 dec64 dec64_from_double(double d)
 {
-    int e2, shift = 19;
+    int e2, shift = 18;
     double m = frexp(d, &e2);
     double e10 = e2*0.3010299956639811952137388947;
     int e = (int)ceil(e10);
     m *= pow(10., (e10 - e));
-    long long m64 = (long long)round(m*10000000000000000000.0);
+    long long m64 = (long long)round(m*1000000000000000000.0);
     return dec64_round(dec64_new(m64, e - shift), (e-15)*256);
 }
