@@ -4,7 +4,7 @@ Douglas Crockford
 douglas@crockford.com
 
 dec64.com
-2019-09-28
+2020-11-03
 Public Domain
 
     NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
@@ -48,3 +48,5 @@ dec64_math_test.c is a test program.
 dec64.html is a descriptive web page.
 
 dec64.png is a logo.
+
+Vadim Pisarevsky has prepared a C++ version that can be found at https://github.com/vpisarev/DEC64/tree/alt
