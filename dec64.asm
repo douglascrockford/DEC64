@@ -441,6 +441,10 @@ dec64_round: function_with_two_parameters
 
 ; The place should be between -16 and 16.
 
+    pad
+
+round_begin:
+
     cmp     r1_b, 128               ; is the number nan?
     jz      return_null
     test    r2_b, r2_b              ; is places already an integer?
@@ -492,7 +496,7 @@ round_places:
     cmp     r2_b, 128
     jne     round_normal
     xor     r2, r2
-    jmp     dec64_round
+    jmp     round_begin
     pad
 
 round_normal:
@@ -504,7 +508,7 @@ round_normal:
     jnz     return_null
     mov     r1, r10
     mov     r2, r0
-    jmp     dec64_round
+    jmp     round_begin
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
