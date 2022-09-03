@@ -68,7 +68,7 @@ static void digitize(dec64_string_state state) {
     }
 }
 
-static emit(dec64_string_state state, int c) {
+static void emit(dec64_string_state state, int c) {
     if (state->string != NULL) {
         if (c > 0) {
             state->string[state->length] = (dec64_string_char)c;
@@ -236,7 +236,7 @@ dec64_string_state dec64_string_begin() {
         state->mode = standard_mode;
         state->nr_digits = 0;
         state->nr_zeros = 0;
-        state->number = DEC64_NAN;
+        state->number = DEC64_NULL;
         state->places = 0;
         state->separation = 3;
         state->separator = 0;
@@ -358,7 +358,7 @@ void dec64_string_separator(
 dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
 /*
     Convert a string into a dec64. If conversion is not possible for any
-    reason, the result will be DEC64_NAN.
+    reason, the result will be DEC64_NULL.
 */
     int at;
     int c;
@@ -374,7 +374,7 @@ dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
     int64 sign_exp;
 
     if (state == NULL || state->valid != confirmed || string == NULL) {
-        return DEC64_NAN;
+        return DEC64_NULL;
     }
 /*
     Get the first character.
@@ -461,11 +461,11 @@ dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
                 }
 /*
     There is a decimal point. If there is more than one decimal point,
-    return DEC64_NAN.
+    return DEC64_NULL.
 */
             } else if (c == state->decimal_point) {
                 if (point) {
-                    return DEC64_NAN;
+                    return DEC64_NULL;
                 }
                 point = 1;
 /*
@@ -498,10 +498,10 @@ dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
                                 ok = 1;
                                 exp = exp * 10 + (c - '0');
                                 if (exp < 0) {
-                                    return DEC64_NAN;
+                                    return DEC64_NULL;
                                 }
                             } else {
-                                return DEC64_NAN;
+                                return DEC64_NULL;
                             }
                             at += 1;
                             c = string[at];
@@ -517,10 +517,10 @@ dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
                         );
                     }
 /*
-    If any other character is seen, return DEC64_NAN.
+    If any other character is seen, return DEC64_NULL.
 */
                 }
-                return DEC64_NAN;
+                return DEC64_NULL;
             }
         }
 /*
@@ -535,7 +535,7 @@ dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
     return (
         ok
         ? dec64_new(sign * coefficient, exponent)
-        : DEC64_NAN
+        : DEC64_NULL
     );
 }
 

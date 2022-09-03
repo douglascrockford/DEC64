@@ -261,7 +261,7 @@ th {
 )</pre>
 <p><code>dec64_from_string</code> converts a zero-delimited string into a <code>dec64</code>. Separator
     characters will be ignored. If conversion is not possible for any reason,
-    the result will be <code>DEC64_NAN</code>.</p>
+    the result will be <code>DEC64_NULL</code>.</p>
 <pre>int <a id="dec64_to_string"><b>dec64_to_string</b></a>(
     dec64_string_state state,
     dec64 number,
@@ -316,7 +316,7 @@ dec64_to_string(state, dec64_new(1024, 0), string);</pre></td>
   </tr>
   <tr>
     <td><pre>dec64_from_string(state, &quot;1,024.0000&quot;)</pre></td>
-    <td><pre>DEC64_NAN</pre></td>
+    <td><pre>DEC64_NULL</pre></td>
   </tr>
   <tr>
     <td><pre>dec64_separator(state, ',');
@@ -324,7 +324,7 @@ dec64_from_string(state, &quot;1,024.0000&quot;)</pre></td>
     <td><pre>1024</pre></td>
   </tr>
   <tr>
-    <td><pre>dec64_string_end();</pre></td>
+    <td><pre>dec64_string_end(state);</pre></td>
     <td><pre>&nbsp;</pre></td>
   </tr>
 </table>
