@@ -199,6 +199,7 @@ dec64_new;(coefficient: int64, exponent: int64) returns number: dec64
 ; The dec64_new function will combine the coefficient and exponent into a dec64.
 ; Numbers that are too tiny to be contained in this format become zero.
 ; Numbers that are too huge to be contained in this format become nan.
+
 ; Clobbers x1, x4 thru x7, x11.
 
 ; The coefficient is in x0.
@@ -376,7 +377,8 @@ dec64_add;(augend: dec64, addend: dec64) returns sum: dec64
 ; If the two exponents are both zero (which is usually the case for integers)
 ; we can take the fastest path. Since the exponents are both zero, we can
 ; simply add the numbers together and check for overflow.
-; Clobbers x4 thru x11
+
+; Clobbers x4 thru x11.
 
     orr     x5, x0, x1
     ands    xzr, x5, 255
@@ -514,7 +516,8 @@ dec64_floor;(number: dec64) returns integer: dec64
 ; be greater than or equal to zero unless it is nan. Numbers with positive
 ; exponents will not be modified, even if the numbers are outside of the safe
 ; integer range.
-: Clobbers x4 thru x10
+
+; Clobbers x4 thru x10.
 
     mov     x7, -1                  ; x7 is the incrementor (round down)
 
@@ -565,7 +568,8 @@ floor_dinky
 dec64_multiply;(multiplicand: dec64, multiplier: dec64) returns product: dec64
 
 ; Multiply two dec64 numbers together.
-; Clobber: x4 thru x11
+
+; Clobbers x4 thru x11.
 
     asr     x4, x0, 8               ; x4 is the first coefficient
     sxtb    x5, w0                  ; x5 is the first exponent
@@ -653,6 +657,7 @@ multiply_null
 dec64_divide;(dividend: dec64, divisor: dec64) returns quotient: dec64
 
 ; Divide a dec64 number by another.
+
 ; Clobbers x4 thru x11.
 
     asr     x4, x0, 8               ; x4 is the dividend coefficient
@@ -949,7 +954,7 @@ dec64_normal;(number: dec64) returns normalization: dec64
 ; Usually normalization is not needed since it does not materially change the
 ; value of a number.
 
-; Clobbers: x4 thru x7
+; Clobbers x4 thru x7.
 
     sxtb    x5, w0                  ; x5 is the exponent
     tbnz    x0, 7, normal_micro     ; is the exponent negative?
@@ -1108,7 +1113,8 @@ dec64_is_less;(comparahend: dec64, comparator: dec64) returns comparison: dec64
 
 ; Compare two dec64 numbers. If the first is less than the second, return true,
 ; otherwise return false.
-; Clobbers: x4 thru x11
+
+; Clobbers x4 thru x11.
 
 ; The other 3 comparison functions are easily implemented with dec64_is_less:
 
