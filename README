@@ -4,7 +4,7 @@ Douglas Crockford
 douglas@crockford.com
 
 dec64.com
-2020-11-03
+2022-09-07
 Public Domain
 
     NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
@@ -50,3 +50,5 @@ dec64.html is a descriptive web page.
 dec64.png is a logo.
 
 Vadim Pisarevsky has prepared a C++ version that can be found at https://github.com/vpisarev/DEC64/tree/alt
+
+A NASM port of dec64.asm is available at https://gist.github.com/jamesdiacono/bc9337520727876e09bafaf98225019c, which passes the tests on Linux and MacOS.
