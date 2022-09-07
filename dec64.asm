@@ -1,18 +1,18 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2019-09-28
+; 2022-09-06
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
 
-; This file implements the elementary arithmetic operations for DEC64, a decimal
-; floating point type. DEC64 uses 64 bits to represent a number. The low order
-; 8 bits contain an exponent that ranges from -127 to 127. The exponent is not
-; biased. The exponent -128 is reserved for nan (not a number). The remaining
-; 56 bits, including the sign bit, are the coefficient in the range
-; -36028797018963968 thru 36028797018963967. The exponent and the coefficient
-; are both two's complement signed numbers.
+; This file implements the elementary arithmetic operations for DEC64, a
+: decimal floating point type. DEC64 uses 64 bits to represent a number. The
+; low order 8 bits contain an exponent that ranges from -127 to 127. The
+; exponent is not biased. The exponent -128 is reserved for nan (not a number).
+; The remaining 56 bits, including the sign bit, are the coefficient in the
+; range -36_028_797_018_963_968 thru 36_028_797_018_963_967. The exponent and
+; the coefficient are both two's complement signed numbers.
 ;
 ; The value of any non-nan DEC64 number is coefficient * (10 ** exponent).
 ;
@@ -20,7 +20,7 @@ title   dec64.asm for x64.
 ; division is floored. The result of modulo has the sign of the divisor.
 ; There is no negative zero.
 ;
-; These operations will produce a result of nan:
+; These operations produce a result of nan:
 ;
 ;   dec64_abs(nan)
 ;   dec64_ceiling(nan)
@@ -29,7 +29,7 @@ title   dec64.asm for x64.
 ;   dec64_normal(nan)
 ;   dec64_signum(nan)
 ;
-; These operations will produce a result of zero for all values of n,
+; These operations produce a result of zero for all values of n,
 ; even if n is nan:
 ;
 ;   dec64_divide(0, n)
@@ -38,7 +38,7 @@ title   dec64.asm for x64.
 ;   dec64_multiply(0, n)
 ;   dec64_multiply(n, 0)
 ;
-; These operations will produce a result of nan for all values of n
+; These operations produce a result of nan for all values of n
 ; except zero:
 ;
 ;   dec64_divide(n, 0)
@@ -50,7 +50,7 @@ title   dec64.asm for x64.
 ;   dec64_multiply(n, nan)
 ;   dec64_multiply(nan, n)
 ;
-; These operations will produce a result of nan for all values of n:
+; These operations produce a result of nan for all values of n:
 ;
 ;   dec64_add(n, nan)
 ;   dec64_add(nan, n)
@@ -78,10 +78,10 @@ title   dec64.asm for x64.
 ; The other 72057594037927933 nan values can be used for any purpose,
 ; including object pointers.
 
-; When these functions return nan, they will always return DEC64_NULL,
+; When these functions return nan, they always return DEC64_NULL,
 ; the normal nan.
 
-; The comparison functions will return DEC64_TRUE or DEC64_FALSE.
+; The comparison functions return DEC64_TRUE or DEC64_FALSE.
 
 null    equ     8000000000000080h
 true    equ     8000000000000380h
@@ -200,8 +200,6 @@ jr1z   equ jrcxz
 ; two arguments are passed in r7 and r6. We try to hide this behind macros. The
 ; two systems also have different conventions about which registers may be
 ; clobbered and which must be preserved. This code lives in the intersection.
-
-; This has not yet been tested on Unix.
 
 UNIX    equ 0                   ; calling convention: 0 for Windows, 1 for Unix
 
@@ -326,7 +324,7 @@ dec64_new: function_with_two_parameters
 
 pack:
 
-; The pack function will combine the coefficient and exponent into a dec64.
+; The pack function combines the coefficient and exponent into a dec64.
 ; Numbers that are too huge to be contained in this format become nan.
 ; Numbers that are too tiny to be contained in this format become zero.
 
@@ -552,14 +550,14 @@ add_slow:
     cmp     r0_b, 128               ; is the first operand nan?
     je      return_null             ; if nan, get out
 
-; Are the two exponents the same? This will happen often, especially with
+; Are the two exponents the same? This happens often, especially with
 ; money values.
 
     cmp     r1_b, r2_b              ; compare the two exponents
     jne     add_slower              ; if not equal, take the slower path
 
 ; The exponents match so we may add now. Zero out the exponents so there
-; will be no carry into the coefficients when the coefficients are added.
+; is no carry into the coefficients when the coefficients are added.
 ; If the result is zero, then return the normal zero.
 
     and     r0, -256                ; remove the exponent
@@ -600,7 +598,7 @@ add_slower:
 add_slower_decrease:
 
 ; The coefficients are not the same. Before we can add, they must be the same.
-; We will try to decrease the first exponent. When we decrease the exponent
+; We try to decrease the first exponent. When we decrease the exponent
 ; by 1, we must also multiply the coefficient by 10. We can do this as long as
 ; there is no overflow. We have 8 extra bits to work with, so we can do this
 ; at least twice, possibly more.
@@ -622,7 +620,7 @@ add_slower_decrease:
 add_slower_increase:
 
 ; We cannot decrease the first exponent any more, so we must instead try to
-; increase the second exponent, which will result in a loss of significance.
+; increase the second exponent, which results in a loss of significance.
 ; That is the heartbreak of floating point.
 
 ; Determine how many places need to be shifted. If it is more than 17, there is
@@ -658,7 +656,7 @@ dec64_ceiling: function_with_one_parameter
 
 ; Produce the smallest integer that is greater than or equal to the number. In
 ; the result, the exponent will be greater than or equal to zero unless it is
-; nan. Numbers with positive exponents will not be modified, even if the
+; nan. Numbers with positive exponents are not modified, even if the
 ; numbers are outside of the safe integer range.
 
 ; Preserved: r11.
@@ -674,7 +672,7 @@ dec64_floor: function_with_one_parameter
 ; Produce the largest integer that is less than or equal to the number. This
 ; is sometimes called the entier function. In the result, the exponent will be
 ; greater than or equal to zero unless it is nan. Numbers with positive
-; exponents will not be modified, even if the numbers are outside of the safe
+; exponents are not modified, even if the numbers are outside of the safe
 ; integer range.
 
 ; Preserved: r11.
@@ -765,7 +763,7 @@ dec64_subtract: function_with_two_parameters
 subtract_slower_decrease:
 
 ; The coefficients are not the same. Before we can add, they must be the same.
-; We will try to decrease the first exponent. When we decrease the exponent
+; We try to decrease the first exponent. When we decrease the exponent
 ; by 1, we must also multiply the coefficient by 10. We can do this as long as
 ; there is no overflow. We have 8 extra bits to work with, so we can do this
 ; at least twice, possibly more.
@@ -791,7 +789,7 @@ subtract_slower_decrease_compare:
 subtract_slower_increase:
 
 ; We cannot decrease the first exponent any more, so we must instead try to
-; increase the second exponent, which will result in a loss of significance.
+; increase the second exponent, which results in a loss of significance.
 ; That is the heartbreak of floating point.
 
 ; Determine how many places need to be shifted. If it is more than 17, there is
@@ -917,7 +915,7 @@ divide_measure:
 
 ; We want to get as many bits into the quotient as possible in order to capture
 ; enough significance. But if the quotient has more than 64 bits, then there
-; will be a hardware fault. To avoid that, we compare the magnitudes of the
+; may be a hardware fault. To avoid that, we compare the magnitudes of the
 ; dividend coefficient and divisor coefficient, and use that to scale the
 ; dividend to give us a good quotient.
 
@@ -959,7 +957,7 @@ divide_measure:
 
 divide_prescale:
 
-; If the number of scaling digits is larger than 18, then we will have to
+; If the number of scaling digits is larger than 18, then we have to
 ; scale in two steps: first prescaling the dividend to fill a register, and
 ; then repeating to fill a second register. This happens when the divisor
 ; coefficient is much larger than the dividend coefficient.

@@ -1,5 +1,5 @@
 ; dec64.s
-; 2019-11-02
+; 2022-09-08
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -12,10 +12,10 @@
 ; This file has been tested with Visual Studio 19.
 
 ; DEC64 uses 64 bits to represent a number. The low order 8 bits contain an
-; exponent that ranges from -127 to 127. The exponent is not biased. The
+; exponent that ranges from -127 thru 127. The exponent is not biased. The
 ; exponent -128 is reserved for nan (not a number). The remaining 56 bits,
 ; including the sign bit, are the coefficient in the range
-; -36 028 797 018 963 968 thru 36 028 797 018 963 967. The exponent and the
+; -36_028_797_018_963_968_thru_36_028_797_018_963_967. The exponent and the
 ; coefficient are both twos complement signed numbers.
 ;
 ; The value of any non-nan DEC64 number is coefficient * (10 ** exponent).
@@ -24,12 +24,12 @@
 ; division is floored. The result of modulo has the sign of the divisor.
 ; There is no negative zero.
 ;
-; All 72057594037927936 values with an exponent of -128 are nan values.
+; All 72_057_594_037_927_936 values with an exponent of -128 are nan values.
 
-; When these functions return nan, they will always return DEC64_NULL,
+; When these functions return nan, they always return DEC64_NULL,
 ; the normal nan value.
 
-; These operations will produce a result of DEC64_NULL:
+; These operations produce a result of DEC64_NULL:
 ;
 ;   dec64_abs(nan)
 ;   dec64_ceiling(nan)
@@ -38,7 +38,7 @@
 ;   dec64_normal(nan)
 ;   dec64_signum(nan)
 ;
-; These operations will produce a result of zero for all values of n,
+; These operations produce a result of zero for all values of n,
 ; even if n is nan:
 ;
 ;   dec64_divide(0, n)
@@ -47,7 +47,7 @@
 ;   dec64_multiply(0, n)
 ;   dec64_multiply(n, 0)
 ;
-; These operations will produce a result of DEC64_NULL for all values of n
+; These operations produce a result of DEC64_NULL for all values of n
 ; except zero:
 ;
 ;   dec64_divide(n, 0)
@@ -59,7 +59,7 @@
 ;   dec64_multiply(n, nan)
 ;   dec64_multiply(nan, n)
 ;
-; These operations will produce a result of normal nan for all values of n:
+; These operations produce a result of normal nan for all values of n:
 ;
 ;   dec64_add(n, nan)
 ;   dec64_add(nan, n)
@@ -196,7 +196,7 @@ dec64_exponent;(number: dec64) returns exponent: int64
 
 dec64_new;(coefficient: int64, exponent: int64) returns number: dec64
 
-; The dec64_new function will combine the coefficient and exponent into a dec64.
+; The dec64_new function combines the coefficient and exponent into a dec64.
 ; Numbers that are too tiny to be contained in this format become zero.
 ; Numbers that are too huge to be contained in this format become nan.
 
@@ -240,7 +240,7 @@ new_done
 new_grow
 
 ; The coefficient is good, but the exponent is too big.
-; We will try to grow the coefficient by mutliplying by ten.
+; We try to grow the coefficient by multiplying by ten.
 
     mul     x0, x0, x7
     sub     x11, x11, 1
@@ -501,7 +501,7 @@ dec64_ceiling;(number: dec64) returns integer: dec64
 
 ; Produce the smallest integer that is greater than or equal to the number.
 ; In the result, the exponent will be greater than or equal to zero unless
-; it is nan. Numbers with positive exponents will not be modified, even if
+; it is nan. Numbers with positive exponents are not modified, even if
 ; the numbers are outside of the safe integer range.
 
     mov     x7, 1                   ; x7 is the incrementor (round up)
@@ -514,7 +514,7 @@ dec64_floor;(number: dec64) returns integer: dec64
 ; Produce the largest integer that is less than or equal to the number. This
 ; is sometimes called the entier function. In the result, the exponent will
 ; be greater than or equal to zero unless it is nan. Numbers with positive
-; exponents will not be modified, even if the numbers are outside of the safe
+; exponents are not modified, even if the numbers are outside of the safe
 ; integer range.
 
 ; Clobbers x4 thru x10.
@@ -687,7 +687,7 @@ dec64_divide;(dividend: dec64, divisor: dec64) returns quotient: dec64
 
     sub     x11, x5, x7             ; x11 is the quotient exponent
 
-; Save the sign of the quotient. We will mostly be using unsigned arithmetic.
+; Save the sign of the quotient. We are mostly using unsigned arithmetic.
 
     eor     x0, x4, x6              ; x0 is the sign of the quotient
 
@@ -698,9 +698,9 @@ dec64_divide;(dividend: dec64, divisor: dec64) returns quotient: dec64
     ands    xzr, x6, x6
     cneg    x6, x6, mi              ; x6 is abs(divisor coefficient)
 
-; This is a floating point divide, so we want to preserve as much information in
-; the quotient as possible. To do this, we will scale up the dividend by a
-; suitable power of ten, reducing the exponent by a comparable amount.
+; This is a floating point divide, so we want to preserve as much information
+; in the quotient as possible. To do this, we scale up the dividend by a
+; suitable power of ten, reducing the exponent by a corresponding amount.
 
     clz     x5, x4                  ; x5 is leading zeros of dividend
     mov     x9, 64                  ; x9 is 64
@@ -1185,7 +1185,7 @@ less_hard_scale
     subs    xzr, x9, 18
     b.ge    return
 
-; Amplify the first coefficient. This will make their exponents the same,
+; Amplify the first coefficient. This makes their exponents the same,
 ; allowing a simple comparison.
 
     adr     x10, power
