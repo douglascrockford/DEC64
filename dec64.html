@@ -112,7 +112,7 @@ th:after {
     adds    x0, x0, x1    ; add the coefficients together
     b.vs    overflow      ; if there was no overflow, we are done</pre>
 <p>The fast path for addition in a hardware implementation should take only 1 cycle when the two exponents are equal to each other and there is no overflow. The fast path for multiplication in hardware takes the time it takes to do a 56*56 signed multiply when there is no overflow. </p>
-<p>A reference implementation is available Intel/AMD x64 and ARM64 at <a href="https://github.com/douglascrockford/DEC64">https://github.com/douglascrockford/DEC64</a>. <a href="http://DEC64.com/dec64.obj.html">It provides the DEC64 elementary operations.</a></p>
+<p>A reference implementation is available Intel/AMD x64 and ARM64 at <a href="https://github.com/douglascrockford/DEC64">https://github.com/douglascrockford/DEC64</a>. <a href="http://dec64.com/dec64.obj.html">It provides the DEC64 elementary operations.</a></p>
 <p>Conversion between <span class=dec64>DEC64</span> and strings is trivially easy. This is demonstrated by <a href="http://www.dec64.com/dec64_string.html">dec64_string</a>.</p>
 <p>The elementary functions (sine, log, sqrt, etc) are demonstrated by <a href="http://dec64.com/dec64_math.html">dec64_math</a>.</p>
 <h1>Motivation</h1>
