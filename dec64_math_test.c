@@ -38,6 +38,7 @@ static dec64 eight;
 static dec64 nine;
 static dec64 ten;
 static dec64 eleven;
+static dec64 hundred;
 static dec64 maxint;
 static dec64 maxint_plus;
 static dec64 maxnum;
@@ -73,6 +74,7 @@ static void define_constants() {
     nine = dec64_new(9, 0);         /* 9 */
     ten = dec64_new(10, 0);         /* 10 */
     eleven = dec64_new(11, 0);      /* 11 */
+    hundred = dec64_new(100, 0);    /* 100 */
     minnum = dec64_new(1, -127);    /* the smallest possible number */
     e = dec64_new(27182818284590452, -16);                  /* e */
     epsilon = dec64_new(1, -16);    /* the smallest number addable to 1 */
@@ -333,6 +335,7 @@ static void test_all_log() {
     test_log(e, one, "e");
     test_log(pi, dec64_new(11447298858494002, -16), "pi");
     test_log(ten, dec64_new(23025850929940457, -16), "10");
+    test_log(hundred, dec64_new(4605170185988091, -15), "100");
 }
 
 static void test_all_raise() {

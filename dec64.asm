@@ -1,13 +1,13 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2022-09-06
+; 2023-07-31
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
 
 ; This file implements the elementary arithmetic operations for DEC64, a
-: decimal floating point type. DEC64 uses 64 bits to represent a number. The
+; decimal floating point type. DEC64 uses 64 bits to represent a number. The
 ; low order 8 bits contain an exponent that ranges from -127 to 127. The
 ; exponent is not biased. The exponent -128 is reserved for nan (not a number).
 ; The remaining 56 bits, including the sign bit, are the coefficient in the
@@ -176,9 +176,7 @@ r0_b    equ al
 r1_b    equ cl
 r2_b    equ dl
 r8_b    equ r8b
-r9_b    equ r9b
 r10_b   equ r10b
-r11_b   equ r11b
 
 r0_h    equ ah
 r1_h    equ ch
@@ -186,8 +184,6 @@ r2_h    equ dh
 
 r0_w    equ ax
 r1_w    equ cx
-
-jr1z   equ jrcxz
 
 ; All of the public functions in this file accept up to two arguments, which
 ; are passed in registers (either r1, r2 or r7, r6), returning a result in r0.
