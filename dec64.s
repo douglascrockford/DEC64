@@ -1,5 +1,5 @@
 ; dec64.s
-; 2022-09-08
+; 2024-01-27
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -15,7 +15,7 @@
 ; exponent that ranges from -127 thru 127. The exponent is not biased. The
 ; exponent -128 is reserved for nan (not a number). The remaining 56 bits,
 ; including the sign bit, are the coefficient in the range
-; -36_028_797_018_963_968_thru_36_028_797_018_963_967. The exponent and the
+; -36_028_797_018_963_968 thru 36_028_797_018_963_967. The exponent and the
 ; coefficient are both twos complement signed numbers.
 ;
 ; The value of any non-nan DEC64 number is coefficient * (10 ** exponent).
@@ -1018,7 +1018,7 @@ return
 
 return_null
 
-    mov     x0, 0x8000000000000000
+    mov     x0, 0x0000000000000000
     add     x0, x0, 0x80
     ret
 
@@ -1229,7 +1229,7 @@ dec64_is_zero;(number: dec64) returns comparison: dec64
 
 return_false
 
-    mov     x0, 0x8000000000000000
+    mov     x0, 0x0000000000000000
     add     x0, x0, 0x280           ; x0 is false
     ret
 
@@ -1237,7 +1237,7 @@ return_false
 
 return_true
 
-    mov     x0, 0x8000000000000000
+    mov     x0, 0x0000000000000000
     add     x0, x0, 0x380           ; x0 is true
     ret
 

@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2023-07-31
+; 2024-01-27
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -83,9 +83,9 @@ title   dec64.asm for x64.
 
 ; The comparison functions return DEC64_TRUE or DEC64_FALSE.
 
-null    equ     8000000000000080h
-true    equ     8000000000000380h
-false   equ     8000000000000280h
+null    equ     0000000000000080h
+true    equ     0000000000000380h
+false   equ     0000000000000280h
 
 ; Multiplication by a scaled reciprocal can be faster than division.
 
