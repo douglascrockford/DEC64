@@ -1,5 +1,5 @@
 ; dec64.s
-; 2024-01-27
+; 2024-04-09
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -1018,8 +1018,7 @@ return
 
 return_null
 
-    mov     x0, 0x0000000000000000
-    add     x0, x0, 0x80
+    mov     x0, 0x80
     ret
 
 ; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -1079,8 +1078,7 @@ dec64_is_false;(boolean: dec64) returns notation: dec64
 
 ; If the boolean is false, the result is true. Otherwise the result is false.
 
-    mov     x4, 0x8000000000000000  ; the most significant bit
-    add     x4, x4, 0x280           ; x4 is false
+    mov     x4, 0x280               ; x4 is false
     add     x5, x4, 0x100           ; x5 is true
     subs    xzr, x0, x4
     csel    x0, x4, x5, ne
@@ -1161,8 +1159,7 @@ less_hard
     b.eq    return_true
     cneg    x4, x4, mi              ; x4 is abs(first coefficient)
     cneg    x6, x6, mi              ; x6 is abs(second coefficient)
-    mov     x0, 0x8000000000000000
-    add     x0, x0, 0x280           ; x0 is false
+    mov     x0, 0x280               ; x0 is false
     lsr     x8, x1, 63              ; x8 is 1 if numbers are negative
     eor     x0, x0, x8, lsl 8       ; flip x0 if the inputs are negative
 
@@ -1206,8 +1203,7 @@ dec64_is_nan;(number: dec64) returns comparison: dec64
     and     x5, x0, 0xFF
     subs    xzr, x5, 0x80
     cset    x5, eq
-    mov     x0, 0x8000000000000000
-    add     x0, x0, 0x280           ; x0 is false
+    mov     x0, 0x280               ; x0 is false
     add     x0, x0, x5, lsl 8
     ret
 
@@ -1220,8 +1216,7 @@ dec64_is_zero;(number: dec64) returns comparison: dec64
     and     x5, x0, 0xFF
     subs    xzr, x5, 0x80
     csel    x4, xzr, x4, eq
-    mov     x0, 0x8000000000000000
-    add     x0, x0, 0x280           ; x0 is false
+    mov     x0, 0x280               ; x0 is false
     add     x0, x0, x4, lsl 8
     ret
 
@@ -1229,16 +1224,14 @@ dec64_is_zero;(number: dec64) returns comparison: dec64
 
 return_false
 
-    mov     x0, 0x0000000000000000
-    add     x0, x0, 0x280           ; x0 is false
+    mov     x0, 0x280               ; x0 is false
     ret
 
 ; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 return_true
 
-    mov     x0, 0x0000000000000000
-    add     x0, x0, 0x380           ; x0 is true
+    mov     x0, 0x380               ; x0 is true
     ret
 
     end
