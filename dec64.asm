@@ -1,7 +1,7 @@
 title   dec64.asm for x64.
 
 ; dec64.com
-; 2024-01-27
+; 2025-12-15
 ; Public Domain
 
 ; No warranty expressed or implied. Use at your own risk. You have been warned.
@@ -24,7 +24,9 @@ title   dec64.asm for x64.
 ;
 ;   dec64_abs(nan)
 ;   dec64_ceiling(nan)
+;   dec64_dec(nan)
 ;   dec64_floor(nan)
+;   dec64_inc(nan)
 ;   dec64_neg(nan)
 ;   dec64_normal(nan)
 ;   dec64_signum(nan)
@@ -103,6 +105,9 @@ public dec64_ceiling;(number: dec64)
 public dec64_coefficient;(number: dec64)
 ;   returns coefficient: int64
 
+public dec64_dec;(number: dec64)
+;   returns difference: dec64
+
 public dec64_divide;(dividend: dec64, divisor: dec64)
 ;   returns quotient: dec64
 
@@ -111,6 +116,9 @@ public dec64_exponent;(number: dec64)
 
 public dec64_floor;(number: dec64)
 ;   returns integer: dec64
+
+public dec64_inc;(number: dec64)
+;   returns sum: dec64
 
 public dec64_integer_divide;(dividend: dec64, divisor: dec64)
 ;   returns quotient: dec64
@@ -506,6 +514,53 @@ round_normal:
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
+dec64_dec: function_with_one_parameter
+;(number: dec64) returns difference: dec64
+
+; Subtract 1 from a dec64 number. This is a special case for fast integers.
+
+    test    r1_b, r1_b              ; r1_b is the exponent
+    jnz     dec_slow                ; if the exponent is not zero, slow path
+    mov     r0, r1                  ; r0 is the number
+    add     r0, -256                ; decrement the coefficient
+    jo      add_overflow            ; deal with the overflow
+    ret                             ; we are done
+
+dec_slow:
+
+; The exponent is not zero, or the incrementation overflowed. So just jump to
+; add_slower. There are more optimizations available (like subtracting a power)
+; but it is not worth it.
+
+    mov     r2, r1                  ; r2 is the number
+    mov     r1, -256                ; r1 is -1
+    jmp     add_slower              ; let add do it
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+dec64_inc: function_with_one_parameter
+;(number: dec64) returns sum: dec64
+
+; Add 1 to a dec64 number. This is a special case for fast integers.
+
+    test    r1_b, r1_b              ; r1_b is the exponent
+    jnz     inc_slow                ; if the exponent is not zero, slow path
+    mov     r0, r1                  ; r0 is the number
+    add     r0, 256                 ; increment the coefficient
+    jo      add_overflow            ; deal with overflow
+    ret                             ; it is done
+
+inc_slow:
+
+; The exponent is not zero. So just jump to add_slower. There are more
+; optimizations available (like adding a power) but it is not worth it.
+
+    mov     r2, r1                  ; r2 is the number
+    mov     r1, 256                 ; r1 is 1
+    jmp     add_slower              ; let add do it
+
+    pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
 dec64_add: function_with_two_parameters
 ;(augend: dec64, addend: dec64) returns sum: dec64
 
@@ -587,7 +642,9 @@ add_slower:
     movsx   r8, r1_b                ; r8 is the first exponent
     movsx   r9, r2_b                ; r9 is the second exponent
     sar     r10, 8                  ; r10 is the first coefficient
+    jz      return_r2
     sar     r11, 8                  ; r11 is the second coefficient
+    jz      return_r1
     mov     r0, r10                 ; r0 is the first coefficient
     pad
 
@@ -642,7 +699,14 @@ add_slower_increase:
 
 return_r1:
 
-    mov     r0, r1                  ; r0 is the original number
+    mov     r0, r1
+    ret
+
+return_r2:
+
+    mov     r0, r2
+    sar     r11, 8                  ; r11 is the second coefficient
+    cmovz   r0, r11
     ret
 
     pad; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

@@ -33,7 +33,9 @@
 ;
 ;   dec64_abs(nan)
 ;   dec64_ceiling(nan)
+;   dec64_dec(nan)
 ;   dec64_floor(nan)
+;   dec64_inc(nan)
 ;   dec64_neg(nan)
 ;   dec64_normal(nan)
 ;   dec64_signum(nan)
@@ -87,6 +89,9 @@
     global dec64_coefficient [func];(number: dec64)
 ;   returns coefficient: int64
 
+    global dec64_dec [func];(number: dec64)
+;   returns difference: dec64
+
     global dec64_divide [func];(dividend: dec64, divisor: dec64)
 ;   returns quotient: dec64
 
@@ -95,6 +100,9 @@
 
     global dec64_floor [func];(number: dec64)
 ;   returns integer: dec64
+
+    global dec64_inc [func];(number: dec64)
+;   returns sum: dec64
 
     global dec64_integer_divide [func];(dividend: dec64, divisor: dec64)
 ;   returns quotient: dec64
@@ -367,6 +375,21 @@ round_normal
     mov     x1, x0
     mov     x0, x14
     b       dec64_round
+
+; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+dec64_dec;(number: dec64) returns difference: dec64
+
+    mov     x2, 256
+    b       dec64_subtract
+
+; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+
+dec64_inc;(number: dec64) returns sum: dec64
+
+    mov     x2, 256
+    b       dec64_add
 
 ; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 

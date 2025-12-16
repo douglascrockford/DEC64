@@ -3,7 +3,7 @@
 This is a test of dec64.obj.
 
 dec64.com
-2019-10-18
+2025-12-14
 Public Domain
 
 No warranty.
@@ -45,6 +45,7 @@ static dec64 negative_maxnum;
 static dec64 negative_minnum;
 static dec64 negative_nine;
 static dec64 negative_one;
+static dec64 negative_two;
 static dec64 negative_pi;
 static dec64 negative_three;
 static dec64 nine;
@@ -93,6 +94,7 @@ static void define_constants() {
 
     negative_minnum = dec64_new(-1, -127);                  /* the smallest possible negative number */
     negative_one = dec64_new(-1, 0);                        /* -1 */
+    negative_two = dec64_new(-2, 0);                        /* -2 */
     negative_three = dec64_new(-3, 0);                      /* -3 */
     negative_four = dec64_new(-4, 0);                       /* -4 */
     negative_nine = dec64_new(-9, 0);                       /* -9 */
@@ -325,6 +327,10 @@ static void test_ceiling(dec64 first, dec64 expected, char* comment) {
     judge_unary(first, expected, actual, "ceiling", "c", comment);
 }
 
+static void test_dec(dec64 first, dec64 expected, char* comment) {
+    dec64 actual = dec64_dec(first);
+    judge_unary(first, expected, actual, "dec", "d", comment);
+}
 static void test_divide(
     dec64 first,
     dec64 second,
@@ -338,6 +344,11 @@ static void test_divide(
 static void test_floor(dec64 first, dec64 expected, char* comment) {
     dec64 actual = dec64_floor(first);
     judge_unary(first, expected, actual, "floor", "f", comment);
+}
+
+static void test_inc(dec64 first, dec64 expected, char* comment) {
+    dec64 actual = dec64_inc(first);
+    judge_unary(first, expected, actual, "inc", "i", comment);
 }
 
 static void test_integer_divide(
@@ -593,6 +604,19 @@ static void test_all_ceiling() {
     test_ceiling(dec64_new(-9999999999999998, -16), zero, "-0.9...8");
 }
 
+static void test_all_dec() {
+    test_dec(nan, nan, "nan");
+    test_dec(nonnan,  nan, "nonnan");
+    test_dec(zero, negative_one, "zero");
+    test_dec(zip, negative_one, "zip");
+    test_dec(one, zero, "1");
+    test_dec(three, two, "3");
+    test_dec(ten, nine, "10");
+    test_dec(negative_one, negative_two, "-1");
+    test_dec(negative_three, negative_four, "-3");
+    test_dec(negative_maxint, negative_maxint_minus, "negative_maxint");
+}
+
 static void test_all_divide() {
     test_divide(six, three, dec64_new(20000000000000000, -16), "6 / 3");
     test_divide(nonnan, two, nan, "nonnan / 2");
@@ -750,6 +774,23 @@ static void test_all_floor() {
     test_floor(almost_negative_one, negative_one, "almost_negative_one");
     test_floor(dec64_new(-999999999999999, -15), negative_one, "-0.9...");
     test_floor(dec64_new(-9999999999999998, -16), negative_one, "-0.9...8");
+}
+
+static void test_all_inc() {
+    test_inc(nan, nan, "nan");
+    test_inc(nonnan, nan, "nonnan");
+    test_inc(negative_one, zero, "-1");
+    test_inc(zip, one, "zip");
+    test_inc(zero, one, "0");
+    test_inc(one, two, "1");
+    test_inc(three, four, "3");
+    test_inc(nine, ten, "9");
+    test_inc(cent, dec64_new(101, -2), "cent");
+    test_inc(epsilon, dec64_new(10000000000000001, -16), "epsilon");
+    test_inc(dec64_new(9999999999999999, 0), dec64_new(10000000000000000, 0), "9999999999999999");
+    test_inc(maxint, maxint_plus, "maxint");
+    test_inc(maxnum, maxnum, "insignificance");
+    test_inc(almost_negative_one, epsilon, "almost_negative_one");
 }
 
 static void test_all_integer_divide() {
@@ -1425,8 +1466,10 @@ static int do_tests(int level_of_detail) {
     test_all_abs();
     test_all_add();
     test_all_ceiling();
+    test_all_dec();
     test_all_divide();
     test_all_floor();
+    test_all_inc();
     test_all_integer_divide();
     test_all_is_equal();
     test_all_is_false();
