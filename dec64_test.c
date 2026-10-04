@@ -1136,6 +1136,7 @@ static void test_all_new() {
     test_new(1, 0, (1 << 8), "one");
     test_new(1, 1000, nan, "0e1000");
     test_new(1, -1000, zero, "0e-1000");
+    test_new(1, -100000, zero, "1e-100000");
     test_new(-1, 127, 0xFFFFFFFFFFFFFF7F, "-1e127");
     test_new(-1, 128, (-10 << 8) + 127, "-1e128");
     test_new(1, -128, zero, "1e-128");

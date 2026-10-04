@@ -393,10 +393,10 @@ pack_large:
 
 pack_increase:
 
-    mov     r10, power
-    mov     r10, [r10][r9*8]        ; r10 is 10^r9
     cmp     r9, 20                  ; is the difference more than 20?
     jae     return_zero             ; if so, the result is zero (rare)
+    mov     r10, power
+    mov     r10, [r10][r9*8]        ; r10 is 10^r9
     mov     r11, r10                ; r11 is the power of ten
     neg     r11                     ; r11 is the negation of the power of ten
     test    r0, r0                  ; examine the sign of the coefficient
