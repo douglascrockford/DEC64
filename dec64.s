@@ -883,21 +883,34 @@ dec64_integer_divide;(dividend: dec64, divisor: dec64) returns quotient: dec64
 ; Divide, with a floored integer result. It produces the same result as
 ;    dec64_floor(dec64_divide(dividend, divisor))
 
-; Clobbers x12. It can also clobber more via dec64_divide and dec64_floor.
+; Clobbers x4, x12. It can also clobber more via dec64_divide and dec64_floor.
 
-; If either exponent is not zero, or if either coefficient is negative, then do
-; it the hard way.
+; If the exponents are the same, then the coefficients can be divided directly.
+; If they are not, or if either number is nan, or if the divisor is -1, which
+; could overflow the quotient of the most negative coefficient, then do it the
+; hard way.
 
-    orr     x12, x0, x1
-    ands    xzr, x12, 255
-    orr     x12, x12, x12, asr 63
-    cbnz    x12, integer_divide_hard
-
-    cbz     x0, return
-    asr     x12, x1, 8              ; x12 is the divisor
+    eor     x12, x0, x1
+    ands    xzr, x12, 255           ; are the exponents the same?
+    b.ne    integer_divide_hard
+    and     x4, x0, 255
+    subs    xzr, x4, 128            ; are the numbers nan?
+    b.eq    integer_divide_hard
+    asr     x12, x1, 8              ; x12 is the divisor coefficient
+    adds    xzr, x12, 1             ; is the divisor coefficient -1?
+    b.eq    integer_divide_hard
+    asr     x4, x0, 8               ; x4 is the dividend coefficient
+    cbz     x4, return_zero
     cbz     x12, return_null        ; divide by zero
 
-    sdiv    x0, x0, x12
+    sdiv    x0, x4, x12             ; x0 is the quotient
+    msub    x4, x0, x12, x4         ; x4 is the remainder
+    cbz     x4, integer_divide_done ; is the quotient exact?
+    eor     x12, x4, x12
+    add     x0, x0, x12, asr 63     ; floor the quotient if the signs differ
+
+integer_divide_done
+
     lsl     x0, x0, 8
     ret
 
