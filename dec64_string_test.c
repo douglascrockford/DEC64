@@ -155,6 +155,28 @@ static void test_to(dec64 number, dec64_string_char * expected) {
     }
 }
 
+static void test_count(dec64 number, int expected) {
+    int actual = dec64_to_string(state, number, NULL);
+    if (actual == expected) {
+        nr_pass += 1;
+        if (level >= 3) {
+            printf("\n\npass count: ");
+            print_dec64(number);
+            printf("\n%-4s%i", "=", actual);
+        }
+    } else {
+        nr_fail += 1;
+        if (level >= 1) {
+            printf("\n\nFAIL count: ");
+            print_dec64(number);
+            if (level >= 2) {
+                printf("\n%-4s%i", "?", actual);
+                printf("\n%-4s%i", "=", expected);
+            }
+        }
+    }
+}
+
 static void test_to_standard() {
     test_to(nan, "");
     test_to(nannan, "");
@@ -198,6 +220,12 @@ static void test_to_standard() {
     test_to(pi, "3.1415926535897932");
     test_to(half, "0.5");
     test_to(cent, "0.01");
+    test_count(nan, 0);
+    test_count(zero, 1);
+    test_count(dec64_new(123, 0), 3);
+    test_count(dec64_new(-5, -3), 6);
+    test_count(pi, 18);
+    test_count(maxnum, 22);
     test_to(negative_one, "-1");
     test_to(negative_nine, "-9");
     test_to(negative_minnum, "-1e-127");
