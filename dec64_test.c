@@ -1037,6 +1037,8 @@ static void test_all_modulo() {
     test_modulo(zip, zip, zero, "zip % zip");
     test_modulo(one, negative_one, zero, "1 % -1");
     test_modulo(one, zero, nan, "1 % 0");
+    test_modulo(pi, zero, nan, "pi % 0");
+    test_modulo(dec64_new(-75, -1), zero, nan, "-7.5 % 0");
     test_modulo(one, one, zero, "1 % 1");
     test_modulo(one, two, one, "1 % 2");
     test_modulo(one, three, one, "1 % 3");

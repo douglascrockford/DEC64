@@ -1151,7 +1151,20 @@ dec64_modulo: function_with_two_parameters
 
 modulo_slow:
 
-; The exponents are not the same, so do it the hard way.
+; The exponents are not the same, so do it the hard way. If the divisor is
+; zero, the result is nan, unless the dividend is zero.
+
+    mov     r0, r2                  ; r0 is the divisor
+    sar     r0, 8                   ; r0 is the divisor coefficient
+    jnz     modulo_slow_divide      ; the divisor is not zero
+    cmp     r1_b, 128               ; is the dividend nan?
+    je      return_null
+    mov     r0, r1                  ; r0 is the dividend
+    sar     r0, 8                   ; r0 is the dividend coefficient
+    jz      return_zero
+    jmp     return_null
+
+modulo_slow_divide:
 
     push    r1                      ; save the dividend
     push    r2                      ; save the divisor
