@@ -23,6 +23,7 @@ faster and more accurate.
 #define D_NHALF_PI       0xC831B0CD44DE5AF0LL
 #define D_NPI            0x9063619A89BCB4F0LL
 #define D_PI             0x6F9C9E6576434CF0LL
+#define D_LN_TEN         0x51CDE3B15487E9F0LL
 #define D_2PI            0x165286144ADA42F1LL
 
 #define FAC              93
@@ -291,6 +292,26 @@ dec64 dec64_log(dec64 x) {
     }
     if (x == D_E) {
         return DEC64_ONE;
+    }
+/*
+    The series does not converge when x is less than 1/2. Move the decimal
+    point to make a number from 1 to 10, and add back log(10) for each place.
+*/
+    if (dec64_is_less(x, D_HALF) == DEC64_TRUE) {
+        int64 coefficient = dec64_coefficient(x);
+        int64 digits = 0;
+        int64 power = 1;
+        while (digits < 17 && power <= coefficient) {
+            power *= 10;
+            digits += 1;
+        }
+        return dec64_add(
+            dec64_log(dec64_new(coefficient, 1 - digits)),
+            dec64_multiply(
+                dec64_new(dec64_exponent(x) + digits - 1, 0),
+                D_LN_TEN
+            )
+        );
     }
     dec64 y = dec64_divide(dec64_add(DEC64_NEGATIVE_ONE, x), x);
     dec64 factor = y;

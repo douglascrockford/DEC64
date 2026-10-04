@@ -338,7 +338,8 @@ static void test_all_factorial() {
 
 static void test_all_log() {
     test_log(zero, nan, "0");
-    test_log(cent, dec64_new(-4605170185988091, -16), "0.01");
+    test_log(dec64_new(1, -3), dec64_new(-6907755278982137, -15), "0.001");
+    test_log(cent, dec64_new(-4605170185988091, -15), "0.01");
     test_log(half, dec64_new(-6931471805599453, -16), "1/2");
     test_log(one, zero, "1");
     test_log(half_pi, dec64_new(4515827052894549, -16), "pi/2");
