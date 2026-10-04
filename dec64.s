@@ -941,6 +941,36 @@ dec64_modulo;(dividend: dec64, divisor: dec64) returns modulus: dec64
 ;        )
 ;    )
 
+; If the exponents are the same, then the coefficients can be divided directly,
+; and the remainder has the same exponent. The product in the formula could be
+; too big to be exact. If they are not the same, or if either number is nan,
+; then do it the hard way.
+
+    eor     x12, x0, x1
+    ands    xzr, x12, 255           ; are the exponents the same?
+    b.ne    modulo_hard
+    and     x12, x0, 255            ; x12 is the exponent
+    subs    xzr, x12, 128           ; are the numbers nan?
+    b.eq    modulo_hard
+    asr     x4, x0, 8               ; x4 is the dividend coefficient
+    cbz     x4, return_zero
+    asr     x6, x1, 8               ; x6 is the divisor coefficient
+    cbz     x6, return_null
+    sdiv    x5, x4, x6
+    msub    x4, x5, x6, x4          ; x4 is the remainder
+    cbz     x4, return_zero
+
+; If the signs of the divisor and remainder are different, add the divisor to
+; the remainder.
+
+    eor     x5, x4, x6
+    and     x5, x6, x5, asr 63
+    add     x4, x4, x5
+    orr     x0, x12, x4, lsl 8
+    ret
+
+modulo_hard
+
     asr     x4, x0, 8               ; x4 is dividend coefficient
     cbz     x4, modulo_zero
     asr     x6, x1, 8               ; x6 is divisor coefficient

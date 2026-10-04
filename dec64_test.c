@@ -1198,6 +1198,10 @@ static void test_all_modulo() {
     test_modulo(maxnum, maxnum, zero, "maxnum % maxnum");
     test_modulo(dec64_new(25272024762369463, 0), dec64_new(-33, 0), dec64_new(-32, 0), "25272024762369463 % -33");
     test_modulo(dec64_new(-25272024762369463, 0), dec64_new(33, 0), dec64_new(32, 0), "-25272024762369463 % 33");
+    test_modulo(dec64_new(34202839070727664, 0), dec64_new(-14054465877771925, 0), dec64_new(-7960558562588111, 0), "34202839070727664 % -14054465877771925");
+    test_modulo(dec64_new(-36028797018963968, 10), dec64_new(-1, 10), zero, "-36028797018963968e10 % -1e10");
+    test_modulo(dec64_new(36028797018963967, 20), dec64_new(-67, 20), dec64_new(-38, 20), "36028797018963967e20 % -67e20");
+    test_modulo(dec64_new(132214064, 2), dec64_new(-36028797018963968, 2), dec64_new(-36028796886749904, 2), "132214064e2 % -36028797018963968e2");
 }
 
 static void test_all_multiply_wide() {
