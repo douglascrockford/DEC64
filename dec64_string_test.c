@@ -172,6 +172,11 @@ static void test_to_standard() {
     test_to(ten, "10");
     test_to(maxint, "36028797018963967");
     test_to(maxint_plus, "36028797018963970");
+    test_to(dec64_new(10, 0) | 0xFF, "1");
+    test_to(dec64_new(1000000000000000, 0) | 0xF1, "1");
+    test_to(dec64_new(-1200, 0) | 0xFE, "-12");
+    test_to(dec64_new(120, 0) | 0xFF, "12");
+    test_to(dec64_new(1200, 0) | 0xFE, "12");
     test_to(maxnum, "3.6028797018963967e143");
     test_to(minnum, "1e-127");
     test_to(epsilon, "0.0000000000000001");

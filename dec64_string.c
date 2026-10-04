@@ -210,11 +210,13 @@ static void emit_standard(dec64_string_state state) {
             }
         } else {
             emit_digits_separated(state, 0, from);
-            emit_decimal_point(state);
             if (to - from < state->places) {
                 to = state->places + from;
             }
-            emit_digits(state, from, to);
+            if (to > from) {
+                emit_decimal_point(state);
+                emit_digits(state, from, to);
+            }
         }
     }
 }
