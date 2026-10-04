@@ -957,6 +957,10 @@ static void test_all_integer_divide() {
     test_integer_divide(dec64_new(10, -1), maxint, zero, "one / maxint");
     test_integer_divide(negative_one, dec64_new(65536, 0), negative_one, "-1 / 65536");
     test_integer_divide(dec64_new(-65537, 0), dec64_new(65536, 0), negative_two, "-65537 / 65536");
+    test_integer_divide(dec64_new(25272024762369463, 0), dec64_new(-33, 0), dec64_new(-765818932193015, 0), "25272024762369463 / -33");
+    test_integer_divide(dec64_new(-25272024762369463, 0), dec64_new(33, 0), dec64_new(-765818932193015, 0), "-25272024762369463 / 33");
+    test_integer_divide(dec64_new(-20111438870874711, 0), dec64_new(-4, 0), dec64_new(5027859717718677, 0), "-20111438870874711 / -4");
+    test_integer_divide(dec64_new(36028797018963967, -1), dec64_new(2, -1), dec64_new(18014398509481983, 0), "maxint e-1 / 2e-1");
 }
 
 static void test_all_is_equal() {
@@ -1192,6 +1196,8 @@ static void test_all_modulo() {
     test_modulo(maxint, epsilon, zero, "maxint % epsilon");
     test_modulo(maxnum, epsilon, nan, "maxnum % epsilon");
     test_modulo(maxnum, maxnum, zero, "maxnum % maxnum");
+    test_modulo(dec64_new(25272024762369463, 0), dec64_new(-33, 0), dec64_new(-32, 0), "25272024762369463 % -33");
+    test_modulo(dec64_new(-25272024762369463, 0), dec64_new(33, 0), dec64_new(32, 0), "-25272024762369463 % 33");
 }
 
 static void test_all_multiply_wide() {
