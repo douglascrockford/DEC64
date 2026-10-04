@@ -1010,8 +1010,28 @@ divide_measure:
     mov     r0, r10                 ; r0 is the dividend coefficient
     mov     r9, power
     imul    qword ptr [r9][r1*8]    ; r2:r0 is the dividend coefficient * 10**r1
-    idiv    r11                     ; r0 is the quotient
+    idiv    r11                     ; r0 is the quotient, r2 is the remainder
     sub     r8, r1                  ; r8 is the exponent
+    test    r2, r2                  ; was the division exact?
+    jz      pack                    ; yes, pack it up
+
+; If the quotient fits in the coefficient, then pack will not round it, and the
+; remainder would be lost. Get one more digit so that pack will round.
+
+    mov     r9, r0                  ; r9 is the quotient
+    mov     r1, 36028797018963967   ; the ultimate coefficient
+    not     r9                      ; r9 is -quotient - 1
+    test    r9, r9                  ; look at the sign bit
+    cmovs   r9, r0                  ; r9 is the magnitude of the quotient, less 1 if negative
+    cmp     r9, r1                  ; compare with the ultimate coefficient
+    ja      pack                    ; pack will round it
+    mov     r9, r0                  ; r9 is the quotient
+    imul    r0, r2, 10              ; r0 is the remainder * 10
+    cqo                             ; sign extend r0 into r2
+    idiv    r11                     ; r0 is the next digit
+    imul    r9, 10                  ; r9 is the quotient * 10
+    add     r0, r9                  ; r0 is the quotient with one more digit
+    sub     r8, 1                   ; reduce the exponent
     jmp     pack                    ; pack it up
     pad
 

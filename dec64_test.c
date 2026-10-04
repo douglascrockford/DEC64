@@ -788,6 +788,10 @@ static void test_all_divide() {
     test_divide(maxint, epsilon, dec64_new(36028797018963967, 16), "maxint / epsilon");
     test_divide(one, maxint, one_over_maxint, "1 / maxint");
     test_divide(one, one_over_maxint, maxint, "1 / 1/maxint");
+    test_divide(three, dec64_new(12345678901234567, 0), dec64_new(24300000218700004, -32), "3 / 12345678901234567");
+    test_divide(dec64_new(159819398, -2), dec64_new(7402217748, 3), dec64_new(21590745292947035, -23), "159819398e-2 / 7402217748e3");
+    test_divide(dec64_new(663569040638037, -1), dec64_new(-197, 4), dec64_new(-33683707646600863, -9), "663569040638037e-1 / -197e4");
+    test_divide(dec64_new(329380, 1), dec64_new(14865, 3), dec64_new(22158089471913892, -17), "329380e1 / 14865e3");
     test_divide(one, negative_maxint, dec64_new(-27755575615628914, -33), "one / -maxint");
     test_divide(maxnum, epsilon, nan, "maxnum / epsilon");
     test_divide(maxnum, maxnum, dec64_new(10000000000000000, -16), "maxnum / maxnum");
