@@ -890,6 +890,9 @@ static void test_all_is_integer() {
     test_is_integer(nonnan, false, "nonnan");
     test_is_integer(zero, true, "zero");
     test_is_integer(zip, true, "zip");
+    test_is_integer(0x9C, true, "zero e-100");
+    test_is_integer(0xEF, true, "zero e-17");
+    test_is_integer(0x19C, false, "1e-100");
     test_is_integer(minnum, false, "minnum");
     test_is_integer(epsilon, false, "epsilon");
     test_is_integer(cent, false, "cent");
