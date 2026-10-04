@@ -42,29 +42,34 @@ static const int64 power[17] = {
 /* functions in service to dec64_to_string */
 
 static void digitize(dec64_string_state state) {
-    int64 coefficient;
-    int digit;
-    int place;
+/*
+    Put the digits of the coefficient in state->digits, without leading zeros.
+    Divide by the constant 10, which is much faster than dividing by a table of
+    powers of ten.
+*/
+    uint64 coefficient;
+    uint64 quotient;
+    int at;
+    int nr_digits = 0;
 
-    coefficient = dec64_coefficient(state->number);
-    if (coefficient < 0) {
-        coefficient = -coefficient;
+    coefficient = (uint64)dec64_coefficient(state->number);
+    if ((int64)coefficient < 0) {
+        coefficient = 0 - coefficient;
     }
-    state->nr_digits = 0;
-    state->nr_zeros = 0;
-    for (place = 16; place >= 0; place -= 1) {
-        digit = (int)(coefficient / power[place]);
-        state->digits[state->nr_digits] = digit + '0';
-        if (digit == 0) {
-            if (state->nr_digits != 0) {
-                state->nr_digits += 1;
-            }
-            state->nr_zeros += 1;
-        } else {
-            state->nr_digits += 1;
-            state->nr_zeros = 0;
-        }
-        coefficient -= digit * power[place];
+    while (nr_digits < 17 && coefficient >= (uint64)power[nr_digits]) {
+        nr_digits += 1;
+    }
+    state->nr_digits = nr_digits;
+    state->nr_zeros = nr_digits == 0 ? 17 : 0;
+    for (at = nr_digits - 1; at >= 0; at -= 1) {
+        quotient = coefficient / 10;
+        state->digits[at] = (int)(coefficient - quotient * 10) + '0';
+        coefficient = quotient;
+    }
+    at = nr_digits - 1;
+    while (at >= 0 && state->digits[at] == '0') {
+        state->nr_zeros += 1;
+        at -= 1;
     }
 }
 
