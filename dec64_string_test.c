@@ -421,6 +421,11 @@ static void test_all_from() {
     test_from("1e", nan);
     test_from("1e+", nan);
     test_from("1e+999", nan);
+    test_from("1e+99999999999999999999", nan);
+    test_from("1e-999", zero);
+    test_from("1e-99999999999999999999", zero);
+    test_from("1e-10000000000", zero);
+    test_from("0e99999999999999999999", zero);
     test_from(".", nan);
     test_from("1e,1", nan);
     test_from(",-0", nan);
