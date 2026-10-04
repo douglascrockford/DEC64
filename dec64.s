@@ -720,14 +720,16 @@ dec64_divide;(dividend: dec64, divisor: dec64) returns quotient: dec64
 
 ; This is a floating point divide, so we want to preserve as much information
 ; in the quotient as possible. To do this, we scale up the dividend by a
-; suitable power of ten, reducing the exponent by a corresponding amount.
+; suitable power of ten, reducing the exponent by a corresponding amount. The
+; quotient must need more than 55 bits, so that pack rounds it. If it fit, the
+; remainder would be lost.
 
     clz     x5, x4                  ; x5 is leading zeros of dividend
     mov     x9, 64                  ; x9 is 64
     clz     x7, x6                  ; x7 is leading zeros of divisor
     sub     x5, x9, x5              ; x5 is sigbits in dividend
     sub     x7, x9, x7              ; x7 is sigbits in divisor
-    add     x8, x7, 59              ; x8 is sigbits needed in dividend
+    add     x8, x7, 60              ; x8 is sigbits needed in dividend
     sub     x8, x8, x5              ; x8 is additional sigbits required
 
 ; To convert bits to digits, we multiply by log10/log2 (0.30103), which is almost
