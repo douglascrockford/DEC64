@@ -1074,6 +1074,10 @@ dec64_integer_divide: function_with_two_parameters
 
     cmp     r1_b, r2_b              ; are the exponents equal?
     jne     integer_divide_slow
+    mov     r0, r2                  ; r0 is the divisor
+    sar     r0, 8                   ; r0 is the divisor coefficient
+    cmp     r0, -1                  ; idiv would overflow on the most negative
+    je      integer_divide_slow     ; dividend, so let divide do it
 
     mov     r0, r1                  ; r0 is the dividend
     mov     r11, r2                 ; r11 is the divisor

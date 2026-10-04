@@ -835,6 +835,8 @@ static void test_all_integer_divide() {
     test_integer_divide(dec64_new(-50000000000000000, -16), dec64_new(-30000000000000000, -16), one, "-5 / -3");
     test_integer_divide(dec64_new(-50000000000000000, -16), three, dec64_new(-2, 0), "-5 / 3");
     test_integer_divide(dec64_new(-16, 0), ten, dec64_new(-2, 0), "-16 / 10");
+    test_integer_divide(negative_maxint, negative_one, two_55, "-maxint / -1");
+    test_integer_divide(maxint, negative_one, dec64_new(-36028797018963967, 0), "maxint / -1");
     test_integer_divide(maxnum, epsilon, nan, "maxnum / epsilon");
     test_integer_divide(maxint, epsilon, dec64_new(36028797018963967, 16), "maxint / epsilon");
     test_integer_divide(dec64_new(10, -1), maxint, zero, "one / maxint");
