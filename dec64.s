@@ -681,7 +681,7 @@ dec64_divide;(dividend: dec64, divisor: dec64) returns quotient: dec64
 
 ; Divide a dec64 number by another.
 
-; Clobbers x4 thru x11.
+; Clobbers x4 thru x11, x13.
 
     asr     x4, x0, 8               ; x4 is the dividend coefficient
     cbz     x4, divide_zero         ; is the dividend 0?
@@ -797,6 +797,7 @@ divide_big
 divide_ready
 
     mov     x7, xzr                 ; x7 is the quotient
+    mov     x13, xzr                ; x13 is the bit shifted out of x9
 
 divide_step
 
@@ -810,9 +811,12 @@ divide_step
 ;           Decrement the countdown
 
     subs    x4, x9, x6              ; x4 is high dividend - divisor
-    cset    x5, pl                  ; x5 is 1 if difference is positive
-    csel    x9, x4, x9, pl          ; x9 is the difference if positive
+    cset    x5, hs                  ; x5 is 1 if high dividend >= divisor
+    orr     x5, x5, x13             ; or if a bit was shifted out of x9
+    ands    xzr, x5, x5
+    csel    x9, x4, x9, ne          ; x9 is the difference if not negative
     add     x7, x5, x7, lsl 1       ; double quotient and + 1 if positive diff
+    lsr     x13, x9, 63             ; x13 is the bit the shift will push out
     lsr     x5, x8, 63              ; x5 is carry (high bit of low dividend)
     orr     x9, x5, x9, lsl 1       ; shift high dividend and insert carry
     lsl     x8, x8, 1               ; shift low dividend

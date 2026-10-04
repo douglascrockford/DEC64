@@ -706,6 +706,9 @@ static void test_all_divide() {
     test_divide(minnum, two, minnum, "minnum / 2");
     test_divide(one, 0x1437EEECD800000LL, dec64_new(28114572543455208, -31), "1/17!");
     test_divide(one, 0x52D09F700003LL, dec64_new(28114572543455208, -31), "1/17!");
+    test_divide(one, dec64_new(33, 0), dec64_new(30303030303030303, -18), "1 / 33");
+    test_divide(dec64_new(-1, 0), dec64_new(35, 0), dec64_new(-28571428571428571, -18), "-1 / 35");
+    test_divide(dec64_new(17997, 0), dec64_new(97, 0), dec64_new(18553608247422680, -14), "17997 / 97");
 }
 
 static void test_all_floor() {
