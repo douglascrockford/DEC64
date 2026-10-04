@@ -20,7 +20,7 @@ faster and more accurate.
 #define D_E              0x6092A113D8D574F0LL
 #define D_HALF                        0x5FFLL
 #define D_HALF_PI        0x37CE4F32BB21A6F0LL
-#define D_NHALF_PI       0xC831B0CD44DE59F0LL
+#define D_NHALF_PI       0xC831B0CD44DE5AF0LL
 #define D_NPI            0x9063619A89BCB4F0LL
 #define D_PI             0x6F9C9E6576434CF0LL
 #define D_2PI            0x165286144ADA42F1LL
