@@ -380,7 +380,7 @@ round_normal
 
 dec64_dec;(number: dec64) returns difference: dec64
 
-    mov     x2, 256
+    mov     x1, 256
     b       dec64_subtract
 
 ; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -388,7 +388,7 @@ dec64_dec;(number: dec64) returns difference: dec64
 
 dec64_inc;(number: dec64) returns sum: dec64
 
-    mov     x2, 256
+    mov     x1, 256
     b       dec64_add
 
 ; -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
