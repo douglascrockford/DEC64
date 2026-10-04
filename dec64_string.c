@@ -74,11 +74,11 @@ static void digitize(dec64_string_state state) {
 }
 
 static void emit(dec64_string_state state, int c) {
-    if (state->string != NULL) {
-        if (c > 0) {
+    if (c > 0) {
+        if (state->string != NULL) {
             state->string[state->length] = (dec64_string_char)c;
-            state->length += 1;
         }
+        state->length += 1;
     }
 }
 
