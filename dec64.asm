@@ -1088,9 +1088,16 @@ dec64_integer_divide: function_with_two_parameters
     setz    r2_h                    ; r2_h is 1 if divisor coefficient is zero
     or      r2_b, r2_h              ; r2_b is 1 if the result is nan
     jnz     return_null
+    mov     r0, r1                  ; r0 is the dividend coefficient
     cqo                             ; sign extend r0 into r2
-    idiv    r11                     ; r0 is the quotient
-    and     r0, -256                ; zero the exponent again
+    idiv    r11                     ; r0 is the quotient, r2 is the remainder
+    test    r2, r2                  ; is there a remainder?
+    jz      integer_divide_done     ; no, so the quotient is exact
+    xor     r2, r11                 ; negative if the signs are different
+    jns     integer_divide_done     ; if the signs are the same, we are done
+    sub     r0, 1                   ; floor the quotient
+integer_divide_done:
+    shl     r0, 8                   ; position the coefficient
     ret                             ; no need to pack
     pad
 
