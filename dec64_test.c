@@ -1327,6 +1327,9 @@ static void test_all_round() {
     test_round(dec64_new(-449, -2), negative_one, dec64_new(-45, -1), "-4.49 -1");
     test_round(dec64_new(-449, -2), zero, dec64_new(-4, 0), "-4.49 0");
     test_round(dec64_new(-450, -2), zero, dec64_new(-5, 0), "-4.50 0");
+    test_round(half, zero, one, "0.5 0");
+    test_round(dec64_new(-5, -1), zero, negative_one, "-0.5 0");
+    test_round(dec64_new(-5, -3), dec64_new(-2, 0), dec64_new(-1, -2), "-0.005 -2");
     test_round(maxint, negative_one, maxint, "maxint -1");
     test_round(maxint, zero, maxint, "maxint 0");
     test_round(maxint, one, dec64_new(3602879701896397, 1), "maxint 1");

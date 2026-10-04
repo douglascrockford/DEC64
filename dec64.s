@@ -351,9 +351,9 @@ round_loop
 ; If abs(remainder) is 5 or more, bump the coefficient.
 
     msub    x5, x4, x10, x5         ; x5 is the remainder
-    ands    xzr, x4, x4             ; is the number negative?
+    asr     x8, x5, 63              ; x8 is -1 or 0
+    ands    xzr, x5, x5             ; is the remainder negative?
     cneg    x5, x5, mi              ; x5 is abs(remainder)
-    asr     x8, x4, 63              ; x8 is -1 or 0
     orr     x8, x8, 1               ; x8 is -1 or 1
     subs    xzr, x5, 5
     csel    x8, x8, xzr, ge         ; x8 is zero if no rounding needed
