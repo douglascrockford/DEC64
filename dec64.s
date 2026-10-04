@@ -997,7 +997,7 @@ normal_grow
 
     mul     x4, x0, x7
     asr     x6, x4, 55
-    adds    xzr, x6, x6, asr 63
+    adds    xzr, x6, x6, lsr 63
     b.ne    normal_done
     mov     x0, x4
     subs    x5, x5, 1

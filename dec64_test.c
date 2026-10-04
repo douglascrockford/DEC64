@@ -1278,6 +1278,10 @@ void test_all_normal() {
     test_normal(dec64_new(1000000000000000, -15), one, "one alias 15");
     test_normal(dec64_new(10000000000000000, -16), one, "one alias 16");
     test_normal(dec64_new(-12500000000000000, -16), dec64_new(-125, -2), "-1.25");
+    test_normal(dec64_new(-1, 3), dec64_new(-1000, 0), "-1000");
+    test_normal(dec64_new(-1, 16), dec64_new(-10000000000000000, 0), "-10000000000000000");
+    test_normal(dec64_new(-1, 17), dec64_new(-10000000000000000, 1), "-100000000000000000");
+    test_normal(dec64_new(-36028797018963968, 1), dec64_new(-36028797018963968, 1), "-minint 1");
 }
 
 static void test_all_round() {
