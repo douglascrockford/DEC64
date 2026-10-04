@@ -1122,13 +1122,23 @@ dec64_is_integer;(number: dec64) returns comparison: dec64
     sxtb    x5, w0                  ; x5 is the exponent
     sub     x5, xzr, x5
     subs    xzr, x5, 17
-    b.gt    return_false
+    b.gt    is_integer_tiny
     adr     x7, power
     ldr     x7, [x7, x5, lsl 3]
     asr     x0, x0, 8
     sdiv    x4, x0, x7
     mul     x4, x4, x7
     subs    xzr, x0, x4
+    b.eq    return_true
+    b       return_false
+
+is_integer_tiny
+
+; The exponent is less than -17. Only zero is an integer, and nan is not.
+
+    subs    xzr, x5, 128            ; is it nan?
+    b.eq    return_false
+    ands    xzr, x0, 0xFFFFFFFFFFFFFF00     ; is the coefficient zero?
     b.eq    return_true
     b       return_false
 
