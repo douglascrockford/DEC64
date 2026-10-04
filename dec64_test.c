@@ -841,6 +841,8 @@ static void test_all_integer_divide() {
     test_integer_divide(maxnum, epsilon, nan, "maxnum / epsilon");
     test_integer_divide(maxint, epsilon, dec64_new(36028797018963967, 16), "maxint / epsilon");
     test_integer_divide(dec64_new(10, -1), maxint, zero, "one / maxint");
+    test_integer_divide(negative_one, dec64_new(65536, 0), negative_one, "-1 / 65536");
+    test_integer_divide(dec64_new(-65537, 0), dec64_new(65536, 0), negative_two, "-65537 / 65536");
 }
 
 static void test_all_is_equal() {
