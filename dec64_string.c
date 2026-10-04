@@ -496,9 +496,8 @@ dec64 dec64_from_string(dec64_string_state state, dec64_string_char string[]) {
                         while (c != 0) {
                             if (c >= '0' && c <= '9') {
                                 ok = 1;
-                                exp = exp * 10 + (c - '0');
-                                if (exp < 0) {
-                                    return DEC64_NULL;
+                                if (exp < 10000) {
+                                    exp = exp * 10 + (c - '0');
                                 }
                             } else {
                                 return DEC64_NULL;
