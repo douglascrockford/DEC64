@@ -1467,6 +1467,11 @@ static void test_all_subtract() {
     test_subtract(negative_maxint, negative_maxint, zero, "-maxint - -maxint");
     test_subtract(maxnum, maxint, maxnum, "maxnum - maxint");
     test_subtract(maxnum, negative_maxint, maxnum, "maxnum - -maxint");
+    test_subtract(zero, negative_maxint, dec64_new(36028797018963968, 0), "0 - -maxint");
+    test_subtract(one, negative_maxint, dec64_new(36028797018963969, 0), "1 - -maxint");
+    test_subtract(ten, negative_maxint, dec64_new(36028797018963978, 0), "10 - -maxint");
+    test_subtract(dec64_new(5, -20), negative_maxint, dec64_new(36028797018963968, 0), "5e-20 - -maxint");
+    test_subtract(dec64_new(5, 3), negative_maxint, dec64_new(36028797018968968, 0), "5e3 - -maxint");
     test_subtract(maxnum, maxnum, zero, "maxnum - maxnum");
     test_subtract(almost_negative_one, almost_negative_one, zero, "almost_negative_one - almost_negative_one");
 }

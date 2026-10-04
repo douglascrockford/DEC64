@@ -510,6 +510,7 @@ dec64_subtract;(minuend: dec64, subtrahend: dec64) returns difference: dec64
 ; Negating the subtrahend caused an overflow.
 ; Set things up to jump into the add slow path.
 
+    mov     x10, 10                 ; x10 is 10
     asr     x4, x0, 8               ; x4 is the first coefficient
     sxtb    x5, w0                  ; x5 is the first exponent
     mov     x6, 0x80000000000000
