@@ -654,13 +654,9 @@ multiply_reduce
     adr     x10, power
     ldr     x6, [x10, x4, lsl 3]    ; x6 is a power of ten
     add     x11, x11, x4            ; pump up the exponent
-    clz     x7, x6                  ; count the leading 0 in high dividend
-    mov     x4, 64
-    sub     x7, x4, x7              ; x7 is sigbits in power of ten
 
 ; x0 is the sign of the product
 ; x6 is the power of ten
-; x7 is the sigbits in the power of ten
 ; x9, x8 is the oversized product
 ; x11 is the exponent
 
@@ -763,72 +759,95 @@ divide_inflate
     mul     x8, x4, x10             ; x8 is the low half of the dividend
     umulh   x9, x4, x10             ; x9 is the high half of the dividend
 
-; Align the dividend and divisor by their leading 1 bits.
-; How we do this depends on the size of the dividend.
-
-    cbnz    x9, divide_big
-
-; If the dividend has only 1 word, then shift the divisor.
-
-    clz     x5, x8                  ; count the leading 0 in low dividend
-    mov     x4, 64                  ; x4 is 64
-    mov     x9, x8                  ; move the low part to the high part
-    sub     x5, x4, x5              ; x5 is sigbits in dividend
-    mov     x8, xzr                 ; zero out the low part
-    sub     x10, x5, x7             ; x10 is the countdown
-    lsl     x6, x6, x10             ; align the divisor
-    b       divide_ready
-
 divide_big
 
-; If the dividend has two words, then shift the dividend.
+; The dividend is in (x9, x8) and the divisor is in x6. The quotient is less
+; than 2**64. If the dividend has only one word, then one divide is enough.
 
-    clz     x5, x9                  ; count the leading 0 in high dividend
-    mov     x4, 64                  ; x4 is 64 (word size)
-    sub     x5, x4, x5              ; x5 is sigbits in high dividend
-    sub     x10, x7, x5             ; x10 is left shift distance
-    sub     x4, x4, x10             ; x4 is right shift distance
-    lsl     x9, x9, x10             ; shift high dividend
-    lsr     x4, x8, x4              ; x4 is the carry
-    orr     x9, x9, x4              ; insert the carry into the high dividend
-    lsl     x8, x8, x10             ; shift the low dividend
-    add     x10, x5, 64             ; x10 is sigbits in whole dividend (x9, x8)
-    sub     x10, x10, x7            ; x10 is the countdown
+    cbnz    x9, divide_wide
+    udiv    x7, x8, x6              ; x7 is the quotient
 
-divide_ready
-
-    mov     x7, xzr                 ; x7 is the quotient
-    mov     x13, xzr                ; x13 is the bit shifted out of x9
-
-divide_step
-
-; In each divide step:
-;           Double the quotient
-;           Find the difference between the aligned dividend and divisor
-;           If the difference is not negative
-;               Add 1 to the quotient
-;               Subtract the divisor from the dividend
-;           Double the dividend (x9, x8)
-;           Decrement the countdown
-
-    subs    x4, x9, x6              ; x4 is high dividend - divisor
-    cset    x5, hs                  ; x5 is 1 if high dividend >= divisor
-    orr     x5, x5, x13             ; or if a bit was shifted out of x9
-    ands    xzr, x5, x5
-    csel    x9, x4, x9, ne          ; x9 is the difference if not negative
-    add     x7, x5, x7, lsl 1       ; double quotient and + 1 if positive diff
-    lsr     x13, x9, 63             ; x13 is the bit the shift will push out
-    lsr     x5, x8, 63              ; x5 is carry (high bit of low dividend)
-    orr     x9, x5, x9, lsl 1       ; shift high dividend and insert carry
-    lsl     x8, x8, 1               ; shift low dividend
-    subs    x10, x10, 1             ; decrement countdown
-    b.pl    divide_step             ; is it done?
+divide_sign
 
 ; Correct the sign and get out.
 
     ands    xzr, x0, x0             ; should it negative?
     cneg    x0, x7, mi              ; correct the sign
     b       new
+
+divide_wide
+
+; The dividend has two words. Divide it by the divisor in two steps, each of
+; which produces 32 bits of the quotient. Each step estimates a quotient digit
+; with the high half of the divisor, and then corrects the estimate, which can
+; be too large by 2. This is Knuth's algorithm D, as in Hacker's Delight divlu.
+; First shift the divisor left until its high bit is 1, and the dividend by
+; the same amount. The quotient does not change.
+
+    clz     x5, x6                  ; x5 is the shift
+    eor     x10, x5, 63             ; x10 is 63 - shift
+    lsl     x6, x6, x5              ; x6 is the shifted divisor
+    lsl     x9, x9, x5
+    lsr     x4, x8, 1
+    lsr     x4, x4, x10             ; x4 is the bits that cross the words
+    orr     x9, x9, x4              ; x9 is the high dividend, shifted
+    lsl     x8, x8, x5              ; x8 is the low dividend, shifted
+    lsr     x10, x8, 32             ; x10 is the high digit of the low dividend
+    mov     w8, w8                  ; x8 is the low digit of the low dividend
+    lsr     x4, x6, 32              ; x4 is the high digit of the divisor
+    mov     w5, w6                  ; x5 is the low digit of the divisor
+
+; First digit. x9 is less than the divisor.
+
+    udiv    x2, x9, x4              ; x2 is the estimated quotient digit
+    msub    x3, x2, x4, x9          ; x3 is the estimated remainder
+    mul     x7, x2, x5
+    orr     x13, x10, x3, lsl 32
+    subs    xzr, x7, x13
+    cset    x7, hi                  ; x7 is 1 if the estimate is too large
+    lsr     x13, x2, 32
+    orr     x7, x7, x13             ; or if the estimate is 2**32
+    sub     x2, x2, x7              ; correct the estimate
+    madd    x3, x7, x4, x3          ; and the remainder
+    mul     x7, x2, x5
+    orr     x13, x10, x3, lsl 32
+    subs    xzr, x7, x13
+    cset    x7, hi
+    lsr     x13, x2, 32
+    orr     x7, x7, x13
+    lsr     x13, x3, 32             ; if the remainder is 2**32 or more
+    ands    xzr, x13, x13           ; then the estimate is good
+    csel    x7, xzr, x7, ne
+    sub     x2, x2, x7              ; x2 is the high digit of the quotient
+    lsl     x9, x9, 32
+    orr     x9, x9, x10
+    msub    x9, x2, x6, x9          ; x9 is the remainder
+    mov     x13, x2                 ; x13 is the high digit of the quotient
+
+; Second digit.
+
+    udiv    x2, x9, x4
+    msub    x3, x2, x4, x9
+    mul     x7, x2, x5
+    orr     x10, x8, x3, lsl 32
+    subs    xzr, x7, x10
+    cset    x7, hi
+    lsr     x10, x2, 32
+    orr     x7, x7, x10
+    sub     x2, x2, x7
+    madd    x3, x7, x4, x3
+    mul     x7, x2, x5
+    orr     x10, x8, x3, lsl 32
+    subs    xzr, x7, x10
+    cset    x7, hi
+    lsr     x10, x2, 32
+    orr     x7, x7, x10
+    lsr     x10, x3, 32
+    ands    xzr, x10, x10
+    csel    x7, xzr, x7, ne
+    sub     x2, x2, x7              ; x2 is the low digit of the quotient
+    add     x7, x2, x13, lsl 32     ; x7 is the quotient
+    b       divide_sign
 
 divide_zero
 
