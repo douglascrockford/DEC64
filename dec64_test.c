@@ -548,6 +548,9 @@ static void test_all_add() {
     test_add(dec64_new(7182818284590704, -16), dec64_new(10, -1), dec64_new(17182818284590704, -16), "7182818284590704e-16 + 10e-1");
     test_add(dec64_new(4000000000000000, -16), dec64_new(10, -1), dec64_new(14000000000000000, -16), "4000000000000000e-16 + 10e-1");
     test_add(dec64_new(1, -1), dec64_new(2, -1), dec64_new(3, -1), "0.1 + 0.2");
+    test_add(dec64_new(92, 17), dec64_new(36000000000000000, 0), dec64_new(9236, 15), "92e17 + 36000000000000000");
+    test_add(dec64_new(-92, 17), dec64_new(-36000000000000000, 0), dec64_new(-9236, 15), "-92e17 + -36000000000000000");
+    test_add(dec64_new(9223372036854775, 3), dec64_new(8080, -1), dec64_new(9223372036854776, 3), "9223372036854775e3 + 808");
 }
 
 static void test_all_ceiling() {
@@ -1689,6 +1692,7 @@ static void test_all_subtract() {
     test_subtract(ten, negative_maxint, dec64_new(36028797018963978, 0), "10 - -maxint");
     test_subtract(dec64_new(5, -20), negative_maxint, dec64_new(36028797018963968, 0), "5e-20 - -maxint");
     test_subtract(dec64_new(5, 3), negative_maxint, dec64_new(36028797018968968, 0), "5e3 - -maxint");
+    test_subtract(dec64_new(92, 17), negative_maxint, dec64_new(9236028797018964, 3), "92e17 - -maxint");
     test_subtract(maxnum, maxnum, zero, "maxnum - maxnum");
     test_subtract(almost_negative_one, almost_negative_one, zero, "almost_negative_one - almost_negative_one");
 }

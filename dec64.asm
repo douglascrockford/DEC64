@@ -373,10 +373,22 @@ pack:
     ret                             ; whew
     pad
 
+pack_overflow:
+
+; The sum of two coefficients overflowed. Its magnitude still fits in 64 bits,
+; and the carry flag has its sign. Divide it by 10 as pack_large does.
+
+    sbb     r1, r1                  ; r1 is -1 if negative, or 0 if positive
+    jmp     pack_magnitude
+    pad
+
 pack_large:
 
     mov     r1, r0                  ; r1 is the coefficient
     sar     r1, 63                  ; r1 is -1 if negative, or 0 if positive
+
+pack_magnitude:
+
     mov     r11, eight_over_ten     ; magic number
     mov     r9, r1                  ; r9 is -1 or 0
     xor     r0, r1                  ; complement the coefficient if negative
@@ -667,6 +679,7 @@ add_slower_decrease:
 ; The exponents are now equal, so the coefficients may be added.
 
     add     r0, r10                 ; add the two coefficients
+    jo      pack_overflow           ; if it overflows, it must be repaired
     jmp     pack                    ; pack it up
     pad
 
@@ -694,6 +707,7 @@ add_slower_increase:
 ; The exponents are now equal, so the coefficients may be added.
 
     add     r0, r10                 ; add the two coefficients
+    jo      pack_overflow           ; if it overflows, it must be repaired
     jmp     pack
     pad
 
@@ -843,6 +857,7 @@ subtract_slower_decrease_compare:
 ; The exponents are now equal, so the coefficients may be added.
 
     add     r0, r10                 ; add the two coefficients
+    jo      pack_overflow           ; if it overflows, it must be repaired
     jmp     pack                    ; pack it up
     pad
 
@@ -868,6 +883,7 @@ subtract_slower_increase:
 ; The exponents are now equal, so the coefficients may be added.
 
     add     r0, r10                 ; add the two coefficients
+    jo      pack_overflow           ; if it overflows, it must be repaired
     jmp     pack
     pad
 
