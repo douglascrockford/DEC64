@@ -462,7 +462,7 @@ add_grow
 
     subs    xzr, x5, x7
     b.eq    add_ready
-    asr     x11, x4, 58
+    asr     x11, x4, 59
     eor     x11, x11, x4, asr 63
     cbnz    x11, add_shrink
     mul     x4, x4, x10
