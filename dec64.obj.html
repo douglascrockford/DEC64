@@ -223,7 +223,10 @@ dec64_subtract(<var>nan</var>, <var>n</var>)</pre>
 <h2 id="functions">Functions</h2>
 <p>Rounding is to the nearest value. Ties are rounded away from zero. Integer
   division is floored. The result of <code>dec64_modulo</code> has the sign of
-  the divisor. There is no negative zero.</p>
+  the divisor. There is no negative zero. When the exponents of the operands of
+  <code>dec64_add</code> or <code>dec64_subtract</code> differ by too much, the
+  digits of the smaller operand that do not fit are truncated before the sum is
+  rounded.</p>
 <h3 id="dec64_abs">dec64_abs(<var>number</var>: dec64) returns
     <var>absolution</var>: dec64</h3>
 <p>The absolute value function removes the sign from a <var>number</var> value.</p>
