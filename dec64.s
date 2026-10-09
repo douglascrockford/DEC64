@@ -472,11 +472,29 @@ add_grow
 add_shrink
 
 ; If the exponents are not equal yet, try shrinking x6.
+; Remember in x9 if any digits are lost.
 
-    sdiv    x6, x6, x10
+    mov     x9, xzr                 ; x9 is the lost digits
+
+add_shrink_more
+
+    sdiv    x8, x6, x10             ; x8 is x6 / 10
+    msub    x11, x8, x10, x6        ; x11 is the lost digit
+    orr     x9, x9, x11             ; mix in the lost digit
+    mov     x6, x8
     add     x7, x7, 1
     subs    xzr, x5, x7
-    b.ne    add_shrink
+    b.ne    add_shrink_more
+
+; If digits were lost and x6 has the other sign, then x6 is too close to zero.
+; Move it one unit away from zero so that new rounds the sum correctly.
+
+    asr     x8, x4, 63              ; x8 is -1 or 0
+    orr     x8, x8, 1               ; x8 is the sign of x4
+    mul     x9, x9, x8              ; x9 is negative if the lost digits oppose
+    asr     x9, x9, 63              ; x9 is -1 or 0
+    and     x9, x9, x8              ; x9 is the adjustment
+    sub     x6, x6, x9              ; adjust x6
 
 add_ready
 

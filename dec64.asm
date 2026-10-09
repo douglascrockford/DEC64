@@ -704,6 +704,18 @@ add_slower_increase:
     test    r0, r0                  ; examine the scaled coefficient
     jz      return_r1               ; too insignificant to add?
 
+; If digits were lost and the second coefficient has the other sign, then the
+; quotient is too close to zero. Move it one unit away from zero so that pack
+; rounds the sum correctly.
+
+    mov     r11, r10                ; r11 is the first coefficient
+    sar     r11, 63                 ; r11 is -1 or 0
+    or      r11, 1                  ; r11 is the sign of the first coefficient
+    imul    r2, r11                 ; r2 is negative if the remainder opposes
+    sar     r2, 63                  ; r2 is -1 or 0
+    and     r2, r11                 ; r2 is the adjustment
+    sub     r0, r2                  ; adjust the quotient
+
 ; The exponents are now equal, so the coefficients may be added.
 
     add     r0, r10                 ; add the two coefficients
