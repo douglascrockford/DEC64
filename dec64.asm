@@ -358,7 +358,7 @@ pack:
     mov     r9, -127                ; r9 is the ultimate exponent
     cmp     r1, r10                 ; compare with the actual coefficient
     adc     r11, 0                  ; add 1 to r11 if 1 digit too big
-    mov     r1, 360287970189639679  ; the ultimate coefficient * 10 - 1
+    mov     r1, 360287970189639683  ; the largest that rounds to fit in 1 digit
     sub     r9, r8                  ; r9 is the difference from actual exponent
     cmp     r1, r10                 ; compare with the actual coefficient
     adc     r11, 0                  ; add 1 to r11 if 2 digits too big
